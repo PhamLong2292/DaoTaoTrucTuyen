@@ -1,0 +1,76 @@
+﻿using OneTSQ.Model;
+using System;
+using Newtonsoft.Json;
+using OneTSQ.Core.Model;
+
+namespace OneTSQ.WebParts
+{
+
+    public class NgheNghiepService : RemoteDataTemplate
+    {
+        public static string StaticServiceId
+        {
+            get
+            {
+                return "NgheNghiepService";
+            }
+        }
+        public override string ServiceId
+        {
+            get
+            {
+                return StaticServiceId;
+            }
+        }
+
+        public override string ServiceName
+        {
+            get
+            {
+                return "Service nghề nghiệp";
+            }
+        }
+        public override AjaxOut Reading(RenderInfoCls ORenderInfo, int PageIndex, string Keyword)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+
+            try
+            {
+                OneMES3.DM.Model.NgheNghiepFilterCls
+                    ONgheNghiepFilter = new OneMES3.DM.Model.NgheNghiepFilterCls();
+                ONgheNghiepFilter.Keyword = Keyword;
+                ONgheNghiepFilter.PageIndex = PageIndex;
+                ONgheNghiepFilter.HieuLuc = (int)eHieuLuc.Co;
+
+                var ajaxOut = OneMES3.DM.Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreateNgheNghiepProcess().Count(Model.Common.CreateRenderInfo(ORenderInfo), ONgheNghiepFilter);
+                long recordTotal = (long)ajaxOut;
+                //long recordTotal = 0;
+                var NgheNghieps = OneMES3.DM.Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreateNgheNghiepProcess().PageReading(Model.Common.CreateRenderInfo(ORenderInfo), ONgheNghiepFilter, ref recordTotal);
+
+                Record ORecord = new Record();
+                ORecord.total_count = recordTotal;
+                ORecord.incomplete_results = true;
+                ORecord.items = new RecordItemCls[NgheNghieps.Length];
+                for (int iIndex = 0; iIndex < NgheNghieps.Length; iIndex++)
+                {
+                    ORecord.items[iIndex] = new RecordItemCls();
+                    ORecord.items[iIndex].id = NgheNghieps[iIndex].Id;
+                    ORecord.items[iIndex].text = NgheNghieps[iIndex].Ten;
+
+
+                    ORecord.items[iIndex].Code = NgheNghieps[iIndex].Ma;
+                    ORecord.items[iIndex].Name = NgheNghieps[iIndex].Ten;
+                }
+
+                string json = JsonConvert.SerializeObject(ORecord, Formatting.Indented);
+                RetAjaxOut.HtmlContent = json;
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+    }
+}

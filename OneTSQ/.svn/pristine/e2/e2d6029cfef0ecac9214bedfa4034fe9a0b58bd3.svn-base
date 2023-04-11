@@ -1,0 +1,374 @@
+﻿//Nơi viết các hàm javascript để dùng chung cho toàn hệ thống
+//CallInitSelect2 chỉ hiển thị tên trên combobox
+function CallInitSelect2(Id, svUrl, place)
+{
+ $('#'+Id).select2({ 
+       allowClear: true,
+       ajax: { 
+           id: function (e) { return e.id + '|' + e.text },  
+           url: svUrl,
+           dataType: 'json', 
+           delay: 250, 
+           type: 'POST',  
+           data: function (params) { 
+               return { 
+                   q: params.term,  
+                   page: params.page 
+               }; 
+           }, 
+           processResults: function (data, params) { 
+               params.page = params.page || 0; 
+               return { 
+                   results: data.items, 
+                   pagination: { 
+                       more: (params.page * 10) < data.total_count 
+                   } 
+               }; 
+           }, 
+           cache: true 
+       }, 
+       escapeMarkup: function (markup) { return markup; },  
+       minimumInputLength: 0, 
+       templateResult: formatRepo,  
+       templateSelection: formatRepoSelection  
+   }); 
+}
+//Hàm hiển thị dữ liệu trong select2
+ function formatRepo(repo) { 
+    var markup = ''; 
+    if (repo.loading) return repo.text; 
+    else if (repo.id == null) markup = '<table style="width: 100%;border-bottom: 1px solid black;"><tr><td style="width:20%;padding:4px"><h3>'+ repo.Code+'</h3></td> <td><h3>'+repo.Name+'</h3></td></tr></table>'; 
+    else markup = '<table style="width: 100%;"><tr><td style="color:maroon;font-weight:bold; width:20%;padding:4px">'+ repo.Code+'</td> <td >'+repo.Name+'</td></tr></table>'; 
+    return markup; 
+ } 
+
+ function formatRepoSelection(repo) { 
+    if(repo.Code == undefined)
+       return repo.text; 
+    else
+       return repo.text + '(' + repo.Code + ')'; 
+  } 
+//CallInitSelect2 chỉ hiển thị tên trên combobox
+function CallInitSelect2ForName(Id, svUrl,place)
+{
+    $('#' + Id).select2({
+        width: '100%',
+        allowClear: true,
+        placeholder:place,
+        ajax: { 
+            //          id: function (e) { return e.id},  
+            url: svUrl, 
+            dataType: 'json', 
+            delay: 250, 
+            type: 'POST',
+            data: function (params) { 
+                return { 
+                    q: params.term,  
+                    page: params.page 
+                }; 
+            }, 
+            processResults: function (data, params) { 
+                params.page = params.page || 0; 
+                console.log(params.page); 
+                return { 
+                    results: data.items, 
+                    pagination: { 
+                        more: params.page * 20 + data.items.length < data.total_count 
+
+                    } 
+                }; 
+            }, 
+            cache: true 
+        }, 
+        escapeMarkup: function (markup) { return markup; },  
+        minimumInputLength: 0, 
+        templateResult: formatRepoForName,  
+        templateSelection: formatRepoSelectionForName 
+    }); 
+}
+//Hàm hiển thị dữ liệu trong select2
+function formatRepoForName (repo) {
+    if (repo.loading) return repo.text;
+    var markup = "<div  class='select2-result-repository clearfix'>" + repo.ShortName + " - " + repo.Name + "</div>"; 
+    return markup;
+}
+function formatRepoSelectionForName (repo) {
+    if(repo.Name == undefined) return repo.text;
+    return repo.Name;
+}
+
+//Check và UnCheck của checkbox
+function CheckBox_OnClick(checkBoxId, value1=1, value2=0){//value1 thì check, value2 thì uncheck
+    if($('#' + checkBoxId).val()==value1)
+        $('#' + checkBoxId).val(value2);
+    else $('#' + checkBoxId).val(value1);
+}
+
+//Hàm add sự kiện xóa giá trị trong select2
+//senderIdOrClass: Id hoặc Class của đối tượng select. Ví dụ: '#cbbLoaiBenhAn' hoặc '.select2'
+function AddDeleteSelect2ValueEvent(senderIdOrClass)
+{
+    $(senderIdOrClass).each(function( index ) {
+        span = $(this).next().find('span').first().find('span').first().find('span').first();//Tìm đến span hiển thị chuỗi text
+        //Thiết lập attribute contenteditable của span hiển thị về true để sự kiện được kích hoạt
+        span.attr('contenteditable', 'true');
+        //Add sự kiện keydown cho span hiển thị
+        span.on('keydown', function (e) {
+            //Nếu nhấn phím Backspace hoặc Delete thì xóa giá trị được chọn trong combobox và giá trị hiển thị trong span.
+            if (e.keyCode == 8 || e.keyCode == 46) {
+                $(this).parent().parent().parent().prev().val('');//xóa giá trị được chọn trong combobx.
+                $(this).html('');//xóa giá trị hiển thị trong span.
+                $(this).attr('title',$(this).parent().attr('title'));//trả về title ban đầu cho span.
+            }
+            return false;//Không cho phép giá trị keydown được nhập vào span
+        });
+    });
+}
+
+//Hàm add sự kiện xóa giá trị trong selectpicker (select có class là selectpicker)
+//senderIdOrClass: Id hoặc Class của đối tượng select. Ví dụ: '#cbbLoaiBenhAn' hoặc '.select2'
+function AddDeleteSelectPickerValueEvent(senderIdOrClass)
+{
+    $(senderIdOrClass).each(function( index ) {
+        span = $(this).prev().prev().find('span').first();//Tìm đến span hiển thị chuỗi text
+        //Thiết lập attribute contenteditable của span hiển thị về true để sự kiện được kích hoạt
+        span.attr('contenteditable', 'true');
+        //Add sự kiện keydown cho span hiển thị
+        span.on('keydown', function (e) {
+            //Nếu nhấn phím Backspace hoặc Delete thì xóa giá trị được chọn trong combobox và giá trị hiển thị trong span.
+            if (e.keyCode == 8 || e.keyCode == 46) {
+                $(this).parent().attr('title',$(this).parent().next().next().attr('title'));//trả về title ban đầu cho icon tam giác đen.
+                $(this).parent().next().next().val('');//xóa giá trị được chọn trong combobx.
+                $(this).html('');//xóa giá trị hiển thị trong span.
+            }
+            return false;//Không cho phép giá trị keydown được nhập vào span
+        });
+    });
+} 
+
+//Kiểm tra định dạng kiểu Time HH:mm
+function CheckTimeFormat(sTime)
+{
+    var reg=/^(20|21|22|23|[0-1]?\d{1}):([0-5]?\d{1})$/;
+    if(sTime.match(reg)){
+        return true;
+    }
+    return false;
+} 
+
+//Kiểm tra định dạng kiểu Date dd/MM/yyyy
+function CheckDateFormat(sDate)
+{ 
+    var reg=/^(([0-2]?[0-9]|3[0-1])\/([0]?[1-9]|1[0-2])\/[1-2]\d{3})$/;
+    if(sDate.match(reg)){
+        return true;
+    }
+    return false;
+} 
+
+//Kiểm tra định dạng kiểu DateTime HH:mm dd/MM/yyyy
+function CheckDateTimeFormat(sDateTime)
+{
+    var reg=/^(20|21|22|23|[0-1]?\d{1}):([0-5]?\d{1}) (([0-2]?[0-9]|3[0-1])\/([0]?[1-9]|1[0-2])\/[1-2]\d{3})$/;
+    if(sDateTime.match(reg)){
+        return true;
+    }
+    return false;
+} 
+
+//Validate control integer
+function ValidateIntegerControl(control, min, max)
+{ 
+    $(control).on('keydown keyup blur', function(e){
+        if (($(this).val() > max || $(this).val() < min) && e.keyCode !== 46 && e.keyCode !== 8){
+            e.preventDefault();
+            $(this).val(min);
+        }
+        else if(e.keyCode != 8 && e.keyCode != 0 && e.keyCode != 37 && e.keyCode != 38 && e.keyCode != 39 && e.keyCode != 40 && e.keyCode != 9 && e.keyCode != 13 && (e.keyCode < 48 || e.keyCode > 57) && !(e.keyCode <= 105 && e.keyCode >= 96))
+            e.preventDefault();
+            //        TH: Nhập 1. không đúng định dạng, click chuột sang control mới xét lại giá trị của nó về rỗng
+        else if(e.bubbles == false && e.type == 'blur' && !this.checkValidity())
+            $(this).val('');
+    });
+} 
+
+//Validate control số thực
+function ValidateNumberControl(control, min, max)
+{ 
+    $(control).on('keydown blur', function(e){
+        var coDauCham = $(this).val().indexOf('.') !== -1;
+        //          TH > max, < min thì mặc định giá trị về min
+        if (($(this).val() > max || $(this).val() < min) && e.keyCode !== 46 && e.keyCode !== 8 && $(this).val() != ''){
+            e.preventDefault();
+            $(this).val(min);
+        }
+            //          Trước dấu thập phân tối thiểu 1 số, sau dấu thập phân tối đa là 2 số
+        else if (coDauCham && ($(this).val().split('.')[0].length < 1 || $(this).val().split('.')[1].length > 2) && e.keyCode !== 46 && e.keyCode !== 8){
+            e.preventDefault();
+            $(this).val(min);
+        }
+            //          Không cho nhập các ký tự đặc biệt ngoại trừ dấu .
+            //          !(e.keyCode <= 105 && e.keyCode >= 96) cho phép nhập các số bên phải bàn phím
+        else if(e.keyCode != 8 && e.keyCode != 0 && e.keyCode != 37 && e.keyCode != 38 && e.keyCode != 39 && e.keyCode != 40 && e.keyCode != 9 && e.keyCode != 13 && e.keyCode != 190 && e.keyCode != 110 && (e.keyCode < 48 || e.keyCode > 57) && !(e.keyCode <= 105 && e.keyCode >= 96))
+            e.preventDefault();
+        //          TH: Nhập 1. không đúng định dạng, ấn tab hoặc enter sang control mới xét lại giá trị của nó về mặc định và focus vào control đấy
+        //        else if((e.keyCode == 9 || e.keyCode == 13) && e.type == 'keydown' && !this.checkValidity()){
+        //            e.preventDefault();
+        //            $(this).val(min);
+        //        }
+        ////          TH: Nhập 1. không đúng định dạng, click chuột sang control mới xét lại giá trị của nó về rỗng
+        //        else if(e.bubbles == false && e.type == 'blur' && !this.checkValidity()){
+        //            e.preventDefault();
+        //            $(this).val('');
+        //        }
+    });
+} 
+
+//ConvertDateTime from string to datetime
+function ConvertDateTime(sDateTime){
+    dateTime = sDateTime.split(' ');
+
+    var time = dateTime[0].split(':');
+    var h = time[0];
+    var m = time[1];
+    var s = 0;
+
+    var date = dateTime[1].split('/');
+    var dd = date[0];
+    var mm = date[1]-1;
+    var yyyy = date[2];
+
+    return new Date(yyyy,mm,dd,h,m,s);
+}
+
+//So sánh 2 Date dd/MM/yyyy
+function CompareDate(sDate1, sDate2)
+{
+    arrDate1 = sDate1.split('/');
+    arrDate2 = sDate2.split('/');
+    date1 = new Date(arrDate1[2],arrDate1[1]-1,arrDate1[0]);
+    date2 = new Date(arrDate2[2],arrDate2[1]-1,arrDate2[0]);
+    if(date1 > date2)
+    {
+        return 1;
+    }
+    else if(date1 < date2)
+    {
+        return -1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+//So sánh 2 DateTime dd/MM/yyyy HH:mm
+function CompareDateTime(sDateTime1, sDateTime2)
+{
+    arrDateTime1 = sDateTime1.split(' ');
+    arrDateTime2 = sDateTime2.split(' ');
+    arrDate1 = arrDateTime1[1].split('/');
+    arrDate2 = arrDateTime2[1].split('/');
+    arrTime1 = arrDateTime1[0].split(':');
+    arrTime2 = arrDateTime2[0].split(':');
+    dateTime1 = new Date(arrDate1[2], arrDate1[1]-1, arrDate1[0], arrTime1[0], arrTime1[1]);
+    dateTime2 = new Date(arrDate2[2], arrDate2[1]-1, arrDate2[0], arrTime2[0], arrTime2[1]);
+    if(dateTime1 > dateTime2)
+    {
+        return 1;
+    }
+    else if(dateTime1 < dateTime2)
+    {
+        return -1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+//Trả về phần cố định của biểu thức trong bộ mã.
+function GetDisplayPart(bieuThuc)
+{
+    if(bieuThuc != '')
+        return bieuThuc.split('{')[0];
+    return null;
+}
+//Trả về chuỗi mask của biểu thức trong bộ mã.
+function GetMaskString(bieuThuc)
+{
+    if(bieuThuc != '')
+    {
+        bieuThucArr = bieuThuc.split('{');
+        //Biểu thức dạng 18/{MaBN,\d\d\d\d\d\d}
+        if(bieuThucArr.length == 2)
+        {
+            return bieuThucArr[0] + bieuThucArr[1].split(',')[1].split('}')[0];
+        }
+    }
+    return null;
+}
+//Hàm chỉ cho phép nhập chữ số, ',', '.' vào control
+function CheckCurrency(e){
+    if(event.which != 8 && isNaN(String.fromCharCode(e.which))&&event.which != 46){
+        event.preventDefault(); 
+    }
+ }
+// format currency with control html input
+function FormatCurrency(ctrl){
+     var val;
+     if(ctrl.tagName=='INPUT'){
+        if (event.keyCode == 37 || event.keyCode == 38 || event.keyCode == 39 || event.keyCode == 40)
+        {
+            return;
+        }
+        val = ctrl.value;
+     }
+     else
+        val = ctrl.innerHTML;
+
+     if(ctrl.tagName=='INPUT')
+         ctrl.value = GetFormatCurrency(val);
+     else
+         ctrl.innerHTML = GetFormatCurrency(val);
+}
+/*Hàm trả về giá trị phân tách phần nghìn của chuỗi số*/
+function GetFormatCurrency(val){
+    val = val.replace(/,/g, "")
+    val += '';
+    x = val.split('.');
+    x1 = x[0];
+    x2 = x.length > 1 ? '.' + x[1] : '';
+    var rgx = /(\d+)(\d{3})/;
+    while (rgx.test(x1)) {
+        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+    }
+    return x1 + x2;
+}
+    /**Mã hóa chuỗi để hiển thị dạng html
+     * Sanitize and encode all HTML in a user-submitted string
+     * https://portswigger.net/web-security/cross-site-scripting/preventing
+     * @param  {String} str  The user-submitted string
+     * @return {String} str  The sanitized string
+     */
+function SanitizeHTML(str) {
+    return str.replace(/[^\w. ]/gi, function (c) {
+        return '&#' + c.charCodeAt(0) + ';';
+    });
+}
+
+    //Hàm đảm bảo giá trị nhập vào trong input có type là number luôn nằm trong khoảng min, max
+$(function() {
+    $("input[type='number']").change(function() {
+        var max = parseFloat($(this).attr('max'));
+        var min = parseFloat($(this).attr('min'));
+        if ($(this).val() > max)
+        {
+            $(this).val(max);
+        }
+        else if ($(this).val() < min)
+        {
+            $(this).val(min);
+        }
+    });
+});

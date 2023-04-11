@@ -1,0 +1,154 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Data;
+using OneTSQ.Core.Model;using OneTSQ.Model;
+using OneTSQ.Call.Bussiness.Template;
+using OneTSQ.Utility;
+using OneTSQ.Bussiness.Utility;
+
+namespace OneTSQ.Call.Bussiness.Sql
+{
+    public class DanhMucNguoiDungProcessBll : DanhMucNguoiDungTemplate
+    {
+        public override string ServiceId
+        {
+            get
+            {
+                return "SqlDanhMucNguoiDungProcessBll";
+            }
+        }
+
+        public override DanhMucNguoiDungCls[] Reading(RenderInfoCls ORenderInfo, DanhMucNguoiDungFilterCls ODanhMucNguoiDungFilter)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            return OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucNguoiDungProcess().Reading(ActionSqlParam, ODanhMucNguoiDungFilter);
+        }
+
+        public override void Add(RenderInfoCls ORenderInfo, DanhMucNguoiDungCls ODanhMucNguoiDung)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucNguoiDungProcess().Add(ActionSqlParam, ODanhMucNguoiDung);
+        }
+
+        public override void Save(RenderInfoCls ORenderInfo, string Id, DanhMucNguoiDungCls ODanhMucNguoiDung)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucNguoiDungProcess().Save(ActionSqlParam, Id, ODanhMucNguoiDung);
+        }
+
+        public override void Delete(RenderInfoCls ORenderInfo, string Id)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucNguoiDungProcess().Delete(ActionSqlParam, Id);
+        }
+
+        public override DanhMucNguoiDungCls CreateModel(RenderInfoCls ORenderInfo, string Id)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            return OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucNguoiDungProcess().CreateModel(ActionSqlParam, Id);
+        }
+
+        public override string Duplicate(RenderInfoCls ORenderInfo, string Id)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            return OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucNguoiDungProcess().Duplicate(ActionSqlParam, Id);
+        }
+
+        public override DanhMucNguoiDungCls[] PageReading(RenderInfoCls ORenderInfo, DanhMucNguoiDungFilterCls ODanhMucNguoiDungFilter, ref int recordTotal)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            return OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucNguoiDungProcess().PageReading(ActionSqlParam, ODanhMucNguoiDungFilter, ref recordTotal);
+        }
+
+        public override DanhMucNguoiDungCls[] ReadingWithPaging(RenderInfoCls ORenderInfo, DanhMucNguoiDungFilterCls ODanhMucNguoiDungFilter, int PageIndex, int PageSize)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            return OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucNguoiDungProcess().ReadingWithPaging(ActionSqlParam, ODanhMucNguoiDungFilter, PageIndex, PageSize);
+        }
+
+        public override long Count(RenderInfoCls ORenderInfo, DanhMucNguoiDungFilterCls ODanhMucNguoiDungFilter)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            return OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucNguoiDungProcess().Count(ActionSqlParam, ODanhMucNguoiDungFilter);
+        }
+
+        public override DanhMucNguoiDungCls[] Reading(SiteParam OSiteParam, DanhMucNguoiDungFilterCls ODanhMucNguoiDungFilter)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(OSiteParam);
+            return OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucNguoiDungProcess().Reading(ActionSqlParam, ODanhMucNguoiDungFilter);
+        }
+
+        public override void Add(SiteParam OSiteParam, DanhMucNguoiDungCls ODanhMucNguoiDung)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(OSiteParam);
+            OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucNguoiDungProcess().Add(ActionSqlParam, ODanhMucNguoiDung);
+        }
+
+        public override void Save(SiteParam OSiteParam, string Id, DanhMucNguoiDungCls ODanhMucNguoiDung)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(OSiteParam);
+            OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucNguoiDungProcess().Save(ActionSqlParam, Id, ODanhMucNguoiDung);
+        }
+
+        public override void Delete(SiteParam OSiteParam, string Id)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(OSiteParam);
+            OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucNguoiDungProcess().Delete(ActionSqlParam, Id);
+        }
+
+        public override DanhMucNguoiDungCls CreateModel(SiteParam OSiteParam, string Id)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(OSiteParam);
+            return OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucNguoiDungProcess().CreateModel(ActionSqlParam, Id);
+        }
+
+        public override string Duplicate(SiteParam OSiteParam, string Id)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(OSiteParam);
+            return OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucNguoiDungProcess().Duplicate(ActionSqlParam, Id);
+        }
+
+        public override DanhMucNguoiDungCls[] PageReading(SiteParam OSiteParam, DanhMucNguoiDungFilterCls ODanhMucNguoiDungFilter, ref int recordTotal)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(OSiteParam);
+            return OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucNguoiDungProcess().PageReading(ActionSqlParam, ODanhMucNguoiDungFilter, ref recordTotal);
+        }
+
+        public override DanhMucNguoiDungCls[] ReadingWithPaging(SiteParam OSiteParam, DanhMucNguoiDungFilterCls ODanhMucNguoiDungFilter, int PageIndex, int PageSize)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(OSiteParam);
+            return OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucNguoiDungProcess().ReadingWithPaging(ActionSqlParam, ODanhMucNguoiDungFilter, PageIndex, PageSize);
+        }
+
+        public override long Count(SiteParam OSiteParam, DanhMucNguoiDungFilterCls ODanhMucNguoiDungFilter)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(OSiteParam);
+            return OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucNguoiDungProcess().Count(ActionSqlParam, ODanhMucNguoiDungFilter);
+        }
+
+        public override DanhMucNguoiDungCls CreateModel(string connectstring, string Id)
+        {
+            return OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucNguoiDungProcess().CreateModel(connectstring, Id);
+        }
+    }
+}

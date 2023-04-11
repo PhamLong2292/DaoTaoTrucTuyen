@@ -1,0 +1,178 @@
+﻿using OneTSQ.Core.Model;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using OneTSQ.Model;
+
+namespace OneTSQ.Model
+{
+    public class DeTaiCls
+    {
+        public string ID;
+        public string DANGKYDETAI_ID;
+        public string MA;
+        public string TENDETAI;
+        public string NGUOIGUI_ID;
+        public DateTime? THOIGIANGUI;
+        public int? KETLUAN;
+        public string LICHXETDUYET_ID;
+        public int? TRANGTHAI;
+        public string YKIENCHUNG;
+        public DateTime? THOIGIANBATDAU;
+        public DateTime? THOIGIANKETTHUC;
+        public string DeTaiLapLichID;
+        public enum eTrangThai
+        {
+            Moi = 0,
+            ChoXetDuyet = 1,
+            DaXetDuyet = 2,
+            HoanTat = 3
+        }  
+    }
+}
+
+public class DeTaiParser
+{
+    public readonly static Dictionary<int, string> TrangThais = new Dictionary<int, string>()
+        {
+            { (int)DeTaiCls.eTrangThai.Moi, "Mới" },
+            { (int)DeTaiCls.eTrangThai.ChoXetDuyet, "Chờ duyệt" },
+            { (int)DeTaiCls.eTrangThai.DaXetDuyet, "Đã nghiệm thu" },
+            { (int)DeTaiCls.eTrangThai.HoanTat, "Hoàn tất" }
+        };
+    public readonly static Dictionary<int, string> sColorTrangThai = new Dictionary<int, string>()
+        {
+            { (int)DeTaiCls.eTrangThai.Moi, "<span style=\"background-color:orange;color:white;\" class=\"badge\" >Mới</span>" },
+            { (int)DeTaiCls.eTrangThai.ChoXetDuyet, "<span style=\"background-color:violet; color:black;\" class=\"badge\">Chờ duyệt</span>" },
+            { (int)DeTaiCls.eTrangThai.DaXetDuyet, "<span style=\"background-color:green;color:white;\" class=\"badge\" >Đã nghiệm thu</span>" },
+            { (int)DeTaiCls.eTrangThai.HoanTat, "<span style=\"background-color:blue;color:white;\" class=\"badge\" >Hoàn tất</span>" }
+        };
+  
+    public static DeTaiCls CreateInstance()
+    {
+        DeTaiCls ODeTai = new DeTaiCls();
+        return ODeTai;
+    }
+    public static DeTaiCls ParseFromDataRow(DataRow dr)
+    {
+        DeTaiCls ODeTai = new DeTaiCls();
+        ODeTai.ID = CoreXmlUtility.GetString(dr, "ID", true);
+        ODeTai.DANGKYDETAI_ID = CoreXmlUtility.GetString(dr, "DANGKYDETAI_ID", true);
+        ODeTai.MA = CoreXmlUtility.GetString(dr, "MA", true);
+        ODeTai.TENDETAI = CoreXmlUtility.GetString(dr, "TENDETAI", true);
+        ODeTai.NGUOIGUI_ID = CoreXmlUtility.GetString(dr, "NGUOIGUI_ID", true);
+        ODeTai.THOIGIANGUI = CoreXmlUtility.GetDateOrNull(dr, "THOIGIANGUI", true);
+        ODeTai.KETLUAN = CoreXmlUtility.GetIntOrNull(dr, "KETLUAN", true);
+        ODeTai.LICHXETDUYET_ID = CoreXmlUtility.GetString(dr, "LICHXETDUYET_ID", true);
+        ODeTai.TRANGTHAI = CoreXmlUtility.GetIntOrNull(dr, "TRANGTHAI", true);
+        ODeTai.YKIENCHUNG = CoreXmlUtility.GetString(dr, "YKIENCHUNG", true);
+        ODeTai.THOIGIANBATDAU = CoreXmlUtility.GetDateOrNull(dr, "THOIGIANBATDAU", true);
+        ODeTai.THOIGIANKETTHUC = CoreXmlUtility.GetDateOrNull(dr, "THOIGIANKETTHUC", true);       
+        return ODeTai;
+    }
+
+    public static DeTaiCls[] ParseFromDataTable(DataTable dtTable)
+    {
+        DeTaiCls[] DeTais = new DeTaiCls[dtTable.Rows.Count];
+        for (int iIndex = 0; iIndex < dtTable.Rows.Count; iIndex++)
+        {
+            DeTais[iIndex] = ParseFromDataRow(dtTable.Rows[iIndex]);
+        }
+        return DeTais;
+    }
+
+
+    public static DeTaiCls[] ParseFromMultiXml(string XmlData, string XmlDataSchema)
+    {
+        DataSet ds = CoreXmlUtility.GetDataSetFromXml(XmlData, XmlDataSchema);
+        DeTaiCls[] DeTais = ParseFromDataTable(ds.Tables[0]);
+        return DeTais;
+    }
+
+
+    public static DeTaiCls ParseFromXml(string XmlData, string XmlDataSchema)
+    {
+        DataSet ds = CoreXmlUtility.GetDataSetFromXml(XmlData, XmlDataSchema);
+        if (ds.Tables[0].Rows.Count == 0) return null;
+        DeTaiCls ODeTai = ParseFromDataRow(ds.Tables[0].Rows[0]);
+        return ODeTai;
+    }
+
+
+    public static XmlCls GetXml(DeTaiCls[] DeTais)
+    {
+        DataSet ds = new DataSet();
+        ds.Tables.Add("info");
+        ds.Tables["info"].Columns.Add("ID");
+        ds.Tables["info"].Columns.Add("DANGKYDETAI_ID");
+        ds.Tables["info"].Columns.Add("MA");
+        ds.Tables["info"].Columns.Add("TENDETAI");
+        ds.Tables["info"].Columns.Add("NGUOIGUI_ID");
+        ds.Tables["info"].Columns.Add("THOIGIANGUI", typeof(DateTime?));
+        ds.Tables["info"].Columns.Add("KETLUAN", typeof(int?));
+        ds.Tables["info"].Columns.Add("LICHXETDUYET_ID");
+        ds.Tables["info"].Columns.Add("TRANGTHAI", typeof(int));
+        ds.Tables["info"].Columns.Add("YKIENCHUNG");
+        ds.Tables["info"].Columns.Add("THOIGIANBATDAU", typeof(DateTime?));
+        ds.Tables["info"].Columns.Add("THOIGIANKETTHUC", typeof(DateTime?));        
+        for (int iIndex = 0; iIndex < DeTais.Length; iIndex++)
+        {
+            ds.Tables["info"].Rows.Add(new object[]
+            {
+                DeTais[iIndex].ID,
+                DeTais[iIndex].DANGKYDETAI_ID,
+                DeTais[iIndex].MA,
+                DeTais[iIndex].TENDETAI,
+                DeTais[iIndex].NGUOIGUI_ID,
+                DeTais[iIndex].THOIGIANGUI,
+                DeTais[iIndex].KETLUAN,
+                DeTais[iIndex].LICHXETDUYET_ID,
+                DeTais[iIndex].TRANGTHAI,
+                DeTais[iIndex].YKIENCHUNG,
+                DeTais[iIndex].THOIGIANBATDAU,
+                DeTais[iIndex].THOIGIANKETTHUC,             
+            });
+        }
+        XmlCls OXml = new XmlCls();
+        OXml.XmlData = ds.GetXml();
+        OXml.XmlDataSchema = ds.GetXmlSchema();
+        return OXml;
+    }
+
+
+    public static XmlCls GetXml(DeTaiCls ODeTai)
+    {
+        DataSet ds = new DataSet();
+        ds.Tables["info"].Columns.Add("ID");
+        ds.Tables["info"].Columns.Add("DANGKYDETAI_ID");
+        ds.Tables["info"].Columns.Add("MA");
+        ds.Tables["info"].Columns.Add("TENDETAI");
+        ds.Tables["info"].Columns.Add("NGUOIGUI_ID");
+        ds.Tables["info"].Columns.Add("THOIGIANGUI", typeof(DateTime?));
+        ds.Tables["info"].Columns.Add("KETLUAN", typeof(int?));
+        ds.Tables["info"].Columns.Add("LICHXETDUYET_ID");
+        ds.Tables["info"].Columns.Add("TRANGTHAI", typeof(int));
+        ds.Tables["info"].Columns.Add("YKIENCHUNG");
+        ds.Tables["info"].Columns.Add("THOIGIANBATDAU", typeof(DateTime?));
+        ds.Tables["info"].Columns.Add("THOIGIANKETTHUC", typeof(DateTime?));
+        ds.Tables["info"].Rows.Add(new object[]
+        {
+                ODeTai.ID,
+                ODeTai.DANGKYDETAI_ID,
+                ODeTai.MA,
+                ODeTai.TENDETAI,
+                ODeTai.NGUOIGUI_ID,
+                ODeTai.THOIGIANGUI,
+                ODeTai.KETLUAN,
+                ODeTai.LICHXETDUYET_ID,
+                ODeTai.TRANGTHAI,
+                ODeTai.YKIENCHUNG,
+                ODeTai.THOIGIANBATDAU,
+                ODeTai.THOIGIANKETTHUC,             
+        });
+        XmlCls OXml = new XmlCls();
+        OXml.XmlData = ds.GetXml();
+        OXml.XmlDataSchema = ds.GetXmlSchema();
+        return OXml;
+    }
+}

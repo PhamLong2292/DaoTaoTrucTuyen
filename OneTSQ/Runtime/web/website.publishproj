@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+***********************************************************************************************
+website.publishproj
+
+WARNING: DO NOT MODIFY this file, it is used for the web publish process.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+***********************************************************************************************
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.30319</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{e59a4103-119f-42b7-92de-2d9adec045f4}</ProjectGuid>
+    <SourceWebPhysicalPath>$(MSBuildThisFileDirectory)</SourceWebPhysicalPath>
+    <SourceWebVirtualPath>/web</SourceWebVirtualPath>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <SourceWebProject>http://localhost:13237</SourceWebProject>
+    <SourceWebMetabasePath>/IISExpress/7.5/LM/W3SVC/4/ROOT</SourceWebMetabasePath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <!-- for VS2010 we need to use 10.5 but for VS2012+ we should use VisualStudioVersion -->
+    <WebPublishTargetsVersion Condition=" '$(WebPublishTargetsVersion)' =='' and '$(VisualStudioVersion)' == 10.0 ">10.5</WebPublishTargetsVersion>
+    <WebPublishTargetsVersion Condition=" '$(WebPublishTargetsVersion)'=='' ">$(VisualStudioVersion)</WebPublishTargetsVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(WebPublishTargetsVersion)</VSToolsPath>
+    <_WebPublishTargetsPath Condition=" '$(_WebPublishTargetsPath)'=='' ">$(VSToolsPath)</_WebPublishTargetsPath>
+    <AssemblyFileVersion Condition="'$(AssemblyFileVersion)' == ''">1.0.0.0</AssemblyFileVersion>
+    <AssemblyVersion Condition="'$(AssemblyVersion)' == ''">1.0.0.0</AssemblyVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <AssemblyAttributes Include="AssemblyFileVersion">
+      <Value>$(AssemblyFileVersion)</Value>
+    </AssemblyAttributes>
+    <AssemblyAttributes Include="AssemblyVersion">
+      <Value>$(AssemblyVersion)</Value>
+    </AssemblyAttributes>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\OneTSQ.Bussiness.Sql\OneTSQ.Bussiness.Sql.csproj">
+      <Project>{C65CE934-9A24-4970-AA22-F88C884E2E69}</Project>
+      <Name>OneTSQ.Bussiness.Sql</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\OneTSQ.Bussiness.Template\OneTSQ.Bussiness.Template.csproj">
+      <Project>{91133486-ED5D-4967-B028-2C112AD1B0CC}</Project>
+      <Name>OneTSQ.Bussiness.Template</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\OneTSQ.Bussiness.Utility\OneTSQ.Bussiness.Utility.csproj">
+      <Project>{6385F257-BC5D-4511-AABF-3057E73C925B}</Project>
+      <Name>OneTSQ.Bussiness.Utility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\OneTSQ.Core.Bussiness.Sql\OneTSQ.Core.Bussiness.Sql.csproj">
+      <Project>{F3D8F163-0FD0-40B0-81F3-AA09E91AC3B7}</Project>
+      <Name>OneTSQ.Core.Bussiness.Sql</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\OneTSQ.Core.Bussiness.Template\OneTSQ.Core.Bussiness.Template.csproj">
+      <Project>{09839579-7D45-49AF-A377-B6FB58E09871}</Project>
+      <Name>OneTSQ.Core.Bussiness.Template</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\OneTSQ.Core.Bussiness.Utility\OneTSQ.Core.Bussiness.Utility.csproj">
+      <Project>{7148A1AE-8370-4B82-B44C-D4B536473239}</Project>
+      <Name>OneTSQ.Core.Bussiness.Utility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\OneTSQ.Core.Model\OneTSQ.Core.Model.csproj">
+      <Project>{D5BACFEE-5B6B-41BC-A3AC-15B691E29923}</Project>
+      <Name>OneTSQ.Core.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\OneTSQ.Database.Service.Oracle\OneTSQ.Database.Service.Oracle.csproj">
+      <Project>{99327F02-5E32-4F9F-848C-BA6A141042BD}</Project>
+      <Name>OneTSQ.Database.Service.Oracle</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\OneTSQ.Database.Service.Sql\OneTSQ.Database.Service.Sql.csproj">
+      <Project>{51FAC77F-D7F8-4612-B5B6-7982EB6B1B9A}</Project>
+      <Name>OneTSQ.Database.Service.Sql</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\OneTSQ.Database.Service\OneTSQ.Database.Service.csproj">
+      <Project>{3AF1F7E2-28FD-4652-8A08-48AC865E9D27}</Project>
+      <Name>OneTSQ.Database.Service</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\OneTSQ.MediaService\OneTSQ.MediaService.csproj">
+      <Project>{6ADB76AE-869A-47EE-A9CB-3E86A2D23611}</Project>
+      <Name>OneTSQ.MediaService</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\OneTSQ.Model\OneTSQ.Model.csproj">
+      <Project>{69C9D595-0157-4618-A501-CAC1A4EC3525}</Project>
+      <Name>OneTSQ.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\OneTSQ.ProcessWebService.Utility\OneTSQ.ProcessWebService.Utility.csproj">
+      <Project>{713CD781-AC87-4B44-B3BA-EA363EE5D873}</Project>
+      <Name>OneTSQ.ProcessWebService.Utility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\OneTSQ.ProcessWebService\OneTSQ.ProcessWebService.csproj">
+      <Project>{3DA680A9-DCC8-4E02-8B0E-46B06CCD2EDF}</Project>
+      <Name>OneTSQ.ProcessWebService</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\OneTSQ.Utility\OneTSQ.Utility.csproj">
+      <Project>{EACF5059-E789-4E50-BA75-6E4487D50B0A}</Project>
+      <Name>OneTSQ.Utility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\OneTSQ.Web.Utility\OneTSQ.Web.Utility.csproj">
+      <Project>{46B6F95F-48B5-4AA1-9F82-FF1550D20516}</Project>
+      <Name>OneTSQ.Web.Utility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\OneTSQ.WorkflowUtility\OneTSQ.WorkflowUtility.csproj">
+      <Project>{F32D2262-454A-4456-B507-3BACC9D8B489}</Project>
+      <Name>OneTSQ.WorkflowUtility</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(_WebPublishTargetsPath)\Web\Microsoft.WebSite.Publishing.targets" />
+</Project>

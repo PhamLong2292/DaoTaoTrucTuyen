@@ -1,0 +1,83 @@
+﻿using FlexCel.Report;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using OneTSQ.Call.Bussiness.Utility;
+using OneTSQ.Core.Call.Bussiness.Utility;
+using OneTSQ.Model;
+using OneTSQ.ReportUtility;
+using OneTSQ.Core.Model;
+
+namespace OneTSQ.WebParts
+{
+    [ObjectReport(ID = "294BE7A2-0A99-4A93-9D4E-B04C4A517E3A", Type = OneTSQ.ReportUtility.Report.eType.Flexcel, Name = "DT_DonDangKyHoc", Title = "Đơn đăng ký học", ReportPath = @"\ReportTemplates\DT_DonDangKyHoc.xlsx")]
+    public class DT_DonDangKyHoc : ObjectReport<DT_DangKy>
+    {
+        private class VanBang
+        {
+            public string Ten { get; set; }
+            public string DonViCap { get; set; }
+            public int? Nam { get; set; }
+        }
+        protected override FlexCelReport OnFlexcelBuild(RenderInfoCls ORenderInfo, string ketQuaDaoTaoId)
+        {
+            FlexCelReport flexCelReport = new FlexCelReport();
+            DT_KetQuaDaoTaoCls ketQuaDaoTao = CallBussinessUtility.CreateBussinessProcess().CreateDT_KetQuaDaoTaoProcess().CreateModel(ORenderInfo, ketQuaDaoTaoId);
+            if (ketQuaDaoTao == null)
+                ketQuaDaoTao = new DT_KetQuaDaoTaoCls();
+            DT_KhoaHocCls khoaHoc = string.IsNullOrEmpty(ketQuaDaoTao.KHOAHOCDANGKY_ID) ? new DT_KhoaHocCls() : CallBussinessUtility.CreateBussinessProcess().CreateDT_KhoaHocProcess().CreateModel(ORenderInfo, ketQuaDaoTao.KHOAHOCDANGKY_ID);
+            DT_HocVienCls hocVien = null;
+            if (!string.IsNullOrEmpty(ketQuaDaoTao.HOCVIEN_ID))
+                hocVien = CallBussinessUtility.CreateBussinessProcess().CreateDT_HocVienProcess().CreateModel(ORenderInfo, ketQuaDaoTao.HOCVIEN_ID);
+            if (hocVien == null)
+                hocVien = new DT_HocVienCls();
+
+            var noiSinh = OneMES3.DM.Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreateTinhThanhProcess().CreateModel(Model.Common.CreateRenderInfo(ORenderInfo), hocVien.NOISINH_MA);
+            var danToc = OneMES3.DM.Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreateDanTocProcess().CreateModel(Model.Common.CreateRenderInfo(ORenderInfo), hocVien.DANTOC_MA);
+            var donViCongTac = OneMES3.DM.Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreateDonViCongTacProcess().CreateModel(Model.Common.CreateRenderInfo(ORenderInfo), hocVien.NOISINH_MA);
+            var donViHanhChinh = OneMES3.DM.Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreateDonViHanhChinhProcess().CreateModel(Model.Common.CreateRenderInfo(ORenderInfo), hocVien.DONVICONGTAC_MA);
+            var trinhDo = OneMES3.DM.Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreateTrinhDoHocVanProcess().CreateModel(Model.Common.CreateRenderInfo(ORenderInfo), hocVien.TOTNGHIEP_MA);
+
+            var vanBangs = CallBussinessUtility.CreateBussinessProcess().CreateDT_VanBangProcess().Reading(ORenderInfo, new DT_VanBangFilterCls() { HOCVIEN_ID = hocVien.ID })
+                .Select(o => new VanBang
+                {
+                    Ten = o.TEN,
+                    DonViCap = o.DONVICAP,
+                    Nam = o.NAM
+                });
+
+            //flexCelReport.SetValue("DonViDaoTao", donVi != null ? donVi.OwnerName.ToUpper() : null);
+            flexCelReport.SetValue("DonViDaoTao", "BỆNH VIỆN YHCT NGHỆ AN");
+            flexCelReport.SetValue("NgayInDangKy", ketQuaDaoTao.NGAYDANGKY == null ? "Hà Nội, ngày   tháng   năm " : "Hà Nội, ngày " + ketQuaDaoTao.NGAYDANGKY.Value.Day + " tháng " + ketQuaDaoTao.NGAYDANGKY.Value.Month + " năm " + ketQuaDaoTao.NGAYDANGKY.Value.Year);
+            flexCelReport.SetValue("TenKhoaHoc", khoaHoc.TENKHOAHOC);
+            flexCelReport.SetValue("ThoiGianHoc", (khoaHoc.NGAYKHAIGIANGDUKIEN == null ? null : khoaHoc.NGAYKHAIGIANGDUKIEN.Value.ToString("dd/MM/yyyy")) + " - " + (khoaHoc.NGAYBEGIANGDUKIEN == null ? null : khoaHoc.NGAYBEGIANGDUKIEN.Value.ToString("dd/MM/yyyy")));
+            flexCelReport.SetValue("ThoiLuongHoc", khoaHoc.THOILUONG + (string.IsNullOrEmpty(khoaHoc.LOAITHOILUONG) ? khoaHoc.LOAITHOILUONG : DT_KhoaHocParser.LoaiThoiLuongs[khoaHoc.LOAITHOILUONG]));
+            flexCelReport.SetValue("HoTen", string.IsNullOrEmpty(hocVien.HOTEN) ? null : hocVien.HOTEN);
+            flexCelReport.SetValue("NgaySinh", (hocVien.NGAYSINH == null ? null : hocVien.NGAYSINH.Value.ToString("dd/MM/yyyy")));
+            flexCelReport.SetValue("GioiTinh", (hocVien.GIOITINH == null ? null : Common.BenhNhan.GioiTinhs[hocVien.GIOITINH.Value]));
+            flexCelReport.SetValue("NoiSinh", noiSinh == null ? hocVien.NOISINH_MA : noiSinh.Ten);
+            flexCelReport.SetValue("DanToc", danToc == null ? hocVien.DANTOC_MA : danToc.Ten);
+            flexCelReport.SetValue("CMND", hocVien.CMTND);
+            flexCelReport.SetValue("NgayCapCMND", hocVien.CMTND_NGAYCAP);
+            flexCelReport.SetValue("NoiCapCMND", hocVien.CMTND_NOICAP);
+            flexCelReport.SetValue("NoiCongTac", hocVien.KHOAPHONGCONGTAC + ", " + (donViCongTac == null ? hocVien.DONVICONGTAC_MA : donViCongTac.Ten));
+            flexCelReport.SetValue("SoNamKinhNghiem", hocVien.SONAMKINHNGHIEM);
+            flexCelReport.SetValue("DiaChiLienHe", hocVien.DIACHISONHA + ", " + (donViHanhChinh == null ? hocVien.DIACHIHANHCHINH_MA : donViHanhChinh.Ten));
+            flexCelReport.SetValue("DienThoai", hocVien.DIENTHOAI);
+            flexCelReport.SetValue("Email", hocVien.EMAIL);
+            flexCelReport.SetValue("VanBang", trinhDo == null ? hocVien.TOTNGHIEP_MA : trinhDo.Ten);
+            flexCelReport.SetValue("NamToNghiep", hocVien.NAMTOTNGHIEP);
+            flexCelReport.SetValue("TruongCapBang", hocVien.TRUONGCAPBANG);
+            flexCelReport.SetValue("ChuyenNganh", hocVien.CHUYENNGANH_MA);
+            flexCelReport.AddTable("VanBang", vanBangs);
+            return flexCelReport;
+        }
+        public string StripHTML(string html)
+        {
+            var regex = new System.Text.RegularExpressions.Regex("<[^>]+>", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            return System.Web.HttpUtility.HtmlDecode((regex.Replace(html, "")));
+        }
+    }
+}

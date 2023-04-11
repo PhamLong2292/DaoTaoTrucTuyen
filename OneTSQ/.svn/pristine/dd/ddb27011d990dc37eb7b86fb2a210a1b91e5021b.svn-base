@@ -1,0 +1,285 @@
+﻿using OneTSQ.Call.Bussiness.Utility;
+using OneTSQ.Model;
+using OneTSQ.Utility;
+using System;
+using System.Linq;
+using System.Data;
+using OneTSQ.CheckPermissionUtility;
+using OneTSQ.Permission;
+using OneTSQ.Core.Call.Bussiness.Utility;
+using System.IO;
+using System.Collections.Generic;
+using System.Xml.Linq;
+using System.Xml;
+using System.Globalization;
+using System.Web;
+using OneTSQ.Common;
+using FlexCel.Report;
+using OneTSQ.Core.Model;
+
+namespace OneTSQ.WebParts
+{
+    public class DT_LopHocs : WebPartTemplate
+    {
+        public override string WebPartId
+        {
+            get
+            {
+                return "DT_LopHocs";
+            }
+        }
+        public override string WebPartTitle
+        {
+            get
+            {
+                return "Danh sách lớp học";
+            }
+        }
+        public override string Description
+        {
+            get
+            {
+                return "Danh sách lớp học";
+
+            }
+        }
+
+        public override void RegAjaxPro(RenderInfoCls ORenderInfo, System.Web.UI.Page Page)
+        {
+            AjaxPro.Utility.RegisterTypeForAjax(typeof(DT_LopHocs), Page);
+        }
+
+        public override AjaxOut CheckPermission(RenderInfoCls ORenderInfo)
+        {
+            SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+            string UserId = WebSessionUtility.GetCurrentLoginUser(OSiteParam).OwnerUserId;
+            bool HasPermission = true;
+            AjaxOut RetAjaxOut = new AjaxOut();
+            RetAjaxOut.RetBoolean = HasPermission;
+
+            return RetAjaxOut;
+        }
+        public override AjaxOut Draw(SiteParam OSiteParam, RenderInfoCls ORenderInfo)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+
+            int pageIndex = string.IsNullOrEmpty(WebEnvironments.Request("PageIndex")) ? 0 : int.Parse(WebEnvironments.Request("PageIndex"));
+            string keyword = WebEnvironments.Request("Keyword");
+            int? nam = string.IsNullOrEmpty(WebEnvironments.Request("Nam")) ? null : (int?)int.Parse(WebEnvironments.Request("Nam"));
+            int? trangThai = string.IsNullOrEmpty(WebEnvironments.Request("TrangThai")) ? null : (int?)int.Parse(WebEnvironments.Request("TrangThai"));
+            if (trangThai == null)
+                trangThai = (int)DT_KhoaHocCls.eLopHocTrangThai.CoHocVien;
+            if (trangThai < 0)
+                trangThai = null;
+            string cbbTrangThai = "";
+            foreach (var tt in DT_KhoaHocParser.LopHocTrangThais)
+                cbbTrangThai += "<option value=" + tt.Key + " " + (trangThai == tt.Key ? "selected" : "") + ">" + tt.Value + "</option>";
+
+            try
+            {
+                string SessionId = System.Guid.NewGuid().ToString();
+
+                #region Javascript
+                RetAjaxOut.HtmlContent =
+                    WebEnvironments.ProcessJavascript(
+                     "<script language=\"javascript\">\r\n" +
+                    "   $(document).ready(function() {\r\n" +
+                    "       document.title = '" + WebLanguage.GetLanguage(OSiteParam, "OneTMP: Danh sách lớp học") + "';\r\n" +
+                    "       $('.yearpicker').datetimepicker({ \r\n" +
+                    "           format: 'YYYY' \r\n" +
+                    "       }); \r\n" +
+                    "       $('#txtKeyword').val('" + keyword + "');\r\n" +
+                    "       $('#txtNam').val('" + nam + "');\r\n" +
+                    "       cbbTrangThai.innerHTML = '" + cbbTrangThai + "';\r\n" +
+                    "       $('#cbbTrangThai').select2({\r\n" +
+                    "          placeholder: 'Trạng thái',\r\n" +
+                    "          allowClear: true\r\n" +
+                    "       });\r\n" +
+                    "       $('#cbbTrangThai').select2('val', " + (trangThai == null ? "null" : trangThai.ToString()) + ");\r\n" +
+                    "   });\r\n" +
+
+                    "   var CurrentPageIndex=0;\r\n" +
+
+                    "   function NextPage(PageIndex)\r\n" +
+                    "   {\r\n" +
+                    "       CurrentPageIndex = PageIndex;\r\n" +
+                    "       setTimeout('Search()',10);\r\n" +
+                    "   }\r\n" +
+
+                    "   function Search()\r\n" +
+                    "   {\r\n" +
+                    "       RenderInfo=CreateRenderInfo();\r\n" +
+                    "       keyword = document.getElementById('txtKeyword').value;\r\n" +
+                    "       nam = parseInt(document.getElementById('txtNam').value);\r\n" +
+                    "       trangThai = parseInt(document.getElementById('cbbTrangThai').value);\r\n" +
+                    "       AjaxOut = OneTSQ.WebParts.DT_LopHocs.DrawSearchResult(RenderInfo, CurrentPageIndex, keyword, nam, trangThai).value;\r\n" +
+                    "       document.getElementById('divDT_LopHocs').innerHTML=AjaxOut.HtmlContent;\r\n" +
+                    "   }\r\n" +
+                    "   function FilterChange(){\r\n" +
+                    "       CurrentPageIndex = 0;\r\n" +
+                    "       Search();\r\n" +
+                    "   }\r\n" +
+                    "</script>\r\n") +
+                #endregion
+                #region html
+                    WebEnvironments.ProcessHtml(
+                    "<div id=\"divListForm\">\r\n" +
+                    " <div class=\"ibox float-e-margins\"> \r\n" +
+                    "     <div class=\"ibox-title\"> \r\n" +
+                    "         <h5>" + WebLanguage.GetLanguage(OSiteParam, "Danh sách lớp học") + " </h5> \r\n" +
+                    "     </div> \r\n" +
+                    "     <div class=\"ibox-content\"> \r\n" +
+                    "       <div id=\"divDT_LopHocs\">" + DT_LopHocs.DrawSearchResult(ORenderInfo, pageIndex, keyword, nam, trangThai).HtmlContent + "</div>\r\n" +
+                    "     </div> \r\n" +
+                    " </div>\r\n" +
+                    "</div>\r\n"
+                        );
+                #endregion
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+        #region Vẽ giao diện
+        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+        public static AjaxOut DrawSearchResult(RenderInfoCls ORenderInfo, int PageIndex, string keyword, int? nam, int? trangThai)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+            try
+            {
+                SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+                WebSession.CheckSessionTimeOut(ORenderInfo);
+                OwnerUserCls user = WebSessionUtility.GetCurrentLoginUser(OSiteParam);
+
+                DT_KhoaHocFilterCls filter = new DT_KhoaHocFilterCls()
+                {
+                    PageIndex = PageIndex,
+                    PageSize = 20,
+                    Keyword = keyword,
+                    Nam = nam,
+                    TrangThai = trangThai,
+                    //DataPermissionQuery = GetDataPermissionQuery(ORenderInfo)
+                };
+                long recordTotal = 0;
+                DT_KhoaHocCls[] DT_KhoaHocs = CallBussinessUtility.CreateBussinessProcess().CreateDT_KhoaHocProcess().LopHocPageReading(ORenderInfo, filter, ref recordTotal);
+                int DT_KhoaHocTotal = DT_KhoaHocs.Count();
+                ReturnPaging RetPaging = WebPaging.GetPaging((int)recordTotal, filter.PageIndex, filter.PageSize, 10, "NextPage");
+                string Html = "";
+                Html +=
+                    "         <div class=\"table-responsive\"> \r\n" +
+                    "             <table class=\"table table-bordered table-hover dataTables-autosort footable-loaded footable\"> \r\n" +
+                    "                 <thead> \r\n" +
+                    "                 <tr> \r\n" +
+                    "                     <th class=\"th-func-20\">STT</th> \r\n" +
+                    "                     <th>" + WebLanguage.GetLanguage(OSiteParam, "Mã") + " </th> \r\n" +
+                    "                     <th>" + WebLanguage.GetLanguage(OSiteParam, "Tên lớp học") + " </th> \r\n" +
+                    "                     <th>" + WebLanguage.GetLanguage(OSiteParam, "Thời lượng học") + " </th> \r\n" +
+                    "                     <th>" + WebLanguage.GetLanguage(OSiteParam, "Ngày khai giảng (dự kiến)") + " </th> \r\n" +
+                    "                     <th>" + WebLanguage.GetLanguage(OSiteParam, "Ngày bế giảng (dự kiến)") + " </th> \r\n" +
+                    "                     <th>" + WebLanguage.GetLanguage(OSiteParam, "Số học viên") + " </th> \r\n" +
+                    "                 </tr> \r\n" +
+                    "                 </thead> \r\n" +
+                    "                 <tbody> \r\n";
+                for (int iIndex = 0; iIndex < DT_KhoaHocTotal; iIndex++)
+                {
+                    //bool suaPermission = DT_KhoaHocs[iIndex].NGUOITAO_ID == user.OwnerUserId || PermissionUtility.CheckPermission(ORenderInfo, new DT_KhoaHocPermission().PermissionFunctionCode, DT_KhoaHocCls.ePermission.Sua.ToString(), new DT_KhoaHocPermission().PermissionFunctionCode, DT_KhoaHocPermission.StaticPermissionFunctionId, user.OwnerUserId, DT_KhoaHocs[iIndex].NGUOITAO_ID);
+                    //bool xoaPermission = DT_KhoaHocs[iIndex].NGUOITAO_ID == user.OwnerUserId || PermissionUtility.CheckPermission(ORenderInfo, new DT_KhoaHocPermission().PermissionFunctionCode, DT_KhoaHocCls.ePermission.Xoa.ToString(), new DT_KhoaHocPermission().PermissionFunctionCode, DT_KhoaHocPermission.StaticPermissionFunctionId, user.OwnerUserId, DT_KhoaHocs[iIndex].NGUOITAO_ID);
+                    var DT_KhoaHocUrl = WebScreen.BuildUrl(OSiteParam, WebSessionUtility.GetCurrentLoginUser(OSiteParam).OwnerCode, "DT_LopHoc",
+                        new WebParamCls[] { new WebParamCls("id", DT_KhoaHocs[iIndex].ID),
+                            new WebParamCls("RecordTotal", recordTotal.ToString()),
+                            new WebParamCls("ChiSoMang", filter.PageIndex * filter.PageSize + iIndex),
+                            new WebParamCls("Keyword", keyword),
+                            new WebParamCls("nam", nam == null? null : nam.Value.ToString()) });
+                    Html +=
+                        "                 <tr> \r\n" +
+                        "                     <td style='text-align: center; vertical-align: middle;'><a href='" + DT_KhoaHocUrl + "' title='" + WebLanguage.GetLanguage(OSiteParam, "Mở lớp học") + "'>" + (filter.PageIndex * filter.PageSize + iIndex + 1).ToString("#,##0") + "</a></td> \r\n" +
+                        "                     <td style='vertical-align: middle;'><a href='" + DT_KhoaHocUrl + "' title='" + WebLanguage.GetLanguage(OSiteParam, "Mở lớp học") + "'>" + DT_KhoaHocs[iIndex].MA + "</a></td> \r\n" +
+                        "                     <td style='vertical-align: middle;'><a href='" + DT_KhoaHocUrl + "' title='" + WebLanguage.GetLanguage(OSiteParam, "Mở lớp học") + "'>" + DT_KhoaHocs[iIndex].TENKHOAHOC + "</a></td> \r\n" +
+                        "                     <td style='text-align: center; vertical-align: middle;'><a href='" + DT_KhoaHocUrl + "' title='" + WebLanguage.GetLanguage(OSiteParam, "Mở lớp học") + "'>" + (DT_KhoaHocs[iIndex].THOILUONG + (string.IsNullOrEmpty(DT_KhoaHocs[iIndex].LOAITHOILUONG) ? null : " " + DT_KhoaHocParser.LoaiThoiLuongs[DT_KhoaHocs[iIndex].LOAITHOILUONG])) + "</a></td> \r\n" +
+                        "                     <td style='text-align: center; vertical-align: middle;'><a href='" + DT_KhoaHocUrl + "' title='" + WebLanguage.GetLanguage(OSiteParam, "Mở lớp học") + "'>" + (DT_KhoaHocs[iIndex].NGAYKHAIGIANGDUKIEN == null ? null : DT_KhoaHocs[iIndex].NGAYKHAIGIANGDUKIEN.Value.ToString("dd/MM/yyyy")) + "</a></td> \r\n" +
+                        "                     <td style='text-align: center; vertical-align: middle;'><a href='" + DT_KhoaHocUrl + "' title='" + WebLanguage.GetLanguage(OSiteParam, "Mở lớp học") + "'>" + (DT_KhoaHocs[iIndex].NGAYBEGIANGDUKIEN == null ? null : DT_KhoaHocs[iIndex].NGAYBEGIANGDUKIEN.Value.ToString("dd/MM/yyyy")) + "</a></td> \r\n" +
+                        "                     <td style='text-align: center; vertical-align: middle;'><a href='" + DT_KhoaHocUrl + "' title='" + WebLanguage.GetLanguage(OSiteParam, "Mở lớp học") + "'>" + DT_KhoaHocs[iIndex].SOLUONGHOCVIENDUKIEN + "</a></td> \r\n" +
+                        "                 </tr> \r\n";
+                }
+                Html +=
+                    "                 </tbody> \r\n" +
+                    "             </table> \r\n" +
+                    "         <div class=\"col-md-12\">\r\n" +
+                    "              <div class=\"col-md-1\" style=\"margin-top:26px;padding-left: 0px;\">\r\n" +
+                    "               <lable>" + WebLanguage.GetLanguage(OSiteParam, "Tổng số") + ": " + (filter.PageIndex * filter.PageSize + DT_KhoaHocTotal).ToString("#,##0") + "" + "/ " + "" + (int)recordTotal + "</lable>\r\n" +
+                    "              </div>\r\n" +
+                    "             <div class=\"col-md-10\" style=\"margin-top:20px;\">\r\n" +
+                    RetPaging.PagingText +
+                    "             </div>\r\n" +
+                    "         </div>\r\n" +
+                    "       </div>\r\n" +
+                    "<style>\r\n" +
+                    "table th{text-align: center; vertical-align: middle;}\r\n" +
+                    "</style>\r\n"
+                    ;
+                Html = WebEnvironments.ProcessHtml(Html);
+                RetAjaxOut.HtmlContent = Html;
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+        #endregion
+        #region Xử lý nghiệp vụ
+        //private static string GetDataPermissionQuery(RenderInfoCls ORenderInfo)
+        //{
+        //    SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+        //    OwnerUserCls user = WebSessionUtility.GetCurrentLoginUser(OSiteParam);
+        //    bool xemPermission = PermissionUtility.CheckPermission(ORenderInfo, new DT_LopHocPermission().PermissionFunctionCode, DT_KhoaHocCls.eLopHocPermission.Xem.ToString(), new DT_LopHocPermission().PermissionFunctionCode, DT_LopHocPermission.StaticPermissionFunctionId, user.OwnerUserId);
+        //    bool qlKeHoachPermission = PermissionUtility.CheckPermission(ORenderInfo, new DT_LopHocPermission().PermissionFunctionCode, DT_KhoaHocCls.eLopHocPermission.QuanLyKeHoach.ToString(), new DT_LopHocPermission().PermissionFunctionCode, DT_LopHocPermission.StaticPermissionFunctionId, user.OwnerUserId);
+        //    bool diemDanhPermission = PermissionUtility.CheckPermission(ORenderInfo, new DT_LopHocPermission().PermissionFunctionCode, DT_KhoaHocCls.eLopHocPermission.DiemDanh.ToString(), new DT_LopHocPermission().PermissionFunctionCode, DT_LopHocPermission.StaticPermissionFunctionId, user.OwnerUserId);
+        //    bool nhapKqDtPermission = PermissionUtility.CheckPermission(ORenderInfo, new DT_LopHocPermission().PermissionFunctionCode, DT_KhoaHocCls.eLopHocPermission.NhapKetQuaDaoTao.ToString(), new DT_LopHocPermission().PermissionFunctionCode, DT_LopHocPermission.StaticPermissionFunctionId, user.OwnerUserId);
+        //    //Quyền dữ liệu
+        //    //1. Người được phân quyền xem/quản lý kế hoạch/điểm danh/nhập kết quả đào tạo được hiển thị ở mọi trạng thái.
+        //    //2. Giảng viên thuộc lịch lý thuyêt, lịch thực hành được hiển thị ở mọi trạng thái.
+        //    //3. Học viên thuộc lớp học được hiển thị ở mọi trạng thái.
+        //    if (user.IsSystemAdmin == 1 || xemPermission || qlKeHoachPermission || diemDanhPermission || nhapKqDtPermission)
+        //        return null;
+        //    return string.Format(" and ((select count(1) from DT_lICHLYTHUYET llt join DT_LICHLYTHUYETCHITIET lltct on llt.ID = lltct.LICHLYTHUYET_ID " +
+        //                               "                                         join bacsyowneruser bso on bso.BACSYID = lltct.GIANGVIEN_ID " +
+        //                               "    where llt.ID = kh.ID and bso.OWNERUSERID = '{0}') > 0 " +
+        //                               "OR(select count(1) from DT_lICHTHUCHANH lth join DT_LICHTHUCHANHCHITIET lthct on lth.ID = lthct.LICHTHUCHANH_ID " +
+        //                               "                                            join bacsyowneruser bso on bso.BACSYID = lthct.GIANGVIEN_ID " +
+        //                               "    where lth.ID = kh.ID and bso.OWNERUSERID = '{0}') > 0 " +
+        //                               "OR(select count(1) from DT_KETQUADAOTAO kqdt inner join DT_HOCVIEN hv on kqdt.HOCVIEN_ID = hv.ID " +
+        //                               "    where kqdt.KHOAHOCDUYET_ID = kh.ID and hv.USERNAME = '{1}') > 0)  ", user.OwnerUserId, user.LoginName);
+        //}
+        #endregion
+        #region Override Func Core
+        public override string divFilter
+        {
+            get
+            {
+                return "<div class=\"col-md-3\" style=\"padding-top: 6px; padding-bottom: 6px;\">\r\n" +
+                       "    <input id=\"txtKeyword\" placeholder=\"Tìm kiếm theo mã lớp học, tên lớp học\" class=\"form-control valueForm\" >\r\n" +
+                       "</div>\r\n" +
+                       "<div class=\"col-md-1\" style=\"padding-top: 6px; padding-bottom: 6px;\">\r\n" +
+                       "    <input id=\"txtNam\" placeholder=\"Năm khai giảng dự kiến.\"  class=\"form-control valueForm yearpicker\">\r\n" +
+                       "</div>\r\n" +
+                       "<div class=\"col-md-1\" style=\"padding-top: 6px; padding-bottom: 6px;\">\r\n" +
+                       "    <select id=\"cbbTrangThai\" class=\"form-control valueForm\">\r\n" +
+                       "        <option></option>\r\n" +
+                       "    </select>\r\n" +
+                       "</div>\r\n" +
+                       "<div class=\"col-md-1\" style=\"padding-top: 6px; padding-bottom: 6px;\">\r\n" +
+                       "    <button id = 'btnTimKiem' class='btn btn-sm  mr-10px' onclick='FilterChange()' style='margin-top: 0px; height: 28px;background-color: #e26614;color:white;'><strong>Tìm kiếm</strong></button>\r\n" +
+                       "</div>\r\n"
+                   ;
+            }
+        }
+        #endregion
+    }
+}

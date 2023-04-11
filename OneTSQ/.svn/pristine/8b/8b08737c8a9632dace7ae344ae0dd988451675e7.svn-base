@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{713CD781-AC87-4B44-B3BA-EA363EE5D873}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OneTSQ.ProcessWebService.Utility</RootNamespace>
+    <AssemblyName>OneTSQ.ProcessWebService.Utility</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ProcessWebServiceUtility.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OneTSQ.Bussiness.Utility\OneTSQ.Bussiness.Utility.csproj">
+      <Project>{6385f257-bc5d-4511-aabf-3057e73c925b}</Project>
+      <Name>OneTSQ.Bussiness.Utility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Core.Bussiness.Template\OneTSQ.Core.Bussiness.Template.csproj">
+      <Project>{09839579-7d45-49af-a377-b6fb58e09871}</Project>
+      <Name>OneTSQ.Core.Bussiness.Template</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Core.Model\OneTSQ.Core.Model.csproj">
+      <Project>{d5bacfee-5b6b-41bc-a3ac-15b691e29923}</Project>
+      <Name>OneTSQ.Core.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Model\OneTSQ.Model.csproj">
+      <Project>{69c9d595-0157-4618-a501-cac1a4ec3525}</Project>
+      <Name>OneTSQ.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Utility\OneTSQ.Utility.csproj">
+      <Project>{eacf5059-e789-4e50-ba75-6e4487d50b0a}</Project>
+      <Name>OneTSQ.Utility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Web.Utility\OneTSQ.Web.Utility.csproj">
+      <Project>{46b6f95f-48b5-4aa1-9f82-ff1550d20516}</Project>
+      <Name>OneTSQ.Web.Utility</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy $(TargetPath) E:\OneTSQ\Runtime\web\bin
+copy $(TargetPath) E:\OneTSQ\CoreDlls
+</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

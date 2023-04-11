@@ -1,0 +1,1049 @@
+﻿using OneMES3.DM.Model;
+using OneTSQ.Call.Bussiness.Utility;
+using OneTSQ.Core.Call.Bussiness.Utility;
+using OneTSQ.Core.Model;
+using OneTSQ.Model;
+using OneTSQ.Utility;
+using OneTSQ.WebParts;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Web.UI;
+
+namespace OneTSQ.WebParts
+{
+    public class PhieuADR: WebPartTemplate
+    {
+        public override string WebPartId { get { return StaticWebPartId; } }
+        public static string StaticWebPartId = "PhieuADR";
+        public override string WebPartTitle
+        {
+            get
+            {
+                return "Lập phiếu ADR";
+            }
+        }
+        public override string Description
+        {
+            get
+            {
+                return "Lập phiếu ADR";
+            }
+        }
+
+        public override void RegAjaxPro(RenderInfoCls ORenderInfo, System.Web.UI.Page Page)
+        {
+            AjaxPro.Utility.RegisterTypeForAjax(typeof(PhieuADR), Page);
+        }
+        public override AjaxOut CheckPermission(RenderInfoCls ORenderInfo)
+        {
+            SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+            bool HasPermission = true;
+            AjaxOut RetAjaxOut = new AjaxOut();
+            RetAjaxOut.RetBoolean = HasPermission;
+
+            return RetAjaxOut;
+        }
+        public override AjaxOut Draw(SiteParam OSiteParam, RenderInfoCls ORenderInfo)
+        {           
+            AjaxOut RetAjaxOut = new AjaxOut();
+            try
+            {
+                OwnerUserCls user = WebSessionUtility.GetCurrentLoginUser(OSiteParam);
+                string PhieuADRId = WebEnvironments.Request("id");
+                #region Html
+                string html =
+                    "<form    method=\"post\"  action='javascript:SaveDangKy();'> \r\n" +
+                    "    <div id=\"divTopButton\" class='col-lg-12' style='margin-top: 10px; padding-bottom: 10px;'> \r\n" +
+                    "       <div style='float:left; padding:0;' class='col-md-10'> \r\n" +
+                    "           <input type='button' id='btnLuu'  title='Lưu' class='btn btn-primary'   value='" + WebLanguage.GetLanguage(OSiteParam, "Lưu") + "' onclick='javascript:LuuPhieu();'style='float:left; margin-left: 20px; '>\r\n" +
+                    "           <input type='button' id='btnTai' title='Tải' class='btn btn-primary' value='" + WebLanguage.GetLanguage(OSiteParam, "Tải") + "' onclick='javascript:TaiPhieu();'  style='float:left; margin-left: 20px;'>\r\n" +
+                    "           <input type='button' id='btnThuHoi'  title='Thu hồi' class='btn btn-primary'   value='" + WebLanguage.GetLanguage(OSiteParam, "Thu hồi") + "' onclick='javascript:ThuHoi();'style='float:left; margin-left: 20px; '>\r\n" +
+                    "           <input type='submit' id='btnHoanTat' title='Hoàn tất' class='btn btn-primary' value='" + WebLanguage.GetLanguage(OSiteParam, "Hoàn tất") + " 'style='float:left; margin-left: 20px;'>\r\n" +
+                    "           <input type='button' id='btnHuy' title='Hủy' class='btn btn-primary' value='" + WebLanguage.GetLanguage(OSiteParam, "Hủy") + " 'style='float:left; margin-left: 20px;'>\r\n" +
+                    "       </div> \r\n" +
+                    "       <div id='divPrintButton' style='margin-top:5px; float:right; padding:0;' class='col-md-2' > \r\n" +
+                    "       </div> \r\n" +
+                    "   </div>\r\n" +
+                    "   <div class='row'>\r\n" +
+                    "       <div class='col-lg-12'>\r\n" +
+                    "           <div class='ibox float-e-margins'>\r\n" +
+                    "               <div class='ibox-title'>\r\n" +
+                    "                   <h5>" + WebLanguage.GetLanguage(OSiteParam, "CHI TIẾT BÁO CÁO ỨNG CÓ HẠI CỦA THUỐC") + "</h5>\r\n" +
+                    "               </div>\r\n" +
+                    "               <div class=\"ibox-content\" style=\"border: 0; \"> \r\n" +
+                                        DrawPhieuADR(ORenderInfo, PhieuADRId, null).HtmlContent +
+                    "               </div>\r\n" +
+                    "           </div>\r\n" +
+                    "       </div>\r\n" +
+                    "   </div>\r\n" +
+                    "</form>\r\n" +
+                #region Phần hiển thị popup
+                    "<div id=\"divFormModal\" class=\"modal fade\" style=\"overflow: hidden\" role=\"dialog\" aria-labelledby=\"largeModal\" aria-hidden=\"true\" data-backdrop=\"static\">\r\n" +
+                    "    <div class=\"modal-dialog\" style='width:90%; height:90%;'>\r\n" +
+                    "       <div class=\"modal-content\" style='width:100%; height:100%; position: relative;'>\r\n" +
+                    "           <div class=\"panel-heading\">\r\n" +
+                    "               <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\r\n" +
+                    "               <h2 class=\"modal-title\" id=\"ModalTitle\"></h2>\r\n" +
+                    "           </div> \r\n" +
+                    "           <div class=\"modal-body\" id=\"divModalContent\" style='width:100%; padding-top:0; position: absolute; top:50px; bottom:0px;'></div> \r\n" +
+                    "        </div> \r\n" +
+                    "    </div> \r\n" +
+                    "</div> \r\n";
+                #endregion
+                #endregion Html
+                #region JavaScript
+                string js =
+                "<script language=\"javascript\">\r\n" +
+                "   RenderInfo=CreateRenderInfo();\r\n" +
+                "   var PhieuADRId = null\r\n" +
+                "    $(document).ready(function() \r\n" +
+                "       {\r\n" +
+                "           $('.datepicker').datetimepicker({ \r\n" +
+                "           format: 'DD/MM/YYYY' \r\n" +
+                "           }); \r\n" +
+                "           $('#btnHuy').hide()\r\n" +
+                "           $('#btnThuHoi').hide()\r\n" +
+                "       CallInitSelect2('cbbKhoaPhong', '" + WebEnvironments.GetRemoteProcessDataUrl(DepartmentService.StaticServiceId) + "', '" + WebLanguage.GetLanguage(OSiteParam, "Nơi báo cáo") + "');\r\n" +
+                "       CallInitSelect2('cbbNguoiLap', '" + WebEnvironments.GetRemoteProcessDataUrl(OwnerUserService.StaticServiceId) + "', '" + WebLanguage.GetLanguage(OSiteParam, "Người lập") + "');\r\n" +
+                 "       CallInitSelect2('cbbChucVu', '" + WebEnvironments.GetRemoteProcessDataUrl(ChucDanhService.StaticServiceId) + "', '" + WebLanguage.GetLanguage(OSiteParam, "Chức vụ") + "');\r\n" +
+                "       });\r\n" +
+                "   var checkedValue=null;\r\n" +
+                "   var checkedValue2=null;\r\n" +
+                "   var checkedValue3=null;\r\n" +
+                "   var checkedValue4=null;\r\n" +
+                    // check box 1 giá trị
+                "   $(\"input:checkbox\").on('click', function() {\r\n" +
+                "       var $box = $(this);\r\n" +
+                "       if ($box.is(\":checked\")) {\r\n" +
+                "           var group = \"input:checkbox[name='\" + $box.attr(\"name\") + \"']\";\r\n" +
+                "           $(group).prop(\"checked\", false);\r\n" +
+                "           $box.prop(\"checked\", true);\r\n" +
+                "       }else {\r\n" +
+                "           $box.prop(\"checked\", false);\r\n" +
+                "       }\r\n" +
+                "   });\r\n" +
+
+                "   function SaveDangKy()\r\n" +
+                "   {\r\n" +
+                "     GetCheckBoxVal();\r\n" +
+                "     var dangBaoCao = '1';\r\n" +
+                "     SoBCDonVi = document.getElementById('txtSoBaoCaoCuaDonVi').value;\r\n" +
+                "     SoBCCuaTTQG = document.getElementById('txtSoBaoCaoCuaTTQG').value;\r\n" +
+                "     KhoaId = document.getElementById('cbbKhoaPhong').value;\r\n" +
+                "     NguoiLapId = document.getElementById('cbbNguoiLap').value\r\n" +
+                "     ChucVuId = document.getElementById('cbbChucVu').value\r\n" +
+                "     DienThoai = document.getElementById('txtDienThoai').value\r\n" +
+                "     Email = document.getElementById('txtEmail').value\r\n" +
+                "     DangBaoCao = document.getElementById('cbbDangBaoCao').value\r\n"+
+                "     NgayLapBaoCao = document.getElementById('txtNgayLapBaoCao').value\r\n" +
+                "     MaBN = document.getElementById('txtMaBN').value\r\n" +
+                "     TenBN = document.getElementById('txtTenBN').value\r\n" +
+                "     NgaySinh = document.getElementById('txtNgaySinh').value\r\n" +
+                "     GioiTinh = document.getElementById('cbbGioiTinh').value\r\n" +
+                "     CanNang = document.getElementById('txtCanNang').value\r\n" +
+                "     NgayXuatHienPU = document.getElementById('txtNgayXuatHienPU').value\r\n" +
+                "     PhanUngXuatHienSau = document.getElementById('txtPhanUngXuatHienSau').value\r\n" +
+                "     MoTaBieuHieuADR = document.getElementById('txtMoTaBieuHienADR').value\r\n" +
+                "     XetNghiemLQPU = document.getElementById('txtXetNghiemLQPU').value\r\n" +
+                "     TienSuBenhSu = document.getElementById('txtTienSuBenh').value\r\n" +
+                "     CachXuTri = document.getElementById('txtXuTri').value\r\n" +
+                "     MucDoNghiemTrong = checkedValue;\r\n" +
+                "     KQXuTri = checkedValue2;\r\n" +
+                "     ThamDinhADR = checkedValue3;\r\n" +
+                "     ThangThamDinhADR = checkedValue4;\r\n" +
+                "     thangDinhADRKhac = document.getElementById('txtThangKhac').value\r\n" +
+                "     thamDinhADRKhac = document.getElementById('txtKhac').value\r\n" +
+                "     BinhLuanCBYTe = document.getElementById('txtBinhLuanCBYTe').value\r\n" +
+                "     RenderInfo=CreateRenderInfo();\r\n" +
+                "     AjaxOut = OneTSQ.WebParts.PhieuADR.HoanTatPhieuADR(RenderInfo, PhieuADRId ,SoBCDonVi, SoBCCuaTTQG, KhoaId, ChucVuId, NguoiLapId, DienThoai, Email, DangBaoCao, NgayLapBaoCao, MaBN, TenBN, NgaySinh, GioiTinh, CanNang, NgayXuatHienPU, PhanUngXuatHienSau, MoTaBieuHieuADR, XetNghiemLQPU, TienSuBenhSu, CachXuTri, MucDoNghiemTrong, KQXuTri, ThamDinhADR, thamDinhADRKhac, ThangThamDinhADR, thangDinhADRKhac, BinhLuanCBYTe).value;\r\n" +
+                "     if(AjaxOut.Error)\r\n" +
+                "      {\r\n" +
+                "        callGallAlert(AjaxOut.InfoMessage);\r\n" +
+                "        return;\r\n" +
+                "      }\r\n" +
+                "     PhieuADRId = AjaxOut.RetExtraParam1\r\n" +
+                "     toastr.info(AjaxOut.InfoMessage);\r\n" +
+                "     $('#btnHuy').show()\r\n" +
+                "     $('#btnThuHoi').show()\r\n" +
+                "     $('#btnHoanTat').hide()\r\n" +
+                "   }\r\n" +
+
+                "   function LuuPhieu()\r\n" +
+                "   {\r\n" +
+                "        GetCheckBoxVal();\r\n" +
+                "        SoBCDonVi = document.getElementById('txtSoBaoCaoCuaDonVi').value;\r\n" +
+                "        SoBCCuaTTQG = document.getElementById('txtSoBaoCaoCuaTTQG').value;\r\n" +
+                "        KhoaId = document.getElementById('cbbKhoaPhong').value;\r\n" +
+                "        NguoiLapId = document.getElementById('cbbNguoiLap').value\r\n" +
+                "        ChucVuId = document.getElementById('cbbChucVu').value\r\n" +
+                "        DienThoai = document.getElementById('txtDienThoai').value\r\n" +
+                "        Email = document.getElementById('txtEmail').value\r\n" +
+                "        DangBaoCao = document.getElementById('cbbDangBaoCao').value\r\n" +
+                "        NgayLapBaoCao = document.getElementById('txtNgayLapBaoCao').value\r\n" +
+                "        MaBN = document.getElementById('txtMaBN').value\r\n" +
+                "        TenBN = document.getElementById('txtTenBN').value\r\n" +
+                "        NgaySinh = document.getElementById('txtNgaySinh').value\r\n" +
+                "        GioiTinh = document.getElementById('cbbGioiTinh').value\r\n" +
+                "        CanNang = document.getElementById('txtCanNang').value\r\n" +
+                "        NgayXuatHienPU = document.getElementById('txtNgayXuatHienPU').value\r\n" +
+                "        PhanUngXuatHienSau = document.getElementById('txtPhanUngXuatHienSau').value\r\n" +
+                "        MoTaBieuHieuADR = document.getElementById('txtMoTaBieuHienADR').value\r\n" +
+                "        XetNghiemLQPU = document.getElementById('txtXetNghiemLQPU').value\r\n" +
+                "        TienSuBenhSu = document.getElementById('txtTienSuBenh').value\r\n" +
+                "        CachXuTri = document.getElementById('txtXuTri').value\r\n" +
+                "        MucDoNghiemTrong = checkedValue;\r\n" +
+                "        KQXuTri = checkedValue2;\r\n" +
+                "        ThamDinhADR = checkedValue3;\r\n" +
+                "        ThangThamDinhADR = checkedValue4;\r\n" +
+                "        thangDinhADRKhac = document.getElementById('txtThangKhac').value\r\n" +
+                "        thamDinhADRKhac = document.getElementById('txtKhac').value\r\n" +
+                "        BinhLuanCBYTe = document.getElementById('txtBinhLuanCBYTe').value\r\n" +
+                "        RenderInfo=CreateRenderInfo();\r\n" +
+                "        AjaxOut = OneTSQ.WebParts.PhieuADR.LuuPhieuADR(RenderInfo, PhieuADRId ,SoBCDonVi, SoBCCuaTTQG, KhoaId, ChucVuId, NguoiLapId, DienThoai, Email, DangBaoCao, NgayLapBaoCao, MaBN, TenBN, NgaySinh, GioiTinh, CanNang, NgayXuatHienPU, PhanUngXuatHienSau, MoTaBieuHieuADR, XetNghiemLQPU, TienSuBenhSu, CachXuTri, MucDoNghiemTrong, KQXuTri, ThamDinhADR, thamDinhADRKhac, ThangThamDinhADR, thangDinhADRKhac, BinhLuanCBYTe).value;\r\n" +
+                "        if(AjaxOut.Error)\r\n" +
+                "         {\r\n" +
+                "           callGallAlert(AjaxOut.InfoMessage);\r\n" +
+                "           return;\r\n" +
+                "         }\r\n" +
+                "        PhieuADRId = AjaxOut.RetExtraParam1\r\n" +
+                "        toastr.info(AjaxOut.InfoMessage);\r\n" +
+                "   }\r\n" +
+
+                " function GetCheckBoxVal(){ " +
+                "   var inputElements = document.getElementsByClassName('moTaNghiemTrong');\r\n" +
+                "    for(var i=0; inputElements[i]; ++i){\r\n" +
+                "         if(inputElements[i].checked){\r\n" +
+                "               checkedValue = inputElements[i].value;\r\n" +
+                "              break;\r\n" +
+                "          }\r\n" +
+                "   }\r\n"+
+                "   var inputElements2 = document.getElementsByClassName('ketQuaXuTri');\r\n" +
+                "    for(var j=0; inputElements2[j]; ++j){\r\n" +
+                "         if(inputElements2[j].checked){\r\n" +
+                "               checkedValue2 = inputElements2[j].value;\r\n" +
+                "              break;\r\n" +
+                "          }\r\n" +
+                "   }\r\n" +
+                "   var inputElements3 = document.getElementsByClassName('thamDinhADR');\r\n" +
+                "    for(var k=0; inputElements3[k]; ++k){\r\n" +
+                "         if(inputElements3[j].checked){\r\n" +
+                "               checkedValue3 = inputElements3[k].value;\r\n" +
+                "              break;\r\n" +
+                "          }\r\n" +
+                "   }\r\n" +
+                "   var inputElements4 = document.getElementsByClassName('thangThamDinhADR');\r\n" +
+                "    for(var n=0; inputElements4[n]; ++n){\r\n" +
+                "         if(inputElements4[n].checked){\r\n" +
+                "               checkedValue4 = inputElements4[n].value;\r\n" +
+                "              break;\r\n" +
+                "          }\r\n" +
+                "   }\r\n" +
+                " }\r\n" +
+                "   function TaiPhieu(){\r\n"+
+                "     RenderInfo=CreateRenderInfo();\r\n" +
+                "     AjaxOut = OneTSQ.WebParts.PhieuADR.DrawTTPhieuADR(RenderInfo, PhieuADRId);\r\n" +
+                "     if(AjaxOut.Error)\r\n" +
+                "      {\r\n" +
+                "        callGallAlert(AjaxOut.InfoMessage);\r\n" +
+                "        return;\r\n" +
+                "      }\r\n" +
+                "     toastr.info(AjaxOut.InfoMessage);\r\n" +
+                "   }\r\n" +
+
+                "  function ThuHoi(){\r\n"+
+                "     RenderInfo=CreateRenderInfo();\r\n" +
+                "     AjaxOut = OneTSQ.WebParts.PhieuADR.ThuHoiPhieuADR(RenderInfo, PhieuADRId);\r\n" +
+                "     if(AjaxOut.Error)\r\n" +
+                "      {\r\n" +
+                "        callGallAlert(AjaxOut.InfoMessage);\r\n" +
+                "        return;\r\n" +
+                "      }\r\n" +
+                "     toastr.info(AjaxOut.InfoMessage);\r\n" +
+                "      $('#btnHoanTat').show();\r\n" +
+                "      $('#btnHuy').hide();\r\n" +
+                "      $('#btnThuHoi').hide();\r\n" +
+                "   }\r\n" +
+
+                "</script>\r\n";
+                #endregion
+                RetAjaxOut.HtmlContent = WebEnvironments.ProcessHtml(html) + WebEnvironments.ProcessJavascript(js);
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+        public static AjaxOut DrawPhieuADR(RenderInfoCls ORenderInfo, string PhieuADRId, string SoBaoCao)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+            try
+            {
+                SiteParam
+                    OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+                WebSession.CheckSessionTimeOut(ORenderInfo);
+                PhieuBaoCaoPhanUngCoHaiADRCls OPhieuBCPUCoHaiADR = null;
+                if (!string.IsNullOrEmpty(PhieuADRId))
+                    OPhieuBCPUCoHaiADR = CallBussinessUtility.CreateBussinessProcess().CreatePhieuBaoCaoPhanUngCoHaiADRProcess().CreateModel(ORenderInfo, PhieuADRId);
+                if (!string.IsNullOrEmpty(SoBaoCao))
+                    OPhieuBCPUCoHaiADR = CallBussinessUtility.CreateBussinessProcess().CreatePhieuBaoCaoPhanUngCoHaiADRProcess().CreateModel(ORenderInfo, SoBaoCao);
+                if (OPhieuBCPUCoHaiADR == null)
+                {
+                    OPhieuBCPUCoHaiADR = new PhieuBaoCaoPhanUngCoHaiADRCls();
+                    if (string.IsNullOrEmpty(SoBaoCao))
+                    {
+                        var boDemValueMaHV = GetBoDemValueAndMaHV(ORenderInfo);
+                        OPhieuBCPUCoHaiADR.SoBcDonVi = boDemValueMaHV.RetExtraParam2;
+                    }
+                    else OPhieuBCPUCoHaiADR.SoBcDonVi = SoBaoCao;
+                }
+
+                DepartmentCls OKhoaPhong = OneTSQ.Core.Call.Bussiness.Utility.CoreCallBussinessUtility.CreateBussinessProcess().CreateDepartmentProcess().CreateModel(ORenderInfo, OPhieuBCPUCoHaiADR.NoiBaoCao_Id);             
+                string cbbKhoaPhong= "<select class='form-control' id='cbbKhoaPhong'    style='font-size: 20px;'>\r\n";
+                if (OKhoaPhong != null)
+                    cbbKhoaPhong += string.Format(" <option value='{0}' selected>{0} - {1}</option>\r\n", OKhoaPhong.DepartmentCode, OKhoaPhong.DepartmentName);
+                cbbKhoaPhong += "</select>\r\n";
+
+                OwnerUserCls ONguoiLap = OneTSQ.Core.Call.Bussiness.Utility.CoreCallBussinessUtility.CreateBussinessProcess().CreateOwnerUserProcess().CreateModel(ORenderInfo, OPhieuBCPUCoHaiADR.NguoiLap_Id);
+                string cbbNguoiLap = "<select class='form-control' id='cbbNguoiLap'    style='font-size: 20px;'>\r\n";
+                if (ONguoiLap != null)
+                    cbbNguoiLap += string.Format(" <option value='{0}' selected>{0} - {1}</option>\r\n", ONguoiLap.OwnerCode, ONguoiLap.OwnerName);
+                cbbNguoiLap += "</select>\r\n";
+
+                ChucVuCls OChucVu = OneMES3.DM.Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreateChucVuProcess().CreateModel(Model.Common.CreateRenderInfo(ORenderInfo), OPhieuBCPUCoHaiADR.ChucVu_Id);
+                string cbbChucVu = "<select class='form-control' id='cbbChucVu' style='font-size: 20px;'>\r\n";
+                if (OChucVu != null)
+                    cbbChucVu += string.Format(" <option value='{0}' selected>{0} - {1}</option>\r\n", OChucVu.Ma, OChucVu.Ten);
+                cbbChucVu += "</select>\r\n";
+
+                string Html =
+                "               <input id='phieuBCPUCoHaiADRId' type='hidden' value=''>\r\n" +
+                "               <div class=\"row\">\r\n" +
+                "                   <div class=\"col-md-2\">\r\n" +
+                "                       <div class=\"form-group\">\r\n" +
+                                            WebLanguage.GetLanguage(OSiteParam, "Số báo cáo của đơn vị:") + "<span style = 'color:red' > *</span >\r\n" +
+                "                           <input id='txtSoBaoCaoCuaDonVi' required type='text' value='"+ OPhieuBCPUCoHaiADR .SoBcDonVi +"' class='form-control valueForm  '>\r\n" +
+                "                       </div>\r\n" +
+                "                   </div>\r\n" +
+                "                   <div class=\"col-md-2\">\r\n" +
+                "                       <div class=\"form-group\">\r\n" +
+                                            WebLanguage.GetLanguage(OSiteParam, "Số báo cáo của TT Quốc Gia:") + "<span style = 'color:red' > *</span >\r\n" +
+                "                           <input id='txtSoBaoCaoCuaTTQG' required type='text' value='" + OPhieuBCPUCoHaiADR.SoBCQuocGia + "' class='form-control valueForm  '>\r\n" +
+                "                       </div>\r\n" +
+                "                   </div>\r\n" +
+
+                "                   <div class=\"col-md-2\">\r\n" +
+                "                       <div class=\"form-group\">\r\n" +
+                                            WebLanguage.GetLanguage(OSiteParam, "Nơi báo cáo khoa ") + "<span style = 'color:red' > *</span >\r\n" +
+                                            cbbKhoaPhong +
+                "                       </div>\r\n" +
+                "                   </div>\r\n" +
+
+                "                   <div class=\"col-md-2\">\r\n" +
+                "                       <div class=\"form-group\">\r\n" +
+                                            WebLanguage.GetLanguage(OSiteParam, "Người lập ") + "<span style = 'color:red' > *</span >\r\n" +
+                                        cbbNguoiLap +
+                "                       </div>\r\n" +
+                "                   </div>\r\n" +
+
+                "                   <div class=\"col-md-2\">\r\n" +
+                "                       <div class=\"form-group\">\r\n" +
+                                            WebLanguage.GetLanguage(OSiteParam, "Chức vụ ") + "<span style = 'color:red' > *</span >\r\n" +
+                                        cbbChucVu +
+                "                       </div>\r\n" +
+                "                   </div>\r\n" +
+
+                "                   <div class=\"col-md-2\">\r\n" +
+                "                       <div class=\"form-group\">\r\n" +
+                                            WebLanguage.GetLanguage(OSiteParam, "Điện thoại ") + "<span style = 'color:red' > *</span >\r\n" +
+                "                           <input id='txtDienThoai' required type='text' value='" + OPhieuBCPUCoHaiADR.DienThoai + "' class='form-control valueForm  '>\r\n" +
+                "                       </div>\r\n" +
+                "                   </div>\r\n" +
+
+                "                   <div class=\"col-md-2\">\r\n" +
+                "                       <div class=\"form-group\">\r\n" +
+                                            WebLanguage.GetLanguage(OSiteParam, "Email") + "<span style = 'color:red' > *</span >\r\n" +
+                "                           <input id='txtEmail' required type='text' value='" + OPhieuBCPUCoHaiADR.Email + "' class='form-control valueForm' style='z-index:0'>\r\n" +
+                "                       </div>\r\n" +
+                "                   </div>\r\n" +
+
+                "                   <div class=\"col-md-2\">\r\n" +
+                "                       <div class=\"form-group\">\r\n" +
+                                            WebLanguage.GetLanguage(OSiteParam, "Dạng báo cáo") + "<span style = 'color:red' > *</span >\r\n" +
+                "                           <select id =\"cbbDangBaoCao\" class=\"form-control valueForm\">"+
+                "                               <option value='1'>Lần đầu</option>"+
+                "                               <option value='0'>Bổ sung</option>" +
+                "                           </select>" +                            
+                "                       </div>\r\n" +
+                "                   </div>\r\n" +
+
+                "                   <div class=\"col-md-2\">\r\n" +
+                "                       <div class=\"form-group\">\r\n" +
+                                            WebLanguage.GetLanguage(OSiteParam, "Ngày lập báo cáo ") + "<span style = 'color:red' > *</span >\r\n" +
+                "                           <input id='txtNgayLapBaoCao' required type='text' value='" + (OPhieuBCPUCoHaiADR.NgayLap == null ? null : OPhieuBCPUCoHaiADR.NgayLap.Value.ToString(" dd/MM/yyyy")) + "' class='form-control valueForm datepicker' style ='z-index:0'>\r\n" +
+                "                       </div>\r\n" +
+                "                   </div>\r\n" +
+                "               </div>\r\n" +
+                "               <div class=\"row\" id='divHocVien'>\r\n" +
+                                    DrawTTPhieuADR(ORenderInfo, PhieuADRId).HtmlContent +
+                "               </div>\r\n";
+
+                Html = WebEnvironments.ProcessHtml(Html);
+                RetAjaxOut.HtmlContent = Html;
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+        public static AjaxOut DrawTTPhieuADR(RenderInfoCls ORenderInfo, string PhieuADRId)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+            try
+            {
+                SiteParam
+                    OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+                WebSession.CheckSessionTimeOut(ORenderInfo);     
+                PhieuBaoCaoPhanUngCoHaiADRCls OPhieuBCPUCoHaiADR = string.IsNullOrEmpty(PhieuADRId) ? new PhieuBaoCaoPhanUngCoHaiADRCls() : CallBussinessUtility.CreateBussinessProcess().CreatePhieuBaoCaoPhanUngCoHaiADRProcess().CreateModel(ORenderInfo, PhieuADRId);
+                string Html = 
+              "                   <div class=\"ibox float-e-margins col-md-12\">\r\n" +
+              "                       <div class=\"ibox-title\">\r\n" +
+              "                           <h5 style = \"color: black\">" + WebLanguage.GetLanguage(OSiteParam, "A. THÔNG TIN BỆNH NHÂN") + "</h5>\r\n" +
+              "                           <div class=\"ibox-tools\">\r\n" +
+              "                               <a class=\"collapse-link\">\r\n" +
+              "                                   <i class=\"fa fa-chevron-up\"></i>\r\n" +
+              "                               </a>\r\n" +
+              "                           </div>\r\n" +
+              "                       </div>\r\n" +
+              "                       <div class=\"ibox-content col-md-12\">\r\n" +
+              "                           <div class='row'>\r\n" +
+              "                               <div class=\"col-md-2\">\r\n" +
+              "                                   <div class=\"form-group\">\r\n" +
+                                                      WebLanguage.GetLanguage(OSiteParam, "Mã BN: ") + "<span style = 'color:red' > *</span >\r\n" +
+              "                                       <input id='txtMaBN' type='text' style='z-index: 0;' required value='"+ OPhieuBCPUCoHaiADR.MaBN +"'  class='form-control valueForm' required>\r\n" +
+              "                                   </div>\r\n" +
+              "                               </div>\r\n" +
+              "                               <div class=\"col-md-2\">\r\n" +
+              "                                   <div class=\"form-group\">\r\n" +
+                                                      WebLanguage.GetLanguage(OSiteParam, "Họ và tên: ") + "<span style = 'color:red' > *</span >\r\n" +
+              "                                       <input id='txtTenBN' type='text' style='z-index: 0;' required value='"+ OPhieuBCPUCoHaiADR.HoTen + "' class='form-control valueForm' required>\r\n" +
+              "                                   </div> \r\n" +
+              "                               </div>\r\n" +
+              "                               <div class=\"col-md-2\">\r\n" +
+              "                                   <div class=\"form-group\">\r\n" +
+                                                      WebLanguage.GetLanguage(OSiteParam, "Ngày sinh: ") + "<span style = 'color:red' > *</span >\r\n" +
+              "                                       <input id='txtNgaySinh' type='text' style='z-index: 0;' required   value='" + (OPhieuBCPUCoHaiADR.NgaySinh == null ? null : OPhieuBCPUCoHaiADR.NgaySinh.Value.ToString(" dd/MM/yyyy")) + "' class='form-control valueForm datepicker' required >\r\n" +
+              "                                   </div> \r\n" +
+              "                               </div>\r\n" +
+              "                               <div class=\"col-md-2\">\r\n" +
+              "                                   <div class=\"form-group\">\r\n" +
+                                                      WebLanguage.GetLanguage(OSiteParam, "Giới tính: ") + "<span style = 'color:red' > *</span >\r\n" +
+              "                                        <select id='cbbGioiTinh' class=\"form-control valueForm\" >" +
+              "                                           <option value='" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eGioiTinh.Nam + "' " + (string.IsNullOrEmpty(OPhieuBCPUCoHaiADR.Id) || OPhieuBCPUCoHaiADR.GioiTinh == (int)PhieuBaoCaoPhanUngCoHaiADRCls.eGioiTinh.Nam ? "checked" : null) + ">Nam</option>" +
+              "                                           <option value='" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eGioiTinh.Nu + "' " + (OPhieuBCPUCoHaiADR.GioiTinh == (int)PhieuBaoCaoPhanUngCoHaiADRCls.eGioiTinh.Nu ? "checked" : null) + ">Nữ</option>" +
+              "                                        </select>" +
+              "                                   </div> \r\n" +
+              "                               </div>\r\n" +
+              "                               <div class=\"col-md-2\">\r\n" +
+              "                                   <div class=\"form-group\">\r\n" +
+                                                      WebLanguage.GetLanguage(OSiteParam, "Cân nặng: ") + "<span style = 'color:red' > *</span >\r\n" +
+              "                                       <input id='txtCanNang' type='text' style='z-index: 0;' required   value='"+ OPhieuBCPUCoHaiADR.CanNang +"' class='form-control valueForm' required>\r\n" +
+              "                                   </div> \r\n" +
+              "                               </div>\r\n" +
+              "                           </div>\r\n" +          
+              "                      </div>\r\n" +
+              "                   </div>\r\n" +
+
+              "                   <div class=\"ibox float-e-margins col-md-12\">\r\n" +
+              "                       <div class=\"ibox-title\">\r\n" +
+              "                           <h5 style = \"color: black\">" + WebLanguage.GetLanguage(OSiteParam, "B. THÔNG TIN VỀ PHẢN ỨNG CÓ HẠI (ADR)") + "</h5>\r\n" +
+              "                           <div class=\"ibox-tools\">\r\n" +
+              "                               <a class=\"collapse-link\">\r\n" +
+              "                                   <i class=\"fa fa-chevron-up\"></i>\r\n" +
+              "                               </a>\r\n" +
+              "                           </div>\r\n" +
+              "                       </div>\r\n" +
+              "                       <div class=\"ibox-content col-md-12\">\r\n" +
+              "                           <div class='row'>\r\n" +
+              "                               <div class=\"col-md-2\">\r\n" +
+              "                                   <div class=\"form-group\">\r\n" +
+                                                      WebLanguage.GetLanguage(OSiteParam, "Ngày xuất hiện phản ứng: ") + "<span style = 'color:red' > *</span >\r\n" +
+              "                                       <input id='txtNgayXuatHienPU' type='text' style='z-index: 0;' required value='" + (OPhieuBCPUCoHaiADR.NgayXuatHienPU == null ? null : OPhieuBCPUCoHaiADR.NgayXuatHienPU.Value.ToString(" dd/MM/yyyy")) + "' class='form-control valueForm datepicker' required >\r\n" +
+              "                                   </div>\r\n" +
+              "                               </div>\r\n" +
+              "                               <div class=\"col-md-10\">\r\n" +
+              "                                   <div class=\"form-group\">\r\n" +
+                                                      WebLanguage.GetLanguage(OSiteParam, "Phản ứng xuất hiện sau bao lâu (tính từ lần dùng cuối của thuốc nghi ngờ): ") + "<span style = 'color:red' > *</span >\r\n" +
+              "                                       <input id='txtPhanUngXuatHienSau' type='text' style='z-index: 0;' required value='" + OPhieuBCPUCoHaiADR.ThoiGianPhanUng + "' class='form-control valueForm'  >\r\n" +
+              "                                   </div>\r\n" +
+              "                               </div>\r\n" +
+              "                           </div>\r\n" +
+              "                           <div class = 'row'>\r\n" +
+              "                               <div class=\"col-md-12\">\r\n" +
+              "                                   <div class=\"form-group\">\r\n" +
+                                                      WebLanguage.GetLanguage(OSiteParam, "Mô tả biểu hiện ADR: ") + "<span style = 'color:red' > *</span >\r\n" +
+              "                                       <input id='txtMoTaBieuHienADR' type='text' style='z-index: 0;' required value='" + OPhieuBCPUCoHaiADR.MoTaADR +"' class='form -control valueForm' required datepicker>\r\n" +
+              "                                   </div>\r\n" +
+              "                               </div>\r\n" +
+              "                           </div>\r\n" +
+              "                           <div class = 'row'>\r\n" +
+              "                               <div class=\"col-md-12\">\r\n" +
+              "                                   <div class=\"form-group\">\r\n" +
+                                                      WebLanguage.GetLanguage(OSiteParam, "Xét nghiệm liên quan tới phản ứng: ") + "<span style = 'color:red' > *</span >\r\n" +
+              "                                       <input id='txtXetNghiemLQPU' type='text' style='z-index: 0;' required value='" + OPhieuBCPUCoHaiADR.XetNghiemLienQuan + "' class='form-control valueForm' required datepicker>\r\n" +
+              "                                   </div>\r\n" +
+              "                               </div>\r\n" +
+              "                           </div>\r\n" +       
+              "                           <div class = 'row'>\r\n" +
+              "                               <div class=\"col-md-12\">\r\n" +
+              "                                   <div class=\"form-group\">\r\n" +
+                                                      WebLanguage.GetLanguage(OSiteParam, "Tiền sử (dị ứng, thai nghén, nghiện thuốc lá, nghiện rượu, bệnh gan, bệnh thận...): ") + "<span style = 'color:red' > *</span >\r\n" +
+              "                                       <input id='txtTienSuBenh' type='text' style='z-index: 0;' required value='" + OPhieuBCPUCoHaiADR.TienSuBenhSu + "' class='form-control valueForm' required datepicker>\r\n" +
+              "                                   </div>\r\n" +
+              "                               </div>\r\n" +
+              "                           </div>\r\n" +
+
+              "                           <div class = 'row'>\r\n" +
+              "                               <div class=\"col-md-12\">\r\n" +
+              "                                   <div class=\"form-group\">\r\n" +
+                                                      WebLanguage.GetLanguage(OSiteParam, "Cách xử trí phản ứng: ") + "<span style = 'color:red' > *</span >\r\n" +
+              "                                       <input id='txtXuTri' type='text' style='z-index: 0;' required value='" + OPhieuBCPUCoHaiADR.XuTri + "' class='form-control valueForm' required datepicker>\r\n" +
+              "                                   </div>\r\n" +
+              "                               </div>\r\n" +
+              "                           </div>\r\n" +
+
+              "                           <div class = 'row'>\r\n" +
+              "                               <div class=\"col-md-12\">\r\n" +
+              "                                   <h3></h3>" +
+              "                               </div>\r\n" +
+              "                               <div class=\"col-md-12\">\r\n" +
+              "                                   <div class=\"form-group\">\r\n" +
+                                                      WebLanguage.GetLanguage(OSiteParam, "Mô tả nghiêm trọng của phản ứng:") + "<span style = 'color:red' > *</span>\r\n" +
+              "                                   </div>\r\n" +
+              "                               </div>\r\n" +
+              "                               <div class=\"col-md-12\">\r\n" +
+              "                                   <div class = 'row  '>\r\n" +
+              "                                       <div class=\"col-md-3\">\r\n" +
+              "                                           <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                              <label class=\"checkbox-inline\"><input id =\"ckbTuVong\" type = \"checkbox\" name=\"ckbmotapu\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.TuVong + "\">Tử vong</label></br> " +
+              "                                           </div>\r\n" +
+              "                                       </div> \r\n" +
+              "                                       <div class=\"col-md-3\">\r\n" +
+              "                                           <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                              <label class=\"checkbox-inline\"><input id =\"ckbNhapVienKeoDai\" type = \"checkbox\" name=\"ckbmotapu\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.NhapVien + "\">Nhập viện kéo dài</label></br> " +
+              "                                           </div>\r\n" +
+              "                                       </div> \r\n" +
+              "                                       <div class=\"col-md-3\">\r\n" +
+              "                                           <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                              <label class=\"checkbox-inline\"><input id =\"ckbDiTatThaiNhi\" type = \"checkbox\" name=\"ckbmotapu\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.DiTatThaiNhi + "\">Dị tật thai nhi</label></br> " +
+              "                                           </div>\r\n" +
+              "                                       </div> \r\n" +
+              "                                   </div>\r\n" +
+              "                                   <div class = 'row'>\r\n" +
+              "                                       <div class=\"col-md-3\">\r\n" +
+              "                                           <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                              <label class=\"checkbox-inline\"><input id =\"ckbDeDoaTinhMang\" type = \"checkbox\" name=\"ckbmotapu\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.DeDoaTinhMang + "\">Đe dọa tính mạng</label></br> " +
+              "                                           </div>\r\n" +
+              "                                       </div> \r\n" +
+              "                                       <div class=\"col-md-3\">\r\n" +
+              "                                           <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                              <label class=\"checkbox-inline\"><input id =\"ckbTanTat\" type = \"checkbox\" name=\"ckbmotapu\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.TanTat + "\">Tàn tật vĩnh viễn/nặng nề</label></br> " +
+              "                                           </div>\r\n" +
+              "                                       </div> \r\n" +
+              "                                       <div class=\"col-md-3\">\r\n" +
+              "                                           <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                              <label class=\"checkbox-inline\"><input id =\"ckbKhongNghiemTrong\" type = \"checkbox\" name=\"ckbmotapu\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.KhongNghiemTrong + "\">không nghiêm trọng</label></br> " +
+              "                                           </div>\r\n" +
+              "                                       </div> \r\n" +
+              "                                   </div>\r\n" +
+              "                               </div>\r\n" +
+              "                           </div>\r\n" +
+
+              "                           <div class = 'row' >\r\n" +
+              "                               <div class=\"col-md-12\">\r\n" +
+              "                                   <h3></h3>" +
+              "                               </div>\r\n" +
+              "                               <div class=\"col-md-12\">\r\n" +
+              "                                   <div class=\"form-group\">\r\n" +
+                                                      WebLanguage.GetLanguage(OSiteParam, "Kết quả sau khi xử trí phản ứng: ") + "<span style = 'color:red' > *</span >\r\n" +
+              "                                   </div>\r\n" +
+              "                               </div>\r\n" +
+              "                               <div class=\"col-md-12\">\r\n" +
+              "                                  <div class = 'row'  >\r\n" +
+              "                                      <div class=\"col-md-3\">\r\n" +
+              "                                          <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                             <label class=\"checkbox-inline\"><input id =\"ckbTuVongADR\" type = \"checkbox\" name=\"ckbKQXuTri\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.TuVongDoADR + "\">Từ vong do ADR</label></br> " +
+              "                                          </div>\r\n" +
+              "                                      </div> \r\n" +
+              "                                      <div class=\"col-md-3\">\r\n" +
+              "                                          <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                             <label class=\"checkbox-inline\"><input id =\"ckbChuaHoiPhuc\" type = \"checkbox\" name=\"ckbKQXuTri\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.ChuaHoiPhuc + "\">Chưa hồi phục</label></br> " +
+              "                                          </div>\r\n" +
+              "                                      </div> \r\n" +
+              "                                      <div class=\"col-md-3\">\r\n" +
+              "                                          <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                             <label class=\"checkbox-inline\"><input id =\"ckbHoiPhucCoDiChung\" type = \"checkbox\" name=\"ckbKQXuTri\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.HoiPhucCoDiChung + "\">Hồi phục có di chứng</label></br> " +
+              "                                          </div>\r\n" +
+              "                                      </div> \r\n" +
+              "                                  </div>\r\n" +
+              "                                  <div class = 'row'>\r\n" +
+              "                                      <div class=\"col-md-3\">\r\n" +
+              "                                          <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                             <label class=\"checkbox-inline\"><input id =\"ckbTuVongKhongLQThuoc\" type = \"checkbox\" name=\"ckbKQXuTri\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.TuVongKhongLqThuoc + "\">Tử vong không liên quan đến thuốc</label></br> " +
+              "                                          </div>\r\n" +
+              "                                      </div> \r\n" +
+              "                                      <div class=\"col-md-3\">\r\n" +
+              "                                          <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                             <label class=\"checkbox-inline\"><input id =\"ckbDangHoiPhuc\" type = \"checkbox\" name=\"ckbKQXuTri\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.DangHoiPhuc + "\">Đang hồi phục</label></br> " +
+              "                                          </div>\r\n" +
+              "                                      </div> \r\n" +
+              "                                      <div class=\"col-md-3\">\r\n" +
+              "                                          <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                             <label class=\"checkbox-inline\"><input id =\"ckbHoiPhucKhongDiChung\" type = \"checkbox\" name=\"ckbKQXuTri\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.HoiPhucKhongDiChung + "\">Hồi phục không di chứng</label></br> " +
+              "                                          </div>\r\n" +
+              "                                      </div> \r\n" +
+              "                                      <div class=\"col-md-3\">\r\n" +
+              "                                          <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                             <label class=\"checkbox-inline\"><input id =\"ckbKhongRo\" type = \"checkbox\" name=\"ckbKQXuTri\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.KhongRo + "\">Không rõ</label></br> " +
+              "                                          </div>\r\n" +
+              "                                      </div> \r\n" +
+              "                                  </div>\r\n" +
+              "                               </div>\r\n" +
+              "                           </div>\r\n" +             
+              "                       </div>\r\n" +
+              "                   </div>\r\n" +
+
+              "                   <div class=\"ibox float-e-margins col-md-12\">\r\n" +
+              "                       <div class=\"ibox-title\">\r\n" +
+              "                           <h5 style = \"color: black\">" + WebLanguage.GetLanguage(OSiteParam, "C. THÔNG TIN VỀ THUỐC NGHI NGỜ GÂY ADR") + "</h5>\r\n" +
+              "                           <div class=\"ibox-tools\">\r\n" +
+              "                               <a class=\"collapse-link\">\r\n" +
+              "                                   <i class=\"fa fa-chevron-up\"></i>\r\n" +
+              "                               </a>\r\n" +
+              "                           </div>\r\n" +
+              "                       </div>\r\n" +
+              "                       <div class=\"ibox-content col-md-12\" id ='divVanBangs'>\r\n" +
+              "                          <div id='tabLichThucHanhChiTiet' class='tab-pane'>\r\n" +
+                                               DrawTTVeThuoc(ORenderInfo, PhieuADRId).HtmlContent +
+              "                          </div>\r\n" +
+              "                       </div>\r\n" +
+              "                   </div>\r\n" +
+
+
+              "                   <div class=\"ibox float-e-margins col-md-12\">\r\n" +
+              "                       <div class=\"ibox-title\">\r\n" +
+              "                           <h5 style = \"color: black\">" + WebLanguage.GetLanguage(OSiteParam, "D. PHẦN THẨM ĐỊNH ADR CỦA ĐƠN VỊ") + "</h5>\r\n" +
+              "                           <div class=\"ibox-tools\">\r\n" +
+              "                               <a class=\"collapse-link\">\r\n" +
+              "                                   <i class=\"fa fa-chevron-up\"></i>\r\n" +
+              "                               </a>\r\n" +
+              "                           </div>\r\n" +
+              "                       </div>\r\n" +
+              "                       <div class=\"ibox-content col-md-12\" >\r\n" +
+              "                           <div class = 'row'>\r\n" +
+              "                               <div class=\"col-md-12\">\r\n" +
+              "                                   <div class=\"form-group\">\r\n" +
+                                                      WebLanguage.GetLanguage(OSiteParam, "1. Đánh giá mối liên quan giữa thuốc và ADR ") + "<span style = 'color:red' > *</span >\r\n" +
+              "                                   </div>\r\n" +
+              "                               </div>\r\n" +
+              "                               <div class=\"col-md-12\">\r\n" +
+              "                                   <div class = 'row' >\r\n" +
+              "                                       <div class=\"col-md-2\">\r\n" +
+              "                                           <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                              <label class=\"checkbox-inline\"><input id =\"ckbChacChan\" type = \"checkbox\" name=\"ckbThamDinhADR\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.ChacChan + "\">Chắc chắn</label></br> " +
+              "                                           </div>\r\n" +
+              "                                       </div> \r\n" +
+              "                                       <div class=\"col-md-2\">\r\n" +
+              "                                           <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                              <label class=\"checkbox-inline\"><input id =\"ckbKhongChacChan\" type = \"checkbox\" name=\"ckbThamDinhADR\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.KhongChacChan + "\">Không chắc chắn</label></br> " +
+              "                                           </div>\r\n" +
+              "                                       </div> \r\n" +
+              "                                   </div>\r\n" +
+              "                                   <div class = 'row'>\r\n" +
+              "                                       <div class=\"col-md-2\">\r\n" +
+              "                                           <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                              <label class=\"checkbox-inline\"><input id =\"ckbCoKhaNang\" type = \"checkbox\" name=\"ckbThamDinhADR\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.CoKhaNang + "\">Có khả năng</label></br> " +
+              "                                           </div>\r\n" +
+              "                                       </div> \r\n" +
+              "                                       <div class=\"col-md-2\">\r\n" +
+              "                                           <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                               <label class=\"checkbox-inline\"><input id =\"ckbChuaPhanLoai\" type = \"checkbox\" name=\"ckbThamDinhADR\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.ChuaPhanLoai + "\">Chưa phân loại</label></br> " +
+              "                                           </div>\r\n" +
+              "                                       </div> \r\n" +
+              "                                   </div>\r\n" +
+              "                                   <div class = 'row '>\r\n" +
+              "                                       <div class=\"col-md-2\">\r\n" +
+              "                                           <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                               <label class=\"checkbox-inline\"><input id =\"ckbCoThe\" type = \"checkbox\" name=\"ckbThamDinhADR\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.CoThe + "\">Có thể</label></br> " +
+              "                                           </div>\r\n" +
+              "                                       </div> \r\n" +
+              "                                       <div class=\"col-md-2\">\r\n" +
+              "                                           <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                               <label class=\"checkbox-inline\"><input id =\"ckbKhongPhanLoai\" type = \"checkbox\" name=\"ckbThamDinhADR\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.KhongThePhanLoai + "\">Không phân loại</label></br> " +
+              "                                           </div>\r\n" +
+              "                                       </div> \r\n" +
+              "                                   </div>\r\n" +
+              "                                   <div class = 'row'>\r\n" +
+              "                                       <div class=\"col-md-2\">\r\n" +
+              "                                           <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                               <label class=\"checkbox-inline\"><input id =\"ckbKhac\" type = \"checkbox\" name=\"ckbThamDinhADR\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.Khac + "\">khác</label></br> " +
+              "                                           </div>\r\n" +
+              "                                       </div> \r\n" +
+              "                                       <div class=\"col-md-8\">\r\n" +
+              "                                           <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                               <input id='txtKhac' type='text' style='z-index: 0;' class='form-control valueForm'  >\r\n" +
+              "                                           </div>\r\n" +
+              "                                       </div> \r\n" +
+              "                                   </div>\r\n" +
+              "                               </div>\r\n" +
+              "                           </div>\r\n" +
+
+              "                           <div class = 'row'>\r\n" +
+              "                               <div class=\"col-md-12\">\r\n" +
+              "                                   <div class=\"form-group\">\r\n" +
+                                                      WebLanguage.GetLanguage(OSiteParam, "2. Đơn vị thẩm định ADR theo thang nào?") + "<span style = 'color:red' > *</span >\r\n" +
+              "                                   </div>\r\n" +
+              "                               </div>\r\n" +
+              "                               <div class=\"col-md-12\">\r\n" +
+              "                                  <div class = 'row'>\r\n" +
+              "                                      <div class=\"col-md-1\">\r\n" +
+              "                                          <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                                <label class=\"checkbox-inline\"><input id = \"ckbThangWHO\" type = \"checkbox\" name=\"ckbThangThamDinhADR\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.ThangWHO + "\">Thang WHO</label></br> " +
+              "                                          </div>\r\n" +
+              "                                      </div> \r\n" +
+              "                                      <div class=\"col-md-1\">\r\n" +
+              "                                          <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                                <label class=\"checkbox-inline\"><input id = \"ckbThangNaranjo\" type = \"checkbox\" name=\"ckbThangThamDinhADR\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.ThangWHO + "\">Thang Naranjo</label></br> " +
+              "                                          </div>\r\n" +
+              "                                      </div> \r\n" +
+              "                                      <div class=\"col-md-1\">\r\n" +
+              "                                          <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                                <label class=\"checkbox-inline\"><input id =\"ckbThangKhac\" type = \"checkbox\" name=\"ckbThangThamDinhADR\" value=\"" + (int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.ThangKhac + "\">Thang khác</label></br> " +
+              "                                          </div>\r\n" +
+              "                                      </div> \r\n" +
+              "                                      <div class=\"col-md-9\">\r\n" +
+              "                                          <div class=\"form-group\" style='margin-top: 20px; '>\r\n" +
+              "                                              <input id='txtThangKhac' type='text' style='z-index: 0;' class='form-control valueForm'  >\r\n" +
+              "                                          </div>\r\n" +
+              "                                      </div> \r\n" +
+              "                                 </div>\r\n" +
+              "                             </div>\r\n" +
+              "                         </div>\r\n" +
+
+              "                           <div class = 'row'>\r\n" +
+              "                               <div class=\"col-md-12\">\r\n" +
+              "                                   <div class=\"form-group\">\r\n" +
+                                                      WebLanguage.GetLanguage(OSiteParam, "Phần bình luận của cán bộ y tế (nếu có)") + "<span style = 'color:red' > *</span >\r\n" +
+              "                                   </div>\r\n" +
+              "                               </div>\r\n" +
+              "                           </div>\r\n" +
+
+              "                           <div class=\"row\">\r\n" +
+              "                               <div class=\"col-md-12\">\r\n" +
+              "                                   <textarea class=\"form-control\" id=\"txtBinhLuanCBYTe\" rows=\"5\"></textarea>\r\n" +
+              "                               </div>\r\n" +
+              "                           </div>" +
+              "                       </div>\r\n" +
+              "                   </div>\r\n";       
+                Html = WebEnvironments.ProcessHtml(Html);
+                RetAjaxOut.HtmlContent = Html;
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+
+        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+        public static AjaxOut DrawTTVeThuoc(RenderInfoCls ORenderInfo, string PhieuADRId)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+            try
+            {
+                //SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+                //WebSession.CheckSessionTimeOut(ORenderInfo);
+                //string userId = WebSessionUtility.GetCurrentLoginUser(OSiteParam).OwnerUserId;
+                //string html = "";         
+                //    List<DT_LichThucHanhChiTietCls> lichThucHanhChiTiets = WebSessionUtility.GetSession(OSiteParam, "DT_LopHoc_LichThucHanhChiTiets" + (string.IsNullOrEmpty(lichThucHanhId) ? khoaHocId : lichThucHanhId)) as List<DT_LichThucHanhChiTietCls>;
+                //    html =
+                //         "<table class=\"table table-striped table-bordered table-hover\"> \r\n" +
+                //         "  <thead> \r\n" +
+                //         "      <tr> \r\n" +
+                //         "          <th width=100 style='text-align: center;'>" + WebLanguage.GetLanguage(OSiteParam, "Ngày") + " </th> \r\n" +
+                //         "          <th width=100 style='text-align: center;'>" + WebLanguage.GetLanguage(OSiteParam, "Từ giờ") + " </th> \r\n" +
+                //         "          <th width=100 style='text-align: center;'>" + WebLanguage.GetLanguage(OSiteParam, "Đến giờ") + " </th> \r\n" +
+                //         "          <th>" + WebLanguage.GetLanguage(OSiteParam, "Nội dung") + " </th> \r\n" +
+                //         "          <th>" + WebLanguage.GetLanguage(OSiteParam, "Giảng viên") + " </th> \r\n" +
+                //         "          <th>" + WebLanguage.GetLanguage(OSiteParam, "Ghi chú") + " </th> \r\n" +
+                //         "          <th width=60 style='text-align:center;'><a href='javascript:ShowLichThucHanhChiTiet()' title='" + WebLanguage.GetLanguage(OSiteParam, "Thêm") + "' ><i class='fa fa-plus' style='font-size:24px; color: white;'></i></a></th> \r\n" +
+                //         "      </tr> \r\n" +
+                //         "  </thead> \r\n" +
+                //         "  <tbody> \r\n" +
+                //         "      <tr id='trAddLichThucHanhChiTiet' style='display:none;'> \r\n" +
+                //         "          <input type='hidden' id='hdLichThucHanhChiTietId' value=''>\r\n" +
+                //         "          <td><input type='text' data-mask='99/99/9999' class='form-control datepicker' id='txtNgay'></td> \r\n" +
+                //         "          <td><input type='text' data-mask='99:99' class='form-control timepicker' id='txtThoiGian'></td> \r\n" +
+                //         "          <td><input type='text' data-mask='99:99' class='form-control timepicker' id='txtThoiGianKetThuc'></td> \r\n" +
+                //         "          <td><input type='text' class='form-control' id='txtNoiDung'></td> \r\n" +
+                //         "          <td><div id='divCbbGiangVien'></div></td> \r\n" +
+                //         "          <td><input type='text' class='form-control' id='txtGhiChu'></td> \r\n" +
+                //         "          <td style='text-align:center;'><a href='javascript:SaveLichThucHanhChiTiet(\"\");' title='" + WebLanguage.GetLanguage(OSiteParam, "Lưu") + "' ><i class='fa fa-save' style='font-size:20px; margin-top:4px;'></i></a></td> \r\n" +
+                //         "      </tr> \r\n";
+                //    for (int iIndex = 0; iIndex < lichThucHanhChiTiets.Count; iIndex++)
+                //    {
+                //        BacSyCls giangVien = string.IsNullOrEmpty(lichThucHanhChiTiets[iIndex].GIANGVIEN_ID) ? null : CallBussinessUtility.CreateBussinessProcess().CreateBacSyProcess().CreateModel(ORenderInfo, lichThucHanhChiTiets[iIndex].GIANGVIEN_ID);
+                //        html += "<tr> \r\n" +
+                //                "   <input type='hidden' id='hdLichThucHanhChiTietId" + iIndex + "' value='" + lichThucHanhChiTiets[iIndex].ID + "'>\r\n" +
+                //                "   <input type='hidden' id='hdGiangVienId" + iIndex + "' value='" + lichThucHanhChiTiets[iIndex].GIANGVIEN_ID + "'>\r\n" +
+                //                "   <td style='text-align: center;'><input type='text' class='form-control CssEditorItemLthct' style='display:none;' id='txtNgay" + iIndex + "' value='" + lichThucHanhChiTiets[iIndex].NGAY.ToString("dd/MM/yyyy") + "'><span class='CssDisplayItemLthct' id='spNgay" + iIndex + "'>" + lichThucHanhChiTiets[iIndex].NGAY.ToString("dd/MM/yyyy") + "</span></td> \r\n" +
+                //                "   <td style='text-align: center;'><input type='text' class='form-control CssEditorItemLthct' style='display:none;' id='txtThoiGian" + iIndex + "' value='" + (lichThucHanhChiTiets[iIndex].THOIGIAN == null ? null : lichThucHanhChiTiets[iIndex].THOIGIAN.Value.ToString("HH:mm")) + "'><span class='CssDisplayItemLthct' id='spThoiGian" + iIndex + "'>" + (lichThucHanhChiTiets[iIndex].THOIGIAN == null ? null : lichThucHanhChiTiets[iIndex].THOIGIAN.Value.ToString("HH:mm")) + "</span></td> \r\n" +
+                //                "   <td style='text-align: center;'><input type='text' class='form-control CssEditorItemLthct' style='display:none;' id='txtThoiGianKetThuc" + iIndex + "' value='" + (lichThucHanhChiTiets[iIndex].THOIGIANKETTHUC == null ? null : lichThucHanhChiTiets[iIndex].THOIGIANKETTHUC.Value.ToString("HH:mm")) + "'><span class='CssDisplayItemLthct' id='spThoiGianKetThuc" + iIndex + "'>" + (lichThucHanhChiTiets[iIndex].THOIGIANKETTHUC == null ? null : lichThucHanhChiTiets[iIndex].THOIGIANKETTHUC.Value.ToString("HH:mm")) + "</span></td> \r\n" +
+                //                "   <td><input type='text' class='form-control CssEditorItemLthct' style='display:none; ' id='txtNoiDung" + iIndex + "' value='" + lichThucHanhChiTiets[iIndex].NOIDUNG + "'><span class='CssDisplayItemLthct' id='spNoiDung" + iIndex + "'>" + lichThucHanhChiTiets[iIndex].NOIDUNG + "</span></td> \r\n" +
+                //                "   <td><div id='divCbbGiangVien" + iIndex + "' class='CssEditorItemLthct' style='display:none'></div><span class='CssDisplayItemLthct' id='spGiangVien" + iIndex + "'>" + (giangVien != null ? giangVien.HOTEN : null) + "</span></td> \r\n" +
+                //                "   <td><input type='text' class='form-control CssEditorItemLthct' style='display:none; ' id='txtGhiChu" + iIndex + "' value='" + lichThucHanhChiTiets[iIndex].GHICHU + "'><span class='CssDisplayItemLthct' id='spGhiChu" + iIndex + "'>" + lichThucHanhChiTiets[iIndex].GHICHU + "</span></td> \r\n" +
+                //                "   <td style='text-align:center;'>\r\n" +
+                //                "       <a id='btnSaveLichThucHanhChiTiet" + iIndex + "' class='CssEditorItemLthct' style='display:none' href='javascript:SaveLichThucHanhChiTiet(" + iIndex + ");' title='" + WebLanguage.GetLanguage(OSiteParam, "Lưu") + "' ><i class='fa fa-save' style='font-size:20px; margin-top:4px;'></i><span class='text-muted'></span></a>\r\n" +
+                //                "       <a id='btnEditLichThucHanhChiTiet" + iIndex + "' class='CssEditorItemLthct' href='javascript:ShowEditItemLineLthct(" + iIndex + ");' title='" + WebLanguage.GetLanguage(OSiteParam, "Sửa") + "' ><i class='fa fa-pencil-square-o' style='font-size:20px;'></i></a>\r\n" +
+                //                "       <a id='btnDeleteLichThucHanhChiTiet" + iIndex + "' class='CssEditorItemLthct' href='javascript:DeleteLichThucHanhChiTiet(" + iIndex + ");' title='" + WebLanguage.GetLanguage(OSiteParam, "Xóa") + "' ><i class='fa fa-times' style='font-size:20px;'></i></a>\r\n" +
+                //                "   </td> \r\n" +
+                //                "</tr> \r\n";
+                //    }
+                //    html += "<tr style='font-weight:bold; text-align:center;'> \r\n" +
+                //            "   <td colspan=3>" + WebLanguage.GetLanguage(OSiteParam, "Tổng") + "</td> \r\n" +
+                //            "   <td>" + lichThucHanhChiTiets.Count + " " + WebLanguage.GetLanguage(OSiteParam, "buổi") + "</td> \r\n" +
+                //            "   <td></td> \r\n" +
+                //            "   <td></td> \r\n" +
+                //            "   <td></td> \r\n" +
+                //            "</tr> \r\n";
+                //    html += "</tbody> \r\n" +
+                //            "</table> \r\n";       
+                //RetAjaxOut.HtmlContent = WebEnvironments.ProcessHtml(html);
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+
+        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+        public static AjaxOut GetBoDemValueAndMaHV(RenderInfoCls ORenderInfo)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+            string boDemValue = null;
+            string maHV = null;
+            BoMaCls boMa = CoreCallBussinessUtility.CreateBussinessProcess().CreateBoMaProcess().Reading(ORenderInfo, new BoMaFilterCls() { TableName = "PhieuADR", FieldName = "SoBaoCao" }).FirstOrDefault();
+            if (boMa != null && !string.IsNullOrEmpty(boMa.BIEUTHUC))
+            {
+                while (maHV == null || CallBussinessUtility.CreateBussinessProcess().CreateDT_HocVienProcess().CreateModel(ORenderInfo, maHV) != null)
+                {
+                    if (maHV != null)
+                    {
+                        var boDem = CoreCallBussinessUtility.CreateBussinessProcess().CreateBoDemProcess().CreateModel(ORenderInfo, Model.Common.GetMaBoDem(boMa.BIEUTHUC));
+                        //if (boDem != null)
+                        //{
+                        //    CoreCallBussinessUtility.CreateBussinessProcess().CreateBoDemProcess().UpdateStatus(ORenderInfo, boDem.ID, int.Parse(boDemValue), 1);
+                        //}
+                    }
+                    boDemValue = CoreCallBussinessUtility.CreateBussinessProcess().CreateBoDemProcess().GetValue(ORenderInfo, Model.Common.GetMaBoDem(boMa.BIEUTHUC), Model.Common.GetValueFormat(boMa.BIEUTHUC));
+                    maHV = Model.Common.GetDisplayPart(boMa.BIEUTHUC) + boDemValue;
+                }
+            }
+            RetAjaxOut.RetExtraParam1 = boDemValue;
+            RetAjaxOut.RetExtraParam2 = maHV;
+            return RetAjaxOut;
+        }
+
+      
+        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+        public static AjaxOut HoanTatPhieuADR(RenderInfoCls ORenderInfo,string PhieuADRId, string SoBCDonVi,  string SoBCCuaTTQG,  string KhoaId, string ChucVuId, string NguoiLapId, string DienThoai, string Email, string DangBaoCao, string NgayLapBaoCao, 
+           string MaBN, string TenBN,  string NgaySinh, string GioiTinh, string CanNang, string NgayXuatHienPU, string PhanUngXuatHienSau, string MoTaBieuHieuADR, string XetNghiemLQPU, string TienSuBenhSu,string  CachXuTri, string MucDoNghiemTrong, string KQXuTri, string ThamDinhADR, string thamDinhADRKhac, string ThangThamDinhADR, string thangDinhADRKhac, string  BinhLuanCBYTe)
+         {
+            AjaxOut ajaxOut = new AjaxOut();
+            try
+            {
+                SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+                WebSession.CheckSessionTimeOut(ORenderInfo);
+                PhieuBaoCaoPhanUngCoHaiADRCls OPhieu = new PhieuBaoCaoPhanUngCoHaiADRCls();
+                if (!string.IsNullOrEmpty(PhieuADRId))
+                {
+                    OPhieu.Id = PhieuADRId;
+                }
+                else
+                {
+                    OPhieu.Id = Guid.NewGuid().ToString();
+                }
+                OPhieu.SoBcDonVi = SoBCDonVi;
+                OPhieu.SoBCQuocGia = SoBCCuaTTQG;
+                OPhieu.NoiBaoCao_Id = KhoaId;
+                OPhieu.NguoiLap_Id = NguoiLapId;
+                OPhieu.ChucVu_Id = ChucVuId;
+                OPhieu.DienThoai = DienThoai;
+                OPhieu.Email = Email;
+                OPhieu.DangBaoCao = Convert.ToInt32(DangBaoCao);
+                OPhieu.MaBN = MaBN;
+                OPhieu.HoTen = TenBN;
+                OPhieu.NgaySinh = DateTime.ParseExact(NgaySinh, "dd/MM/yyyy", null);
+                OPhieu.GioiTinh = Convert.ToInt32(GioiTinh);
+                OPhieu.NgayXuatHienPU = DateTime.ParseExact(NgayXuatHienPU, "dd/MM/yyyy", null) ;
+                OPhieu.NgayLap = DateTime.ParseExact(NgayLapBaoCao, "dd/MM/yyyy", null);
+                OPhieu.ThoiGianPhanUng = PhanUngXuatHienSau;
+                OPhieu.MoTaADR = MoTaBieuHieuADR;
+                OPhieu.XetNghiemLienQuan = XetNghiemLQPU;
+                OPhieu.TienSuBenhSu = TienSuBenhSu;
+                OPhieu.XuTri = CachXuTri;
+                OPhieu.MucDoNghiemTrong = Convert.ToInt32(MucDoNghiemTrong) ;
+                OPhieu.KetQuaSauXuTri = Convert.ToInt32(KQXuTri);
+                OPhieu.ThangThamDinhADR = Convert.ToInt32(ThangThamDinhADR);
+                if (ThangThamDinhADR == ((int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.Khac).ToString())
+                {
+                    OPhieu.MoTaThamDinhADR = thangDinhADRKhac;
+                }
+                else
+                {
+                    OPhieu.ThangThamDinhADR = Convert.ToInt32(ThangThamDinhADR);
+                }
+                if(ThamDinhADR == ((int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.Khac).ToString())
+                {
+                    OPhieu.MoTaThuocVaADR = thamDinhADRKhac;
+                }
+                else
+                {
+                    OPhieu.ThuocVaADR = Convert.ToInt32(ThamDinhADR);
+                }
+                OPhieu.BinhLuan = BinhLuanCBYTe;
+                OPhieu.TrangThai = (int)PhieuBaoCaoPhanUngCoHaiADRCls.eTrangThai.HoanTat;
+                if (!string.IsNullOrEmpty(PhieuADRId))
+                {
+                    Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreatePhieuBaoCaoPhanUngCoHaiADRProcess().Save(ORenderInfo, PhieuADRId, OPhieu);
+                }
+                else
+                {
+                    Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreatePhieuBaoCaoPhanUngCoHaiADRProcess().Add(ORenderInfo, OPhieu);
+                }
+                ajaxOut.RetExtraParam1 = OPhieu.Id;
+                ajaxOut.InfoMessage = WebLanguage.GetLanguage(OSiteParam, "Đã lưu!");
+            }
+            catch (Exception ex)
+            {
+                ajaxOut.Error = true;
+                ajaxOut.InfoMessage = ex.Message.ToString();
+                ajaxOut.HtmlContent = ex.Message.ToString();
+            }
+            return ajaxOut;
+        }
+        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+        public static AjaxOut LuuPhieuADR(RenderInfoCls ORenderInfo, string PhieuADRId, string SoBCDonVi, string SoBCCuaTTQG, string KhoaId, string ChucVuId, string NguoiLapId, string DienThoai, string Email, string DangBaoCao, string NgayLapBaoCao,
+           string MaBN, string TenBN, string NgaySinh, string GioiTinh, string CanNang, string NgayXuatHienPU, string PhanUngXuatHienSau, string MoTaBieuHieuADR, string XetNghiemLQPU, string TienSuBenhSu, string CachXuTri, string MucDoNghiemTrong, string KQXuTri, string ThamDinhADR, string thamDinhADRKhac, string ThangThamDinhADR, string thangDinhADRKhac, string BinhLuanCBYTe)
+        {
+            AjaxOut ajaxOut = new AjaxOut();
+            try
+            {
+                SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+                WebSession.CheckSessionTimeOut(ORenderInfo);
+                PhieuBaoCaoPhanUngCoHaiADRCls OPhieu = new PhieuBaoCaoPhanUngCoHaiADRCls();
+                if (!string.IsNullOrEmpty(PhieuADRId))
+                {
+                    OPhieu.Id = PhieuADRId;
+                }
+                else
+                {
+                    OPhieu.Id = Guid.NewGuid().ToString();
+                }
+                OPhieu.SoBcDonVi = SoBCDonVi;
+                OPhieu.SoBCQuocGia = SoBCCuaTTQG;
+                OPhieu.NoiBaoCao_Id = KhoaId;
+                OPhieu.NguoiLap_Id = NguoiLapId;
+                OPhieu.ChucVu_Id = ChucVuId;
+                OPhieu.DienThoai = DienThoai;
+                OPhieu.Email = Email;
+                OPhieu.DangBaoCao = Convert.ToInt32(DangBaoCao);
+                OPhieu.MaBN = MaBN;
+                OPhieu.HoTen = TenBN;
+                OPhieu.NgaySinh = DateTime.ParseExact(NgaySinh, "dd/MM/yyyy", null);
+                OPhieu.GioiTinh = Convert.ToInt32(GioiTinh);
+                OPhieu.NgayXuatHienPU = DateTime.ParseExact(NgayXuatHienPU, "dd/MM/yyyy", null);
+                OPhieu.NgayLap = DateTime.ParseExact(NgayLapBaoCao, "dd/MM/yyyy", null);
+                OPhieu.ThoiGianPhanUng = PhanUngXuatHienSau;
+                OPhieu.MoTaADR = MoTaBieuHieuADR;
+                OPhieu.XetNghiemLienQuan = XetNghiemLQPU;
+                OPhieu.TienSuBenhSu = TienSuBenhSu;
+                OPhieu.XuTri = CachXuTri;
+                OPhieu.MucDoNghiemTrong = Convert.ToInt32(MucDoNghiemTrong);
+                OPhieu.KetQuaSauXuTri = Convert.ToInt32(KQXuTri);
+                OPhieu.ThangThamDinhADR = Convert.ToInt32(ThangThamDinhADR);
+                if (ThangThamDinhADR == ((int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.Khac).ToString())
+                {
+                    OPhieu.MoTaThamDinhADR = thangDinhADRKhac;
+                }
+                else
+                {
+                    OPhieu.ThangThamDinhADR = Convert.ToInt32(ThangThamDinhADR);
+                }
+                if (ThamDinhADR == ((int)PhieuBaoCaoPhanUngCoHaiADRCls.eLoai.Khac).ToString())
+                {
+                    OPhieu.MoTaThuocVaADR = thamDinhADRKhac;
+                }
+                else
+                {
+                    OPhieu.ThuocVaADR = Convert.ToInt32(ThamDinhADR);
+                }
+                OPhieu.BinhLuan = BinhLuanCBYTe;
+                OPhieu.TrangThai = (int)PhieuBaoCaoPhanUngCoHaiADRCls.eTrangThai.Moi;
+                if (!string.IsNullOrEmpty(PhieuADRId))
+                {
+                    Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreatePhieuBaoCaoPhanUngCoHaiADRProcess().Save(ORenderInfo, PhieuADRId, OPhieu);
+                }
+                else
+                {
+                    Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreatePhieuBaoCaoPhanUngCoHaiADRProcess().Add(ORenderInfo, OPhieu);
+                }
+                ajaxOut.RetExtraParam1 = OPhieu.Id;
+                ajaxOut.InfoMessage = WebLanguage.GetLanguage(OSiteParam, "Đã cập nhập!");
+            }
+            catch (Exception ex)
+            {
+                ajaxOut.Error = true;
+                ajaxOut.InfoMessage = ex.Message.ToString();
+                ajaxOut.HtmlContent = ex.Message.ToString();
+            }
+            return ajaxOut;
+        }
+        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+        public static AjaxOut ThuHoiPhieuADR(RenderInfoCls ORenderInfo, string PhieuADRId)
+        {
+            AjaxOut ajaxOut = new AjaxOut();
+            try
+            {
+                SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+                WebSession.CheckSessionTimeOut(ORenderInfo);
+                Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreatePhieuBaoCaoPhanUngCoHaiADRProcess().Delete(ORenderInfo, PhieuADRId);
+                ajaxOut.InfoMessage = WebLanguage.GetLanguage(OSiteParam, "Đã thu hồi!");
+            }
+            catch (Exception ex)
+            {
+
+                ajaxOut.Error = true;
+                ajaxOut.InfoMessage = ex.Message.ToString();
+                ajaxOut.HtmlContent = ex.Message.ToString();
+            }
+            return ajaxOut;
+        }
+
+    }
+}

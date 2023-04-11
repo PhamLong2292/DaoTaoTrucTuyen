@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{CF22D2BD-B9F0-4DF5-9986-EBF155B04F3F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OneTSQ.Call.Bussiness.Sql</RootNamespace>
+    <AssemblyName>OneTSQ.Call.Bussiness.Sql</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="OneTSQ.Core.Model">
+      <HintPath>..\Runtime\web\bin\OneTSQ.Core.Model.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Database.Service, Version=1.0.0.0, Culture=neutral, PublicKeyToken=3b6ee3c81ce7aaf6, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\OneTSQ.Database.Service.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Utility">
+      <HintPath>..\CoreDlls\OneTSQ.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Process\Dictionary\BacSyOwnerUserProcess.cs" />
+    <Compile Include="Process\Dictionary\BacSyProcess.cs" />
+    <Compile Include="Process\Dictionary\CommonProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DM_ChuyenKhoaDaoTaoTtProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DM_GiayToDiChuyenGiaoProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DM_KyThuatChuyenGiaoProcess.cs" />
+    <Compile Include="Process\Dictionary\DM_NhomKhoaHocProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DM_TenKhoaHocProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DM_TieuChiThoiGianDaoTaoTtProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DM_TieuChiThoiLuongDaoTaoTtProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DM_TieuChuanThamGiaKhoaHocProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DM_TrangThietBiTruyenHinhTtProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DT_LichChuyenGiaoChiTietProcess.cs" />
+    <Compile Include="Process\Dictionary\DT_LichChuyenGiaoProcess.cs" />
+    <Compile Include="Process\Dictionary\DT_LichLyThuyetProcess.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CoreSqlProcess.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OneTSQ.Bussiness.Template\OneTSQ.Bussiness.Template.csproj">
+      <Project>{91133486-ed5d-4967-b028-2c112ad1b0cc}</Project>
+      <Name>OneTSQ.Bussiness.Template</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Bussiness.Utility\OneTSQ.Bussiness.Utility.csproj">
+      <Project>{6385f257-bc5d-4511-aabf-3057e73c925b}</Project>
+      <Name>OneTSQ.Bussiness.Utility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Call.Bussiness.Template\OneTSQ.Call.Bussiness.Template.csproj">
+      <Project>{2e84367a-6d3f-4f87-9c31-b9896abb6aed}</Project>
+      <Name>OneTSQ.Call.Bussiness.Template</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Model\OneTSQ.Model.csproj">
+      <Project>{69c9d595-0157-4618-a501-cac1a4ec3525}</Project>
+      <Name>OneTSQ.Model</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy $(TargetPath) E:\OneTSQ\Runtime\web\bin
+copy $(TargetPath) E:\OneTSQ\CoreDlls
+</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

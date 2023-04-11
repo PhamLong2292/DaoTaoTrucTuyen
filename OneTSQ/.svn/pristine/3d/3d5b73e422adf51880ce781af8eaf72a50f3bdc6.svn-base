@@ -1,0 +1,259 @@
+﻿//using FlexCel.Report;
+//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.Text;
+//using System.Threading.Tasks;
+//using OneTSQ.Call.Bussiness.Utility;
+//using OneTSQ.Core.Call.Bussiness.Utility;
+//using OneTSQ.Model;
+//using OneTSQ.ReportUtility;
+//using OneTSQ.Utility;
+//using static OneTSQ.WebParts.BcDanhGiaChatLuongDaoTao;
+//using OneTSQ.Core.Model;
+
+//namespace OneTSQ.WebParts.Report
+//{
+//    [ObjectReport(ID = "E312A3F4-3ECC-4CE2-B276-FFADCA695A55", Type = OneTSQ.ReportUtility.Report.eType.Flexcel, Name = "TongHopBaoCao", Title = "Tổng hợp báo cáo", ReportPath = @"\ReportTemplates\TongHopBaoCao.xls")]
+//    class TongHopBaoCao : ObjectReport<BcDanhGiaChatLuongDaoTao>
+//    {
+//        private class ChuyenGiaHoiChan
+//        {
+//            public string Cot1 { get; set; }
+//            public string Cot2 { get; set; }
+//            public string Cot3 { get; set; }
+//            public string Cot4 { get; set; }
+//        }
+//        protected override FlexCelReport OnFlexcelBuild(RenderInfoCls ORenderInfo, string bcDanhGiaChatLuongDaoTaoId)
+//        {
+//            FlexCelReport flexCelReport = new FlexCelReport();
+//            WebSession.CheckSessionTimeOut(ORenderInfo);
+//            SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+//            OwnerCls[] benhViens;
+//            BcDanhGiaChatLuongDaoTaoCls bcDanhGiaChatLuongDaoTao;
+//            if (!string.IsNullOrEmpty(bcDanhGiaChatLuongDaoTaoId))
+//            {
+//                bcDanhGiaChatLuongDaoTao = CallBussinessUtility.CreateBussinessProcess().CreateBcDanhGiaChatLuongDaoTaoProcess().CreateModel(ORenderInfo, bcDanhGiaChatLuongDaoTaoId);
+//                benhViens = CoreCallBussinessUtility.CreateBussinessProcess().CreateOwnerProcess().Reading(ORenderInfo, new OwnerFilterCls() { OwnerUserId = bcDanhGiaChatLuongDaoTao.TAOBOI });
+//            }
+//            else
+//            {
+//                bcDanhGiaChatLuongDaoTao = new BcDanhGiaChatLuongDaoTaoCls();
+//                bcDanhGiaChatLuongDaoTao.QUY = (int)BcDanhGiaChatLuongDaoTaoCls.eQuy.I;
+//                bcDanhGiaChatLuongDaoTao.NAM = DateTime.Now.Year;
+//                bcDanhGiaChatLuongDaoTao.TAOBOI = WebSessionUtility.GetCurrentLoginUser(OSiteParam).OwnerUserId;
+//                bcDanhGiaChatLuongDaoTao.TAOVAO = DateTime.Now;
+//                benhViens = CoreCallBussinessUtility.CreateBussinessProcess().CreateOwnerProcess().Reading(ORenderInfo, new OwnerFilterCls() { OwnerUserId = bcDanhGiaChatLuongDaoTao.TAOBOI });
+//                bcDanhGiaChatLuongDaoTao.BENHVIENID = benhViens.Select(o => o.OwnerId).FirstOrDefault();
+//                bcDanhGiaChatLuongDaoTao.GHICHULYDOBVKODANHGIA = GetBenhVienKoDanhGiaChatLuongDaoTaos(ORenderInfo, bcDanhGiaChatLuongDaoTaoId, bcDanhGiaChatLuongDaoTao.BENHVIENID, bcDanhGiaChatLuongDaoTao.QUY, bcDanhGiaChatLuongDaoTao.NAM);
+//                if (!string.IsNullOrEmpty(bcDanhGiaChatLuongDaoTao.GHICHULYDOBVKODANHGIA))
+//                    bcDanhGiaChatLuongDaoTao.GHICHULYDOBVKODANHGIA = "Trừ " + bcDanhGiaChatLuongDaoTao.GHICHULYDOBVKODANHGIA;
+//            }
+//            string[] benhVienThamGiaHoiChans = GetBenhVienThamGiaHoiChan(ORenderInfo, bcDanhGiaChatLuongDaoTaoId, bcDanhGiaChatLuongDaoTao.BENHVIENID);
+//            string[] benhVienDanhGiaChatLuongDaoTaos = benhVienThamGiaHoiChans.Count() == 0 ? new string[0] : CallBussinessUtility.CreateBussinessProcess().CreateBcDanhGiaChatLuongDaoTaoProcess().GetBenhVienDanhGiaChatLuongDaoTao(ORenderInfo, bcDanhGiaChatLuongDaoTao.BENHVIENID, bcDanhGiaChatLuongDaoTao.QUY, bcDanhGiaChatLuongDaoTao.NAM, benhVienThamGiaHoiChans);
+//            string cbbBenhVien = "";
+//            for (int iIndex = 0; iIndex < benhViens.Length; iIndex++)
+//            {
+//                cbbBenhVien = benhViens[iIndex].OwnerId == bcDanhGiaChatLuongDaoTao.BENHVIENID ? benhViens[iIndex].OwnerName : cbbBenhVien;
+//            }
+//            string cbbQuy = "";
+//            foreach (var quy in BcDanhGiaChatLuongDaoTaoParser.Quys)
+//                cbbQuy = bcDanhGiaChatLuongDaoTao.QUY == quy.Key ? BcDanhGiaChatLuongDaoTaoParser.Quys[quy.Key] : cbbQuy;
+
+//            flexCelReport.SetValue("BenhVienTuVan", cbbBenhVien);
+//            flexCelReport.SetValue("Ngay", "Ngày " + bcDanhGiaChatLuongDaoTao.TAOVAO.Day + " Tháng " + bcDanhGiaChatLuongDaoTao.TAOVAO.Month + " Năm " + bcDanhGiaChatLuongDaoTao.TAOVAO.Year);
+//            flexCelReport.SetValue("QuyNam", " Quý " + cbbQuy + " Năm " + bcDanhGiaChatLuongDaoTao.NAM);
+//            flexCelReport.SetValue("Nam", bcDanhGiaChatLuongDaoTao.TAOVAO.Year);
+//            flexCelReport.SetValue("SoBV", benhVienThamGiaHoiChans.Count());
+//            List<ChuyenGiaHoiChan> Bangs = new List<ChuyenGiaHoiChan>();
+//            List<ChuyenGiaHoiChan> Bang1s = new List<ChuyenGiaHoiChan>();
+//            List<ChuyenGiaHoiChan> Bang2s = new List<ChuyenGiaHoiChan>();
+//            List<ChuyenGiaHoiChan> Bang3s = new List<ChuyenGiaHoiChan>();
+//            List<ChuyenGiaHoiChan> Bang4s = new List<ChuyenGiaHoiChan>();
+//            string[] benhVienThamGiaHoiChans1 = GetBenhVienThamGiaHoiChan(ORenderInfo, bcDanhGiaChatLuongDaoTaoId, bcDanhGiaChatLuongDaoTao.BENHVIENID);
+//            int soLuongBenhVienThamGiaHoiChan = benhVienThamGiaHoiChans1.Count();
+//            int soLuongRow = (int)Math.Ceiling((decimal)soLuongBenhVienThamGiaHoiChan / 2);
+//            for (int i = 0; i <= soLuongRow - 1; i++)
+//            {
+//                ChuyenGiaHoiChan Bang = new ChuyenGiaHoiChan();
+//                var benhVienCol1 = CoreCallBussinessUtility.CreateBussinessProcess().CreateOwnerProcess().CreateModel(ORenderInfo, benhVienThamGiaHoiChans1[i]);
+//                var benhVienCol2 = i + soLuongRow == soLuongBenhVienThamGiaHoiChan ? null : CoreCallBussinessUtility.CreateBussinessProcess().CreateOwnerProcess().CreateModel(ORenderInfo, benhVienThamGiaHoiChans1[i + soLuongRow]);
+//                Bang.Cot1 = (i + 1) + "";
+//                Bang.Cot2 = benhVienCol1 != null ? benhVienCol1.OwnerName : "";
+//                Bang.Cot3 = (i + soLuongRow == soLuongBenhVienThamGiaHoiChan ? null : (int?)i + soLuongRow + 1) + "";
+//                Bang.Cot4 = benhVienCol2 != null ? benhVienCol2.OwnerName : "";
+//                Bangs.Add(Bang);
+//            }
+//            flexCelReport.AddTable("Bang", Bangs);
+//            TongHopDanhGiaCls[] tongHopDanhGiaDoHieuQuas = benhVienThamGiaHoiChans1.Count() == 0 ? new TongHopDanhGiaCls[0] : CallBussinessUtility.CreateBussinessProcess().CreateBcDanhGiaChatLuongDaoTaoProcess().GetTongHopDanhGiaDoHieuQua(ORenderInfo, bcDanhGiaChatLuongDaoTao.BENHVIENID, bcDanhGiaChatLuongDaoTao.QUY, bcDanhGiaChatLuongDaoTao.NAM, benhVienThamGiaHoiChans1);
+//            string[] chuyenKhoaDaoTaoTens = tongHopDanhGiaDoHieuQuas.Select(o => o.DANHMUCTEN).Distinct().ToArray();
+//            int soLuongChuyenKhoaDaoTao = chuyenKhoaDaoTaoTens.Count();
+//            for (int i = 0; i <= soLuongChuyenKhoaDaoTao - 1; i++)
+//            {
+//                ChuyenGiaHoiChan Bang1 = new ChuyenGiaHoiChan();
+//                int tongSoLuongDanhGiaCuaChuyeKhoa = tongHopDanhGiaDoHieuQuas.Where(o => o.DANHMUCTEN == chuyenKhoaDaoTaoTens[i]).Sum(o => o.SOLUONG);
+//                int hieuQua = tongHopDanhGiaDoHieuQuas.Where(o => o.DANHMUCTEN == chuyenKhoaDaoTaoTens[i] && o.DANHGIA == (int)DoHieuQuaGiangDayCls.eDanhGia.HieuQua).Sum(o => o.SOLUONG);
+//                int binhThuong = tongHopDanhGiaDoHieuQuas.Where(o => o.DANHMUCTEN == chuyenKhoaDaoTaoTens[i] && o.DANHGIA == (int)DoHieuQuaGiangDayCls.eDanhGia.BinhThuong).Sum(o => o.SOLUONG);
+//                int khongHieuQua = tongHopDanhGiaDoHieuQuas.Where(o => o.DANHMUCTEN == chuyenKhoaDaoTaoTens[i] && o.DANHGIA == (int)DoHieuQuaGiangDayCls.eDanhGia.KhongHieuQua).Sum(o => o.SOLUONG);
+//                Bang1.Cot1 = chuyenKhoaDaoTaoTens[i];
+//                Bang1.Cot2 = (tongSoLuongDanhGiaCuaChuyeKhoa == 0 ? null : (decimal?)Math.Round(((decimal)hieuQua / tongSoLuongDanhGiaCuaChuyeKhoa * 100), 2)) + "% " + WebLanguage.GetLanguage(OSiteParam, "Bệnh viện");
+//                Bang1.Cot3 = (tongSoLuongDanhGiaCuaChuyeKhoa == 0 ? null : (decimal?)Math.Round(((decimal)binhThuong / tongSoLuongDanhGiaCuaChuyeKhoa * 100), 2)) + "% " + WebLanguage.GetLanguage(OSiteParam, "Bệnh viện");
+//                Bang1.Cot4 = (tongSoLuongDanhGiaCuaChuyeKhoa == 0 ? null : (decimal?)Math.Round(((decimal)khongHieuQua / tongSoLuongDanhGiaCuaChuyeKhoa * 100), 2)) + "% " + WebLanguage.GetLanguage(OSiteParam, "Bệnh viện");
+//                Bang1s.Add(Bang1);
+//            }
+//            TongHopDanhGiaCls[] tongHopDanhGiaMucDoPhongPhus = benhVienThamGiaHoiChans1.Count() == 0 ? new TongHopDanhGiaCls[0] : CallBussinessUtility.CreateBussinessProcess().CreateBcDanhGiaChatLuongDaoTaoProcess().GetTongHopDanhGiaMucDoPhongPhu(ORenderInfo, bcDanhGiaChatLuongDaoTao.BENHVIENID, bcDanhGiaChatLuongDaoTao.QUY, bcDanhGiaChatLuongDaoTao.NAM, benhVienThamGiaHoiChans1);
+//            string[] chuyenKhoaDaoTaoTens1 = tongHopDanhGiaMucDoPhongPhus.Select(o => o.DANHMUCTEN).Distinct().ToArray();
+//            int soLuongChuyenKhoaDaoTao1 = chuyenKhoaDaoTaoTens1.Count();
+//            for (int i = 0; i <= soLuongChuyenKhoaDaoTao1 - 1; i++)
+//            {
+//                int tongSoLuongDanhGiaCuaChuyeKhoa = tongHopDanhGiaMucDoPhongPhus.Where(o => o.DANHMUCTEN == chuyenKhoaDaoTaoTens1[i]).Sum(o => o.SOLUONG);
+//                int phongPhu = tongHopDanhGiaMucDoPhongPhus.Where(o => o.DANHMUCTEN == chuyenKhoaDaoTaoTens1[i] && o.DANHGIA == (int)MucDoPhongPhuBaiBaoCaoCls.eDanhGia.PhongPhu).Sum(o => o.SOLUONG);
+//                int binhThuong = tongHopDanhGiaMucDoPhongPhus.Where(o => o.DANHMUCTEN == chuyenKhoaDaoTaoTens1[i] && o.DANHGIA == (int)MucDoPhongPhuBaiBaoCaoCls.eDanhGia.BinhThuong).Sum(o => o.SOLUONG);
+//                int khongPhongPhu = tongHopDanhGiaMucDoPhongPhus.Where(o => o.DANHMUCTEN == chuyenKhoaDaoTaoTens1[i] && o.DANHGIA == (int)MucDoPhongPhuBaiBaoCaoCls.eDanhGia.KhongPhongPhu).Sum(o => o.SOLUONG);
+//                ChuyenGiaHoiChan Bang2 = new ChuyenGiaHoiChan();
+//                Bang2.Cot1 = chuyenKhoaDaoTaoTens1[i];
+//                Bang2.Cot2 = (tongSoLuongDanhGiaCuaChuyeKhoa == 0 ? null : (decimal?)Math.Round(((decimal)phongPhu / tongSoLuongDanhGiaCuaChuyeKhoa * 100), 2)) + "% " + WebLanguage.GetLanguage(OSiteParam, "Bệnh viện");
+//                Bang2.Cot3 = (tongSoLuongDanhGiaCuaChuyeKhoa == 0 ? null : (decimal?)Math.Round(((decimal)binhThuong / tongSoLuongDanhGiaCuaChuyeKhoa * 100), 2)) + "% " + WebLanguage.GetLanguage(OSiteParam, "Bệnh viện");
+//                Bang2.Cot4 = (tongSoLuongDanhGiaCuaChuyeKhoa == 0 ? null : (decimal?)Math.Round(((decimal)khongPhongPhu / tongSoLuongDanhGiaCuaChuyeKhoa * 100), 2)) + "% " + WebLanguage.GetLanguage(OSiteParam, "Bệnh viện");
+//                Bang2s.Add(Bang2);
+//            }
+//            TongHopDanhGiaMucYNghiaCls[] tongHopDanhGiaMucYNghias = benhVienThamGiaHoiChans1.Count() == 0 ? new TongHopDanhGiaMucYNghiaCls[0] : CallBussinessUtility.CreateBussinessProcess().CreateBcDanhGiaChatLuongDaoTaoProcess().GetTongHopDanhGiaMucYNghia(ORenderInfo, bcDanhGiaChatLuongDaoTao.BENHVIENID, bcDanhGiaChatLuongDaoTao.QUY, bcDanhGiaChatLuongDaoTao.NAM, benhVienThamGiaHoiChans1);
+//            var chuyenKhoaDaoTaoTens2 = tongHopDanhGiaMucYNghias.Select(o => o.CHUYENKHOADAOTAOTTTEN).Distinct().ToArray();
+//            var benhVienTens = tongHopDanhGiaMucYNghias.Select(o => o.BENHVIENTEN).Distinct().ToArray();
+//            int soLuongChuyenKhoaDaoTao2 = chuyenKhoaDaoTaoTens2.Count();
+//            int soLuongBenhVien = benhVienTens.Count();
+//            int tongDiemToiDa = soLuongBenhVien * 8;
+//            for (int i = 0; i <= soLuongChuyenKhoaDaoTao2 - 1; i++)
+//            {
+//                ChuyenGiaHoiChan Bang3 = new ChuyenGiaHoiChan();
+//                var danhGiaCuaChuyenKhoas = tongHopDanhGiaMucYNghias.Where(o => o.CHUYENKHOADAOTAOTTTEN == chuyenKhoaDaoTaoTens2[i]);
+//                int tongDiemCuaChuyeKhoa = danhGiaCuaChuyenKhoas.Sum(o => o.DANHGIA);
+//                int diemPhoBien = danhGiaCuaChuyenKhoas
+//                    .GroupBy(o => o.DANHGIA)
+//                    .Select(o => new { o.Key, sl = o.Count() })
+//                    .OrderByDescending(o => o.sl)
+//                    .Select(o => o.Key)
+//                    .FirstOrDefault();
+//                var danhGiaKoPhoBiens = danhGiaCuaChuyenKhoas.Where(o => o.DANHGIA != diemPhoBien);
+//                string ghiChu = "";
+//                foreach (var danhGiaKoPhoBien in danhGiaKoPhoBiens)
+//                {
+//                    ghiChu += string.Format("- {0}: {1}đ\n", danhGiaKoPhoBien.BENHVIENTEN, danhGiaKoPhoBien.DANHGIA);
+//                }
+//                if (danhGiaKoPhoBiens.Count() > 0)
+//                    ghiChu += string.Format("- {0}/{1} BV còn lại: {2}đ", danhGiaCuaChuyenKhoas.Where(o => o.DANHGIA == diemPhoBien).Count(), danhGiaCuaChuyenKhoas.Count(), diemPhoBien);
+//                else
+//                    ghiChu += string.Format("- {0}/{1} BV: {2}đ", danhGiaCuaChuyenKhoas.Where(o => o.DANHGIA == diemPhoBien).Count(), danhGiaCuaChuyenKhoas.Count(), diemPhoBien);
+//                Bang3.Cot1 = (i + 1) + "";
+//                Bang3.Cot2 = chuyenKhoaDaoTaoTens2[i];
+//                Bang3.Cot3 = tongDiemCuaChuyeKhoa + "/" + tongDiemToiDa;
+//                Bang3.Cot4 = ghiChu;
+//                Bang3s.Add(Bang3);
+//            }
+//            flexCelReport.SetValue("Muc12", benhVienDanhGiaChatLuongDaoTaos.Count() + "/" + benhVienThamGiaHoiChans.Count() + bcDanhGiaChatLuongDaoTao.GHICHULYDOBVKODANHGIA);
+//            flexCelReport.SetValue("Muc2", bcDanhGiaChatLuongDaoTao.DIENGIAICHATLUONGTTB);
+//            flexCelReport.SetValue("Muc3", bcDanhGiaChatLuongDaoTao.DIENGIAIDOHIEUQUA);
+//            flexCelReport.SetValue("Muc4", bcDanhGiaChatLuongDaoTao.DIENGIAIMUCDOPHONGPHU);
+//            flexCelReport.SetValue("Muc5", bcDanhGiaChatLuongDaoTao.DIENGIAITHOIGIANTHOILUONG);
+//            flexCelReport.SetValue("Muc6", bcDanhGiaChatLuongDaoTao.DIENGIAIMUCYNGHIA);
+//            flexCelReport.SetValue("Muc7", bcDanhGiaChatLuongDaoTao.YKIENKHAC);
+//            flexCelReport.AddTable("Bang1", Bang1s);
+//            flexCelReport.AddTable("Bang2", Bang2s);
+//            flexCelReport.AddTable("Bang3", Bang3s);
+
+
+
+
+
+//            TongHopDanhGiaCls[] tongHopDanhGiaChatLuongHoatDongTtbs = benhVienThamGiaHoiChans1.Count() == 0 ? new TongHopDanhGiaCls[0] : CallBussinessUtility.CreateBussinessProcess().CreateBcDanhGiaChatLuongDaoTaoProcess().GetTongHopDanhGiaChatLuongHoatDongTtb(ORenderInfo, bcDanhGiaChatLuongDaoTao.BENHVIENID, bcDanhGiaChatLuongDaoTao.QUY, bcDanhGiaChatLuongDaoTao.NAM, benhVienThamGiaHoiChans1);
+//            var trangThietBiTruyenHinhTts = tongHopDanhGiaChatLuongHoatDongTtbs.Select(o => new { o.DANHMUCMA, o.DANHMUCTEN }).Distinct().ToArray();
+//            string html = "";
+//            int soLuongtrangThietBiTruyenHinhTt = trangThietBiTruyenHinhTts.Count();
+//            DanhGiaTrangThietBiChartCls[] soLieuCharts = new DanhGiaTrangThietBiChartCls[soLuongtrangThietBiTruyenHinhTt];
+//            for (int i = 0; i <= soLuongtrangThietBiTruyenHinhTt - 1; i++)
+//            {
+//                var danhGiaCuaTrangThietBi = tongHopDanhGiaChatLuongHoatDongTtbs.Where(o => o.DANHMUCMA == trangThietBiTruyenHinhTts[i].DANHMUCMA);
+//                flexCelReport.SetValue("GiaTri" + (16 + i), trangThietBiTruyenHinhTts[i].DANHMUCTEN);
+//                flexCelReport.SetValue("GiaTri" + (5 * i + 1), danhGiaCuaTrangThietBi.Where(o => o.DANHGIA == (int)ChatLuongHoatDongTtbCls.eDanhGia.RatTot).Sum(o => o.SOLUONG));
+//                flexCelReport.SetValue("GiaTri" + (5 * i + 2), danhGiaCuaTrangThietBi.Where(o => o.DANHGIA == (int)ChatLuongHoatDongTtbCls.eDanhGia.Tot).Sum(o => o.SOLUONG));
+//                flexCelReport.SetValue("GiaTri" + (5 * i + 3), danhGiaCuaTrangThietBi.Where(o => o.DANHGIA == (int)ChatLuongHoatDongTtbCls.eDanhGia.BinhThuong).Sum(o => o.SOLUONG));
+//                flexCelReport.SetValue("GiaTri" + (5 * i + 4), danhGiaCuaTrangThietBi.Where(o => o.DANHGIA == (int)ChatLuongHoatDongTtbCls.eDanhGia.Kem).Sum(o => o.SOLUONG));
+//                flexCelReport.SetValue("GiaTri" + (5 * i + 5), danhGiaCuaTrangThietBi.Where(o => o.DANHGIA == (int)ChatLuongHoatDongTtbCls.eDanhGia.RatKem).Sum(o => o.SOLUONG));
+//            }
+//            TongHopDanhGiaMucYNghiaCls[] tongHopDanhGiaMucYNghias1 = benhVienThamGiaHoiChans1.Count() == 0 ? new TongHopDanhGiaMucYNghiaCls[0] : CallBussinessUtility.CreateBussinessProcess().CreateBcDanhGiaChatLuongDaoTaoProcess().GetTongHopDanhGiaMucYNghia(ORenderInfo, bcDanhGiaChatLuongDaoTao.BENHVIENID, bcDanhGiaChatLuongDaoTao.QUY, bcDanhGiaChatLuongDaoTao.NAM, benhVienThamGiaHoiChans1);
+//            var chuyenKhoaDaoTaoTens11 = tongHopDanhGiaMucYNghias1.Select(o => o.CHUYENKHOADAOTAOTTTENNGAN).Distinct().ToArray();
+
+//            MucDoYNghiaChartCls mucDoYNghiaChart = new MucDoYNghiaChartCls();
+//            mucDoYNghiaChart.ChartId = "barMucYNghiaChart";
+//            mucDoYNghiaChart.Labels = new string[chuyenKhoaDaoTaoTens11.Count()];
+//            mucDoYNghiaChart.Data = new decimal[chuyenKhoaDaoTaoTens11.Count()];
+//            int soLuongChuyenKhoaDaoTao4 = chuyenKhoaDaoTaoTens11.Count();
+//            string x = "x";
+//            string y = "Số liệu";
+//            for (int i = 0; i <= soLuongChuyenKhoaDaoTao4 - 1; i++)
+//            {
+//                flexCelReport.SetValue("GiaTri" + (21 + i), chuyenKhoaDaoTaoTens11[i]);
+//                flexCelReport.SetValue("GiaTri" + (29 + i), tongHopDanhGiaMucYNghias1.Where(o => o.CHUYENKHOADAOTAOTTTENNGAN == chuyenKhoaDaoTaoTens11[i]).Sum(o => o.DANHGIA));
+//            }
+//            //flexCelReport.SetValue("LyDo", phieuDanhGiaChatLuongDaoTao.LYDODIEMYNGHIA);
+//            //flexCelReport.SetValue("YKIEN", phieuDanhGiaChatLuongDaoTao.YKIENDONGGOP);
+//            //flexCelReport.AddTable("Bang1", Bang1s);
+//            //flexCelReport.AddTable("Bang2", Bang2s);
+//            //flexCelReport.AddTable("Bang3", Bang3s);
+//            //flexCelReport.AddTable("Bang4", Bang4s);
+//            //flexCelReport.AddTable("Bang41", Bang41s);
+//            return flexCelReport;
+//        }
+
+//        public string StripHTML(string html)
+//        {
+//            var regex = new System.Text.RegularExpressions.Regex("<[^>]+>", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+//            return System.Web.HttpUtility.HtmlDecode((regex.Replace(html, "")));
+//        }
+//        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+//        public static string GetBenhVienKoDanhGiaChatLuongDaoTaos(RenderInfoCls ORenderInfo, string bcDanhGiaChatLuongDaoTaoId, string benhVienId, int quy, int nam)
+//        {
+//            string result = "";
+//            try
+//            {
+//                SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+//                WebSession.CheckSessionTimeOut(ORenderInfo);
+//                string[] benhVienThamGiaHoiChans = GetBenhVienThamGiaHoiChan(ORenderInfo, bcDanhGiaChatLuongDaoTaoId, benhVienId);
+//                string[] benhVienDanhGiaChatLuongDaoTaos = benhVienThamGiaHoiChans.Count() == 0 ? new string[0] : CallBussinessUtility.CreateBussinessProcess().CreateBcDanhGiaChatLuongDaoTaoProcess().GetBenhVienDanhGiaChatLuongDaoTao(ORenderInfo, benhVienId, quy, nam, benhVienThamGiaHoiChans);
+//                //Tìm ra bệnh viện không đánh giá
+//                if (benhVienThamGiaHoiChans.Count() != benhVienDanhGiaChatLuongDaoTaos.Count())
+//                {
+//                    List<string> benhVienKoDanhGiaChatLuongDaoTaos = new List<string>();
+//                    foreach (var benhVienThamGiaHoiChan in benhVienThamGiaHoiChans)
+//                    {
+//                        if (!benhVienDanhGiaChatLuongDaoTaos.Any(o => o == benhVienThamGiaHoiChan))
+//                        {
+//                            OwnerCls owner = CoreCallBussinessUtility.CreateBussinessProcess().CreateOwnerProcess().CreateModel(ORenderInfo, benhVienThamGiaHoiChan);
+//                            if (owner != null)
+//                                result += owner.OwnerName + "; ";
+//                        }
+//                    }
+//                }
+//            }
+//            catch (Exception ex)
+//            {
+//            }
+//            return result;
+//        }
+//        public static string[] GetBenhVienThamGiaHoiChan(RenderInfoCls ORenderInfo, string bcDanhGiaChatLuongDaoTaoId, string benhVienId)
+//        {
+//            string[] result = new string[0];
+//            try
+//            {
+//                WebSession.CheckSessionTimeOut(ORenderInfo);
+//                var benhVien = CoreCallBussinessUtility.CreateBussinessProcess().CreateOwnerProcess().CreateModel(ORenderInfo, benhVienId);
+//                if (benhVien != null)
+//                    result = CallBussinessUtility.CreateBussinessProcess().CreateBcDanhGiaChatLuongDaoTaoProcess().GetBenhVienThamGiaHoiChan(ORenderInfo, bcDanhGiaChatLuongDaoTaoId).Select(o => o.DONVICONGTACMA).ToArray();
+//            }
+//            catch (Exception ex)
+//            {
+//            }
+//            return result;
+//        }
+//    }
+//}

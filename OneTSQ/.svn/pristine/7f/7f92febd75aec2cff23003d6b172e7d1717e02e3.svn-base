@@ -1,0 +1,411 @@
+﻿using FlexCel.Report;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using OneTSQ.Call.Bussiness.Utility;
+using OneTSQ.Core.Call.Bussiness.Utility;
+using OneTSQ.Model;
+using OneTSQ.ReportUtility;
+using OneTSQ.Utility;
+using OneTSQ.Core.Model;
+
+namespace OneTSQ.WebParts
+{
+    internal class DT_BcThongKeKhoaHoc : WebPartTemplate
+    {
+        public sealed class KhoaHocReport
+        {
+            public string MAKHOAHOC { set; get; }
+            public string SOKHOAHOC { set; get; }
+            public string TENKHOAHOC { set; get; }
+            public string THOILUONG { set; get; }
+            public DateTime? NGAYKHAIGIANG { set; get; }
+            public DateTime? NGAYKETTHUCorHANNOPHOSO { set; get; }
+            public string DOITUONG { set; get; }
+            public string LOAIHINH { set; get; }
+            public int? SOHOCVIEN { set; get; }
+
+        }
+        public override string WebPartId { get { return "DT_BcThongKeKhoaHoc"; } }
+        public override string WebPartTitle { get { return "Thống kê khóa học"; } }
+        public override string Description { get { return "Thống kê khóa học"; } }
+        public override void RegAjaxPro(RenderInfoCls ORenderInfo, System.Web.UI.Page Page)
+        {
+            AjaxPro.Utility.RegisterTypeForAjax(typeof(DT_BcThongKeKhoaHoc), Page);
+        }     
+        public override AjaxOut Draw(SiteParam OSiteParam, RenderInfoCls ORenderInfo)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+            try
+            {
+                //SiteParam OSiteParam1 = WebEnvironments.CreateSiteParam(ORenderInfo);
+                string UserId = WebSessionUtility.GetCurrentLoginUser(OSiteParam).OwnerUserId;
+                string cbbLoaiHinhDaoTao = "<select class='form-control' id='cbbLoaiHinhDaoTao' placeholder='" + WebLanguage.GetLanguage(OSiteParam, "Loại hình đào tạo") + "'>\r\n";
+                foreach (var lkh in DT_KhoaHocParser.LoaiHinhDaoTaos)
+                    cbbLoaiHinhDaoTao += string.Format("<option value={0}>{1}</option>\r\n", lkh.Key, lkh.Value);
+                cbbLoaiHinhDaoTao += "</select>\r\n";
+
+                string cbbDoiTuong = "<select class='chosen-select form-control' id='cbbDoiTuong' placeholder='" + WebLanguage.GetLanguage(OSiteParam, "Đối tượng") + "'>\r\n";
+                foreach (var lkh in DT_KhoaHocParser.DoiTuongs)
+                    cbbDoiTuong += string.Format("<option value={0}>{1}</option>\r\n", lkh.Key, lkh.Value);
+                cbbDoiTuong += "</select>\r\n";
+
+                string cbbTrangThai = "<select id=\"cbbTrangThai\" class=\"form-control valueForm\" placeholder='" + WebLanguage.GetLanguage(OSiteParam, "Trạng thái") + "'>" +
+                "   <option value=0>" + WebLanguage.GetLanguage(OSiteParam, "Chưa đào tạo") + "</option>" +
+                "   <option value=1>" + WebLanguage.GetLanguage(OSiteParam, "Đang đào tạo") + "</option>" +
+                "   <option value=2>" + WebLanguage.GetLanguage(OSiteParam, "Đã đào tạo") + "</option>" +
+                "</select>\r\n";
+                TimeFilterView timeFilterView = new TimeFilterView()
+                {
+                    thoiGian = (int)TimeFilter.eThoiGian.quy,
+                    quy = ((DateTime.Today.Month - 1) / 3) + 1,
+                    thang = DateTime.Today.Month,
+                    nam = DateTime.Today.Year,
+                };
+                RetAjaxOut.HtmlContent =
+                #region Html
+                WebEnvironments.ProcessHtml(
+                "<div class='modal fade' id='ModalFilter' style='overflow: auto' role='dialog' aria-labelledby='largeModal' aria-hidden='true' data-backdrop='static'>\r\n" +
+                "     <div class='modal-dialog modal-lg' style='width:780px;'>\r\n" +
+                "         <div class='modal-content'>\r\n" +
+                "               <div class='panel-heading'>" +
+                "                   <strong class='mr-top-x' data-dismiss='modal' aria-hidden='true'><a style='color:white; font-size: x-large;'>&times;</a></strong>\r\n" +
+                "                   <strong class='modal-title'>" + WebLanguage.GetLanguage(OSiteParam, new DT_BcThongKeKhoaHoc().WebPartTitle.ToUpper()) + "</strong>\r\n" +
+                "               </div>" +
+                "              <div class='modal-body'>\r\n" +
+                "                   <div class='row'>\r\n" +
+                "                        <div class='form-group col-sm-4'>\r\n" +
+                                            cbbLoaiHinhDaoTao +
+                "                        </div>\r\n" +
+                "                        <div class='form-group col-sm-4'>\r\n" +
+                                            cbbDoiTuong +
+                "                        </div>\r\n" +
+                "                        <div class='form-group col-sm-4'>\r\n" +
+                                            cbbTrangThai +
+                "                        </div>\r\n" +
+                "                        <div class='form-group col-sm-12'>\r\n" +
+                                            TimeFilter.Draw(ORenderInfo, timeFilterView).HtmlContent +
+                "                        </div>\r\n" +              
+                "                              <div class='form-group btn-padding-modal col-sm-12' style=\"padding-top: 0px;\">\r\n" +
+                "                                  <button style='margin:0px; padding:0px; width: 100px; height: 28px; margin-right: 5px; float: left;' class='btn btn-primary' onclick='FilterChange();' id='btnTimKiem'><strong>" + WebLanguage.GetLanguage(OSiteParam, "Xem báo cáo") + "</strong></button>\r\n" +
+                "                                   <div class='dropdown pull-right' style=\"float: left !important;\">\r\n" +
+                "                                        <button style='margin:0px; padding:0px; width: 100px; height: 28px;' class='btn btn-primary dropdown-toggle' type='button' data-toggle='dropdown' aria-expanded='false' id='btnExport'>\r\n" +
+                "                                             <strong>" + WebLanguage.GetLanguage(OSiteParam, "Export") + "</strong>\r\n" +
+                "                                             <span class='caret'></span>" +
+                "                                        </button>\r\n" +
+                "                                        <ul class='dropdown-menu'>\r\n" +
+                "                                      <li><a href=\"javascript:onExport('xlsx');\">" + WebLanguage.GetLanguage(OSiteParam, "Excel 2007") + "</a></li>\r\n" +
+                "                                      <li><a href=\"javascript:onExport('xls');\">" + WebLanguage.GetLanguage(OSiteParam, "Excel 97-2003") + "</a></li>\r\n" +
+                "                                      <li><a href=\"javascript:FilterChange();\">" + WebLanguage.GetLanguage(OSiteParam, "PDF") + "</a></li>\r\n" +
+                "                                      <li><a >" + WebLanguage.GetLanguage(OSiteParam, "TXT") + "</a></li>\r\n" +
+                "                                  </ul>\r\n" +
+                "                             </div>\r\n" +
+                "                        </div>\r\n" +
+                "                   </div>\r\n" +
+                "              </div>\r\n" +
+                "         </div>\r\n" +
+                "     </div>\r\n" +
+                "</div>\r\n") +
+                #endregion
+                #region Javascript
+                WebEnvironments.ProcessJavascript(
+                "<script language=javascript>\r\n" +
+                "    RenderInfo=CreateRenderInfo();\r\n" +
+                "    $(document).ready(function() \r\n" +
+                "    {\r\n" +
+                "       $('#ModalFilter').modal('show');\r\n" +
+                "       $('#cbbLoaiHinhDaoTao').select2({\r\n" +
+                "          placeholder: '" + WebLanguage.GetLanguage(OSiteParam, "Loại hình đào tạo") + "',\r\n" +
+                "          allowClear: true\r\n" +
+                "       });\r\n" +
+                "       $('#cbbDoiTuong').select2({\r\n" +
+                "          placeholder: '" + WebLanguage.GetLanguage(OSiteParam, "Đối tượng") + "',\r\n" +
+                "          allowClear: true\r\n" +
+                "       });\r\n" +
+                "    });\r\n" +
+                "    function FilterChange(){\r\n" +
+                "        loaiHinhDaoTao = parseInt(document.getElementById('cbbLoaiHinhDaoTao').value);\r\n" +
+                "        doiTuong = document.getElementById('cbbDoiTuong').value;\r\n" +
+                "        trangThai = parseInt(document.getElementById('cbbTrangThai').value);\r\n" +
+                "        loaiThoiGian = parseInt(document.getElementById('cbbThoiGian').value);\r\n" +
+                "        timeFilter=GetTimeInput();\r\n" +
+                "        AjaxOut = OneTSQ.WebParts.DT_BcThongKeKhoaHoc.ServerSideDrawSearchResult(RenderInfo, loaiHinhDaoTao, doiTuong, trangThai, timeFilter, loaiThoiGian).value;\r\n" +
+                "        if(AjaxOut.Error)\r\n" +
+                "        {\r\n" +
+                "            callSweetAlert(AjaxOut.InfoMessage);\r\n" +
+                "            return;\r\n" +
+                "        }\r\n" +
+                "        window.open(AjaxOut.RetUrl,'_blank');\r\n" +
+                "    }\r\n" +
+                "    function onExport(stern){\r\n" +
+                "        loaiHinhDaoTao = parseInt(document.getElementById('cbbLoaiHinhDaoTao').value);\r\n" +
+                "        doiTuong = document.getElementById('cbbDoiTuong').value;\r\n" +
+                "        trangThai = parseInt(document.getElementById('cbbTrangThai').value);\r\n" +
+                "        loaiThoiGian = parseInt(document.getElementById('cbbThoiGian').value);\r\n" +
+                "        timeFilter=GetTimeInput();\r\n" +
+                "        AjaxOut = OneTSQ.WebParts.DT_BcThongKeKhoaHoc.ServerSideDrawExportResult(RenderInfo, loaiHinhDaoTao, doiTuong, trangThai, timeFilter, loaiThoiGian).value;\r\n" +
+                "        if(AjaxOut.Error)\r\n" +
+                "        {\r\n" +
+                "            callSweetAlert(AjaxOut.InfoMessage);\r\n" +
+                "            return;\r\n" +
+                "        }\r\n" +
+                "        window.open(AjaxOut.RetUrl,'_blank');\r\n" +
+                "    }\r\n" +
+                "</script>\r\n");
+                #endregion           
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+
+        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+        public static AjaxOut ServerSideDrawSearchResult(RenderInfoCls ORenderInfo, int? loaiHinhDaoTao, string doiTuong, int? trangThai, TimeFilterView timeFilterView, int loaiThoiGian)
+        {
+            FlexCelReport flexCelReport = new FlexCelReport();
+            AjaxOut RetAjaxOut = new AjaxOut();
+            try
+            {
+                string thoiGianThongKe = "-";
+                if (timeFilterView.tuNgay != null)
+                    thoiGianThongKe = timeFilterView.tuNgay.Value.ToString("dd/MM/yyyy") + thoiGianThongKe;
+                if (timeFilterView.denNgay != null)
+                {
+                    thoiGianThongKe = thoiGianThongKe + timeFilterView.denNgay.Value.ToString("dd/MM/yyyy");
+                    if (loaiThoiGian != 3)
+                        timeFilterView.denNgay = timeFilterView.denNgay.Value.AddDays(1);
+                }
+
+                string query = "";
+                if (trangThai == 0)//chưa đào tạo
+                {
+                    query = "select kh.*, dmtkh.ten TENKHOAHOC from DT_KhoaHoc kh left join dm_tenkhoahoc dmtkh on kh.ten = dmtkh.ma " +
+                        "left join DT_KEHOACHLOP khl on khl.ID = kh.ID where kh.TRANGTHAI<>" + (int)DT_KhoaHocCls.eTrangThai.KetThuc + " and (kh.TRANGTHAI <>" + (int)DT_KhoaHocCls.eTrangThai.Duyet + " or khl.BATDAU > SYSDATETIME()) ";
+                    if (timeFilterView.tuNgay != null)
+                        query += string.Format("and TRY_CONVERT(DATETIME, '{0}') <= kh.NGAYKHAIGIANGDUKIEN ", timeFilterView.tuNgay.Value.ToString("HH:mm yyyy/MM/dd"));
+                    else if (timeFilterView.denNgay != null)
+                    {
+                        if (loaiThoiGian != 3)
+                            query += string.Format("and TRY_CONVERT(DATETIME, '{0}') > kh.NGAYKHAIGIANGDUKIEN ", timeFilterView.denNgay.Value.ToString("HH:mm yyyy/MM/dd"));
+                        else
+                            query += string.Format("and TRY_CONVERT(DATETIME, '{0}') >= kh.NGAYKHAIGIANGDUKIEN ", timeFilterView.denNgay.Value.ToString("HH:mm yyyy/MM/dd"));
+                    }
+                }
+                else if (trangThai == 1)//đang đào tạo
+                {
+                    query = "select kh.*, dmtkh.ten TENKHOAHOC, khl.BATDAU, khl.KETTHUC, " +
+                        "(select count(1) from DT_KETQUADAOTAO kqdt where KHOAHOCDUYET_ID = kh.ID) SOLUONGHOCVIEN " +
+                        "from DT_KhoaHoc kh left join dm_tenkhoahoc dmtkh on kh.ten = dmtkh.ma " +
+                        "left join DT_KEHOACHLOP khl on khl.ID = kh.ID where kh.TRANGTHAI=" + (int)DT_KhoaHocCls.eTrangThai.Duyet + " and khl.BATDAU <= SYSDATETIME() ";
+                    if (timeFilterView.tuNgay != null)
+                        query += string.Format("and TRY_CONVERT(DATETIME, '{0}') <= khl.BATDAU ", timeFilterView.tuNgay.Value.ToString("HH:mm yyyy/MM/dd"));
+                    else if (timeFilterView.denNgay != null)
+                    {
+                        if (loaiThoiGian != 3)
+                            query += string.Format("and TRY_CONVERT(DATETIME, '{0}') > khl.BATDAU ", timeFilterView.denNgay.Value.ToString("HH:mm yyyy/MM/dd"));
+                        else
+                            query += string.Format("and TRY_CONVERT(DATETIME, '{0}') >= khl.BATDAU ", timeFilterView.denNgay.Value.ToString("HH:mm yyyy/MM/dd"));
+                    }
+                }
+                else if (trangThai == 2)//đã đào tạo
+                {
+                    query = "select kh.*, dmtkh.ten TENKHOAHOC, khl.BATDAU, khl.KETTHUC, " +
+                        "(select count(1) from DT_KETQUADAOTAO kqdt where KHOAHOCDUYET_ID = kh.ID) SOLUONGHOCVIEN " +
+                        "from DT_KhoaHoc kh left join dm_tenkhoahoc dmtkh on kh.ten = dmtkh.ma " +
+                        "left join DT_KEHOACHLOP khl on khl.ID = kh.ID where kh.TRANGTHAI=" + (int)DT_KhoaHocCls.eTrangThai.KetThuc + " ";
+                    if (timeFilterView.tuNgay != null)
+                        query += string.Format("and TRY_CONVERT(DATETIME, '{0}') <= khl.BATDAU ", timeFilterView.tuNgay.Value.ToString("HH:mm yyyy/MM/dd"));
+                    else if (timeFilterView.denNgay != null)
+                    {
+                        if (loaiThoiGian != 3)
+                            query += string.Format("and TRY_CONVERT(DATETIME, '{0}') > khl.BATDAU ", timeFilterView.denNgay.Value.ToString("HH:mm yyyy/MM/dd"));
+                        else
+                            query += string.Format("and TRY_CONVERT(DATETIME, '{0}') >= khl.BATDAU ", timeFilterView.denNgay.Value.ToString("HH:mm yyyy/MM/dd"));
+                    }
+                }
+                if (loaiHinhDaoTao != null)
+                    query += string.Format("and kh.LOAIHINHDAOTAO = {0} ", loaiHinhDaoTao);
+                if (!string.IsNullOrEmpty(doiTuong))
+                    query += string.Format("and CONCAT('|', CONCAT( doituong, '|' )) like '%|{0}|%' ", doiTuong);
+                SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+                var dsResult = CallBussinessUtility.CreateBussinessProcess().CreateCaBenhProcess().BCQuery(ORenderInfo, query);
+                List<KhoaHocReport> Datas = new List<KhoaHocReport>();
+                for (int i = 0; i < dsResult.Rows.Count; i++)
+                {
+                    string[] doiTuongs;
+                    if (string.IsNullOrEmpty(CoreXmlUtility.GetString(dsResult.Rows[i], "DOITUONG", true)))
+                        doiTuongs = new string[0];
+                    else doiTuongs = CoreXmlUtility.GetString(dsResult.Rows[i], "DOITUONG", true).Split('|');
+                    KhoaHocReport KhoaHoc = new KhoaHocReport();
+                    KhoaHoc.TENKHOAHOC = CoreXmlUtility.GetString(dsResult.Rows[i], "TENKHOAHOC", true);
+                    KhoaHoc.SOKHOAHOC = CoreXmlUtility.GetString(dsResult.Rows[i], "KHOA", true);
+                    KhoaHoc.MAKHOAHOC = CoreXmlUtility.GetString(dsResult.Rows[i], "MA", true);
+                    KhoaHoc.THOILUONG = CoreXmlUtility.GetIntOrNull(dsResult.Rows[i], "THOILUONG", true) + (string.IsNullOrEmpty(CoreXmlUtility.GetString(dsResult.Rows[i], "LOAITHOILUONG", true)) ? null : " " + DT_KhoaHocParser.LoaiThoiLuongs[CoreXmlUtility.GetString(dsResult.Rows[i], "LOAITHOILUONG", true)]);
+                    KhoaHoc.DOITUONG = string.Join(", ", DT_KhoaHocParser.DoiTuongs.Where(o => doiTuongs.Contains(o.Key.ToString())).Select(o => o.Value));
+                    KhoaHoc.LOAIHINH = CoreXmlUtility.GetIntOrNull(dsResult.Rows[i], "LOAIHINHDAOTAO", true) == null ? null : DT_KhoaHocParser.LoaiHinhDaoTaos[CoreXmlUtility.GetIntOrNull(dsResult.Rows[i], "LOAIHINHDAOTAO", true).Value];
+
+                    if (trangThai == 0)//Chưa đào tạo
+                    {
+                        KhoaHoc.NGAYKHAIGIANG = CoreXmlUtility.GetDateOrNull(dsResult.Rows[i], "NGAYKHAIGIANGDUKIEN", true);
+                        KhoaHoc.NGAYKETTHUCorHANNOPHOSO = CoreXmlUtility.GetDateOrNull(dsResult.Rows[i], "HANNOPHOSO", true);
+                        KhoaHoc.SOHOCVIEN = CoreXmlUtility.GetIntOrNull(dsResult.Rows[i], "SOLUONGHOCVIENDUKIEN", true);
+                    }
+                    else//đang/đã đào tạo
+                    {
+                        KhoaHoc.NGAYKHAIGIANG = CoreXmlUtility.GetDateOrNull(dsResult.Rows[i], "BATDAU", true);
+                        KhoaHoc.NGAYKETTHUCorHANNOPHOSO = CoreXmlUtility.GetDateOrNull(dsResult.Rows[i], "KETTHUC", true);
+                        KhoaHoc.SOHOCVIEN = CoreXmlUtility.GetIntOrNull(dsResult.Rows[i], "SOLUONGHOCVIEN", true);
+                    }
+                    Datas.Add(KhoaHoc);
+                }
+                flexCelReport.SetValue("DonViDaoTao", "BỆNH VIỆN HỮU NGHỊ VIỆT ĐỨC");
+                flexCelReport.SetValue("ThoiGianThongKe", thoiGianThongKe);
+                flexCelReport.SetValue("Loai", trangThai);
+                flexCelReport.AddTable("KH", Datas);
+
+                string XmlFile = OSiteParam.PathRoot + "\\ReportTemplates\\DT_BcThongKeKhoaHoc.xlsx";
+                string Id = "BcThongKeKhoaHoc_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".pdf";
+                string LoginName = WebSessionUtility.GetCurrentLoginUser(OSiteParam).LoginName;
+                string Directoryfile = WebConfig.ConvertPathRoot(OSiteParam, OSiteParam.TempPathRoot);
+                string SaveFile = WebConfig.ConvertPathRoot(OSiteParam, OSiteParam.TempPathRoot + "\\" + Id);
+                if (!System.IO.Directory.Exists(Directoryfile))
+                    System.IO.Directory.CreateDirectory(Directoryfile);
+                RetAjaxOut = new OneTSQ.ReportUtility.FlexcelReportUtility().Execute(ORenderInfo, LoginName, XmlFile, "BcThongKeKhoaHoc", flexCelReport, SaveFile);
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+        public static AjaxOut ServerSideDrawExportResult(RenderInfoCls ORenderInfo, int? loaiHinhDaoTao, string doiTuong, int? trangThai, TimeFilterView timeFilterView, int loaiThoiGian)
+        {
+            FlexCelReport flexCelReport = new FlexCelReport();
+            AjaxOut RetAjaxOut = new AjaxOut();
+            try
+            {
+                string thoiGianThongKe = "-";
+                if (timeFilterView.tuNgay != null)
+                    thoiGianThongKe = timeFilterView.tuNgay.Value.ToString("dd/MM/yyyy") + thoiGianThongKe;
+                if (timeFilterView.denNgay != null)
+                {
+                    thoiGianThongKe = thoiGianThongKe + timeFilterView.denNgay.Value.ToString("dd/MM/yyyy");
+                    if (loaiThoiGian != 3)
+                        timeFilterView.denNgay = timeFilterView.denNgay.Value.AddDays(1);
+                }
+                string query = "";
+                if (trangThai == 0)//chưa đào tạo
+                {
+                    query = "select kh.*, dmtkh.ten TENKHOAHOC from DT_KhoaHoc kh left join dm_tenkhoahoc dmtkh on kh.ten = dmtkh.ma " +
+                        "left join DT_KEHOACHLOP khl on khl.ID = kh.ID where TRANGTHAI<>" + (int)DT_KhoaHocCls.eTrangThai.KetThuc + " and (TRANGTHAI <>" + (int)DT_KhoaHocCls.eTrangThai.Duyet + " || khl.BATDAU > SYSDATETIME()) ";
+                    if (timeFilterView.tuNgay != null)
+                        query += string.Format("and TRY_CONVERT(DATETIME, '{0}') <= kh.NGAYKHAIGIANGDUKIEN ", timeFilterView.tuNgay.Value.ToString("HH:mm yyyy/MM/dd"));
+                    else if (timeFilterView.denNgay != null)
+                    {
+                        if (loaiThoiGian != 3)
+                            query += string.Format("and TRY_CONVERT(DATETIME, '{0}') > kh.NGAYKHAIGIANGDUKIEN ", timeFilterView.denNgay.Value.ToString("HH:mm yyyy/MM/dd"));
+                        else
+                            query += string.Format("and TRY_CONVERT(DATETIME, '{0}') >= kh.NGAYKHAIGIANGDUKIEN ", timeFilterView.denNgay.Value.ToString("HH:mm yyyy/MM/dd"));
+                    }
+                }
+                else if (trangThai == 1)//đang đào tạo
+                {
+                    query = "select kh.*, dmtkh.ten TENKHOAHOC, khl.BATDAU, khl.KETTHUC, " +
+                        "(select count(1) from DT_KETQUADAOTAO kqdt where KHOAHOCDUYET_ID = kh.ID) SOLUONGHOCVIEN " +
+                        "from DT_KhoaHoc kh left join dm_tenkhoahoc dmtkh on kh.ten = dmtkh.ma " +
+                        "left join DT_KEHOACHLOP khl on khl.ID = kh.ID where TRANGTHAI=" + (int)DT_KhoaHocCls.eTrangThai.Duyet + " and khl.BATDAU <= SYSDATETIME() ";
+                    if (timeFilterView.tuNgay != null)
+                        query += string.Format("and TRY_CONVERT(DATETIME, '{0}') <= khl.BATDAU ", timeFilterView.tuNgay.Value.ToString("HH:mm yyyy/MM/dd"));
+                    else if (timeFilterView.denNgay != null)
+                    {
+                        if (loaiThoiGian != 3)
+                            query += string.Format("and TRY_CONVERT(DATETIME, '{0}') > khl.BATDAU ", timeFilterView.denNgay.Value.ToString("HH:mm yyyy/MM/dd"));
+                        else
+                            query += string.Format("and TRY_CONVERT(DATETIME, '{0}') >= khl.BATDAU ", timeFilterView.denNgay.Value.ToString("HH:mm yyyy/MM/dd"));
+                    }
+                }
+                else if (trangThai == 2)//đã đào tạo
+                {
+                    query = "select kh.*, dmtkh.ten TENKHOAHOC, khl.BATDAU, khl.KETTHUC, " +
+                        "(select count(1) from DT_KETQUADAOTAO kqdt where KHOAHOCDUYET_ID = kh.ID) SOLUONGHOCVIEN " +
+                        "from DT_KhoaHoc kh left join dm_tenkhoahoc dmtkh on kh.ten = dmtkh.ma " +
+                        "left join DT_KEHOACHLOP khl on khl.ID = kh.ID where TRANGTHAI=" + (int)DT_KhoaHocCls.eTrangThai.KetThuc + " ";
+                    if (timeFilterView.tuNgay != null)
+                        query += string.Format("and TRY_CONVERT(DATETIME, '{0}') <= khl.BATDAU ", timeFilterView.tuNgay.Value.ToString("HH:mm yyyy/MM/dd"));
+                    else if (timeFilterView.denNgay != null)
+                    {
+                        if (loaiThoiGian != 3)
+                            query += string.Format("and TRY_CONVERT(DATETIME, '{0}') > khl.BATDAU ", timeFilterView.denNgay.Value.ToString("HH:mm yyyy/MM/dd"));
+                        else
+                            query += string.Format("and TRY_CONVERT(DATETIME, '{0}') >= khl.BATDAU ", timeFilterView.denNgay.Value.ToString("HH:mm yyyy/MM/dd"));
+                    }
+                }
+                if (loaiHinhDaoTao != null)
+                    query += string.Format("and kh.LOAIHINHDAOTAO = {0} ", loaiHinhDaoTao);
+                if (!string.IsNullOrEmpty(doiTuong))
+                    query += string.Format("and CONCAT('|', CONCAT( doituong, '|' )) like '%|{0}|%' ", doiTuong);
+                SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+                var dsResult = CallBussinessUtility.CreateBussinessProcess().CreateCaBenhProcess().BCQuery(ORenderInfo, query);
+                List<KhoaHocReport> Datas = new List<KhoaHocReport>();
+                for (int i = 0; i < dsResult.Rows.Count; i++)
+                {
+                    string[] doiTuongs;
+                    if (string.IsNullOrEmpty(CoreXmlUtility.GetString(dsResult.Rows[i], "DOITUONG", true)))
+                        doiTuongs = new string[0];
+                    else doiTuongs = CoreXmlUtility.GetString(dsResult.Rows[i], "DOITUONG", true).Split('|');
+                    KhoaHocReport KhoaHoc = new KhoaHocReport();
+                    KhoaHoc.TENKHOAHOC = CoreXmlUtility.GetString(dsResult.Rows[i], "TENKHOAHOC", true);
+                    KhoaHoc.SOKHOAHOC = CoreXmlUtility.GetString(dsResult.Rows[i], "KHOA", true);
+                    KhoaHoc.MAKHOAHOC = CoreXmlUtility.GetString(dsResult.Rows[i], "MA", true);
+                    KhoaHoc.THOILUONG = CoreXmlUtility.GetIntOrNull(dsResult.Rows[i], "THOILUONG", true) + (string.IsNullOrEmpty(CoreXmlUtility.GetString(dsResult.Rows[i], "LOAITHOILUONG", true)) ? null : " " + DT_KhoaHocParser.LoaiThoiLuongs[CoreXmlUtility.GetString(dsResult.Rows[i], "LOAITHOILUONG", true)]);
+                    KhoaHoc.DOITUONG = string.Join(", ", DT_KhoaHocParser.DoiTuongs.Where(o => doiTuongs.Contains(o.Key.ToString())).Select(o => o.Value));
+                    KhoaHoc.LOAIHINH = CoreXmlUtility.GetIntOrNull(dsResult.Rows[i], "LOAIHINHDAOTAO", true) == null ? null : DT_KhoaHocParser.LoaiHinhDaoTaos[CoreXmlUtility.GetIntOrNull(dsResult.Rows[i], "LOAIHINHDAOTAO", true).Value];
+
+                    if (trangThai == 0)//Chưa đào tạo
+                    {
+                        KhoaHoc.NGAYKHAIGIANG = CoreXmlUtility.GetDateOrNull(dsResult.Rows[i], "NGAYKHAIGIANGDUKIEN", true);
+                        KhoaHoc.NGAYKETTHUCorHANNOPHOSO = CoreXmlUtility.GetDateOrNull(dsResult.Rows[i], "HANNOPHOSO", true);
+                        KhoaHoc.SOHOCVIEN = CoreXmlUtility.GetIntOrNull(dsResult.Rows[i], "SOLUONGHOCVIENDUKIEN", true);
+                    }
+                    else//đang/đã đào tạo
+                    {
+                        KhoaHoc.NGAYKHAIGIANG = CoreXmlUtility.GetDateOrNull(dsResult.Rows[i], "BATDAU", true);
+                        KhoaHoc.NGAYKETTHUCorHANNOPHOSO = CoreXmlUtility.GetDateOrNull(dsResult.Rows[i], "KETTHUC", true);
+                        KhoaHoc.SOHOCVIEN = CoreXmlUtility.GetIntOrNull(dsResult.Rows[i], "SOLUONGHOCVIEN", true);
+                    }
+                    Datas.Add(KhoaHoc);
+                }
+                flexCelReport.SetValue("DonViDaoTao", "BỆNH VIỆN HỮU NGHỊ VIỆT ĐỨC");
+                flexCelReport.SetValue("ThoiGianThongKe", thoiGianThongKe);
+                flexCelReport.SetValue("Loai", trangThai);
+                flexCelReport.AddTable("KH", Datas);
+
+                string XmlFile = OSiteParam.PathRoot + "\\ReportTemplates\\DT_BcThongKeKhoaHoc.xlsx";
+                string Id = "BcThongKeKhoaHoc_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
+                string LoginName = WebSessionUtility.GetCurrentLoginUser(OSiteParam).LoginName;
+                string Directoryfile = WebConfig.ConvertPathRoot(OSiteParam, OSiteParam.TempPathRoot);
+                string SaveFile = WebConfig.ConvertPathRoot(OSiteParam, OSiteParam.TempPathRoot + "\\" + Id);
+                if (!System.IO.Directory.Exists(Directoryfile))
+                    System.IO.Directory.CreateDirectory(Directoryfile);
+                RetAjaxOut = new OneTSQ.ReportUtility.FlexcelReportUtility().Execute(ORenderInfo, LoginName, XmlFile, "BcThongKeKhoaHoc", flexCelReport, SaveFile);
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+    }
+}

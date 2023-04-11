@@ -1,0 +1,45 @@
+﻿using OneTSQ.Core.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OneTSQ.Bussiness.Template
+{
+    public interface IBussinessProcess
+    {
+        string Id { get; }
+        string ServiceName { get; }
+
+        #region Danh mục
+        ICommonProcess CreateCommonProcess();
+        IDM_NhomKhoaHocProcess CreateDM_NhomKhoaHocProcess();
+        IDM_TenKhoaHocProcess CreateDM_TenKhoaHocProcess();
+        IDM_TieuChuanThamGiaKhoaHocProcess CreateDM_TieuChuanThamGiaKhoaHocProcess();
+        #endregion
+
+        #region Nghiệp vụ
+        #endregion
+    }
+
+    public class BussinessProcessTemplate : IBussinessProcess
+    {
+        public virtual string Id { get { return null; } }
+
+
+        public virtual string ServiceName { get { return null; } }
+
+        #region Danh mục
+        public virtual ICommonProcess CreateCommonProcess() { return null; }
+        public virtual IDM_NhomKhoaHocProcess CreateDM_NhomKhoaHocProcess() { return null; }
+        public virtual IDM_TenKhoaHocProcess CreateDM_TenKhoaHocProcess() { return null; }
+        public virtual IDM_TieuChuanThamGiaKhoaHocProcess CreateDM_TieuChuanThamGiaKhoaHocProcess() { return null; }
+        #endregion
+
+        #region Nghiệp vụ
+        #endregion
+
+    }
+}
+ 

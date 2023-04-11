@@ -1,0 +1,35 @@
+﻿using OneTSQ.Call.Bussiness.Template;
+using OneTSQ.Core.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OneTSQ.Call.Bussiness.Sql
+{
+    public class CoreSqlProcess : BussinessProcessTemplate
+    {
+        public override string Id
+        {
+            get
+            {
+                return "CoreSqlProcess";
+            }
+        }
+        public override string ServiceName
+        {
+            get
+            {
+                return "MSSQL SERVICE";
+            }
+        }
+
+        #region Danh mục
+        #endregion
+
+        #region Nghiệp vụ
+        #endregion
+    }
+}
+ 

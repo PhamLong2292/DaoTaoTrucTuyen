@@ -1,0 +1,81 @@
+﻿using OneTSQ.Call.Bussiness.Utility;
+using OneTSQ.Model;
+using OneTSQ.Bussiness.Utility;
+using OneTSQ.Utility;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using OneTSQ.Core.Model;
+
+namespace OneTSQ.WebParts
+{
+
+    public class DM_TenKhoaHocService : RemoteDataTemplate
+    {
+        public static string StaticServiceId
+        {
+            get
+            {
+                return "DM_TenKhoaHocService";
+            }
+        }
+        public override string ServiceId
+        {
+            get
+            {
+                return StaticServiceId;
+            }
+        }
+
+        public override string ServiceName
+        {
+            get
+            {
+                return "Service danh mục tên khóa học";
+            }
+        }
+        public override AjaxOut Reading(RenderInfoCls ORenderInfo, int PageIndex, string Keyword)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+
+            try
+            {
+                DM_TenKhoaHocFilterCls ODM_TenKhoaHocFilter = new DM_TenKhoaHocFilterCls();
+                ODM_TenKhoaHocFilter.Keyword = Keyword;
+                ODM_TenKhoaHocFilter.PageIndex = PageIndex;
+                ODM_TenKhoaHocFilter.PageSize = 20;
+                ODM_TenKhoaHocFilter.HieuLuc = (int)OneTSQ.Model.eHieuLuc.Co;
+                int recordTotal = 0;
+                var DM_TenKhoaHocs = CallBussinessUtility.CreateBussinessProcess().CreateDM_TenKhoaHocProcess().PageReading(ORenderInfo, ODM_TenKhoaHocFilter, ref recordTotal);
+
+                Record ORecord = new Record();
+                ORecord.total_count = recordTotal;
+                ORecord.incomplete_results = true;
+                ORecord.items = new RecordItemCls[DM_TenKhoaHocs.Length];
+
+                for (int iIndex = 0; iIndex < DM_TenKhoaHocs.Length; iIndex++)
+                {
+                    ORecord.items[iIndex] = new RecordItemCls();
+                    ORecord.items[iIndex].id = DM_TenKhoaHocs[iIndex].Ma;
+                    ORecord.items[iIndex].text = DM_TenKhoaHocs[iIndex].Ten;
+
+                    ORecord.items[iIndex].Code = DM_TenKhoaHocs[iIndex].Ma;
+                    ORecord.items[iIndex].ShortName = DM_TenKhoaHocs[iIndex].Ma;
+                    ORecord.items[iIndex].Name = DM_TenKhoaHocs[iIndex].Ten;
+                }
+
+                string json = JsonConvert.SerializeObject(ORecord, Formatting.Indented);
+                RetAjaxOut.HtmlContent = json;
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+    }
+}

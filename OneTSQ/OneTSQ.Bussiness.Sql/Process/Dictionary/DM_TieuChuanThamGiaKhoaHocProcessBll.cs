@@ -1,0 +1,528 @@
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Data;
+using OneTSQ.Model;
+using OneTSQ.Bussiness.Template;
+using OneTSQ.Database.Service;
+using OneTSQ.Core.Model;
+
+namespace OneTSQ.Bussiness.Sql
+{
+    public class DM_TieuChuanThamGiaKhoaHocProcessBll : DM_TieuChuanThamGiaKhoaHocTemplate
+    {
+        public override string ServiceId
+        {
+            get
+            {
+                return "SqlDM_TieuChuanThamGiaKhoaHocProcessBll";
+            }
+        }
+
+        public override DM_TieuChuanThamGiaKhoaHocCls[] Reading(ActionSqlParamCls ActionSqlParam, DM_TieuChuanThamGiaKhoaHocFilterCls OTieuChuanThamGiaKhoaHocFilter)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                if (OTieuChuanThamGiaKhoaHocFilter == null)
+                {
+                    OTieuChuanThamGiaKhoaHocFilter = new DM_TieuChuanThamGiaKhoaHocFilterCls();
+                }
+                Collection<DbParam>
+                    ColDbParams = new Collection<DbParam>();
+                string Query = "";
+
+                Query = " select * from DM_TieuChuanThamGiaKhoaHoc where 1=1 ";
+                if (!string.IsNullOrEmpty(OTieuChuanThamGiaKhoaHocFilter.Keyword))
+                {
+                    ColDbParams.Add(new DbParam("Keyword", "%" + OTieuChuanThamGiaKhoaHocFilter.Keyword + "%"));
+                    Query += " and (UPPER(MA) like UPPER(" + ActionSqlParam.SpecialChar + "Keyword) OR UPPER(TEN) like UPPER(" + ActionSqlParam.SpecialChar + "Keyword ))";
+                }
+                if (OTieuChuanThamGiaKhoaHocFilter.HieuLuc != (int)eSearch.SearchAll)
+                {
+                    ColDbParams.Add(new DbParam("HIEULUC", OTieuChuanThamGiaKhoaHocFilter.HieuLuc));
+                    Query += " and HIEULUC=" + ActionSqlParam.SpecialChar + "HIEULUC";
+                }
+                if (!string.IsNullOrEmpty(OTieuChuanThamGiaKhoaHocFilter.NhomKhoaHoc_Ma))
+                {
+                    ColDbParams.Add(new DbParam("NhomKhoaHoc_Ma", OTieuChuanThamGiaKhoaHocFilter.NhomKhoaHoc_Ma));
+                    Query += " and NHOMKHOAHOC_MA=" + ActionSqlParam.SpecialChar + "NhomKhoaHoc_Ma";
+                }
+                Query += " order by STT";
+
+                DataSet dsResult =
+                        DBService.GetDataSet(ActionSqlParam.Trans, Query, ColDbParams.ToArray());
+                DM_TieuChuanThamGiaKhoaHocCls[] TieuChuanThamGiaKhoaHocs = DM_TieuChuanThamGiaKhoaHocParser.ParseFromDataTable(dsResult.Tables[0]);
+
+                dsResult.Clear();
+                dsResult.Dispose();
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return TieuChuanThamGiaKhoaHocs;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+
+        public override DM_TieuChuanThamGiaKhoaHocCls[] PageReading(ActionSqlParamCls ActionSqlParam, DM_TieuChuanThamGiaKhoaHocFilterCls OTieuChuanThamGiaKhoaHocFilter, ref int recordTotal)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                if (OTieuChuanThamGiaKhoaHocFilter == null)
+                {
+                    OTieuChuanThamGiaKhoaHocFilter = new DM_TieuChuanThamGiaKhoaHocFilterCls();
+                }
+                Collection<DbParam>
+                    ColDbParams = new Collection<DbParam>();
+                string Query = ""; ;
+                string recordTotalQuery = " select count(1) from DM_TieuChuanThamGiaKhoaHoc where 1 = 1 ";
+                if (ActionSqlParam.SupportDb == ESupportDb.ORACLE)
+                {
+                    if (!string.IsNullOrEmpty(OTieuChuanThamGiaKhoaHocFilter.Keyword))
+                    {
+                        Query += " and (UPPER(MA) like UPPER('%" + OTieuChuanThamGiaKhoaHocFilter.Keyword + "%') OR UPPER(TEN) like UPPER('%" + OTieuChuanThamGiaKhoaHocFilter.Keyword + "%')) ";
+                        recordTotalQuery += " and (UPPER(MA) like UPPER('%" + OTieuChuanThamGiaKhoaHocFilter.Keyword + "%') OR UPPER(TEN) like UPPER('%" + OTieuChuanThamGiaKhoaHocFilter.Keyword + "%')) ";
+                    }
+                    if (OTieuChuanThamGiaKhoaHocFilter.HieuLuc != (int)eSearch.SearchAll)
+                    {
+                        Query += " and HIEULUC=" + OTieuChuanThamGiaKhoaHocFilter.HieuLuc;
+                        recordTotalQuery += " and HIEULUC=" + OTieuChuanThamGiaKhoaHocFilter.HieuLuc;
+                    }
+
+                    Query = string.Format("SELECT * FROM " +
+                        "( " +
+                        "    SELECT a.*, rownum r " +
+                        "    FROM " +
+                        "    ( " +
+                        "        SELECT * FROM DM_TieuChuanThamGiaKhoaHoc WHERE 1 = 1 {0} " +
+                        "        ORDER BY STT " +
+                        "    ) a " +
+                        "    WHERE rownum < (({1} * {2}) + 1 ) " +
+                        ") " +
+                        "WHERE r >= ((({1}-1) * {2}) + 1) ", Query, OTieuChuanThamGiaKhoaHocFilter.PageIndex + 1, OTieuChuanThamGiaKhoaHocFilter.PageSize);
+                }
+                else
+                {
+                    Query = " select * from DM_TieuChuanThamGiaKhoaHoc where 1=1 ";
+
+                    if (!string.IsNullOrEmpty(OTieuChuanThamGiaKhoaHocFilter.Keyword))
+                    {
+                        Query += " and (UPPER(MA) like UPPER('%" + OTieuChuanThamGiaKhoaHocFilter.Keyword + "%') OR UPPER(TEN) like UPPER('%" + OTieuChuanThamGiaKhoaHocFilter.Keyword + "%')) ";
+                        recordTotalQuery += " and (UPPER(MA) like UPPER('%" + OTieuChuanThamGiaKhoaHocFilter.Keyword + "%') OR UPPER(TEN) like UPPER('%" + OTieuChuanThamGiaKhoaHocFilter.Keyword + "%')) ";
+                    }
+                    if (OTieuChuanThamGiaKhoaHocFilter.HieuLuc != (int)eSearch.SearchAll)
+                    {
+                        Query += " and HIEULUC=" + OTieuChuanThamGiaKhoaHocFilter.HieuLuc;
+                        recordTotalQuery += " and HIEULUC=" + OTieuChuanThamGiaKhoaHocFilter.HieuLuc;
+                    }
+
+                    Query += "ORDER BY STT " +
+                        "OFFSET " + (OTieuChuanThamGiaKhoaHocFilter.PageIndex * OTieuChuanThamGiaKhoaHocFilter.PageSize) + " ROWS " +
+                        "FETCH NEXT " + OTieuChuanThamGiaKhoaHocFilter.PageSize + " ROWS ONLY ";
+                }
+                DataSet dsResult = DBService.GetDataSet(ActionSqlParam.Trans, Query, ColDbParams.ToArray());
+                DM_TieuChuanThamGiaKhoaHocCls[] TieuChuanThamGiaKhoaHocs = DM_TieuChuanThamGiaKhoaHocParser.ParseFromDataTable(dsResult.Tables[0]);
+                recordTotal = int.Parse(DBService.GetDataSet(ActionSqlParam.Trans, recordTotalQuery, ColDbParams.ToArray()).Tables[0].Rows[0][0].ToString());
+
+                dsResult.Clear();
+                dsResult.Dispose();
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return TieuChuanThamGiaKhoaHocs;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+
+        public override void Add(ActionSqlParamCls ActionSqlParam, DM_TieuChuanThamGiaKhoaHocCls OTieuChuanThamGiaKhoaHoc)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                if (string.IsNullOrEmpty(OTieuChuanThamGiaKhoaHoc.Id))
+                {
+                    OTieuChuanThamGiaKhoaHoc.Id = System.Guid.NewGuid().ToString();
+                }
+                string Query = "select * from DM_TieuChuanThamGiaKhoaHoc where MA=" + ActionSqlParam.SpecialChar + "MA ";
+                DataTable dtCheck = DBService.GetDataTable(ActionSqlParam.Trans, Query, new DbParam[]
+            {
+                new DbParam("MA",OTieuChuanThamGiaKhoaHoc.Ma)
+            });
+
+                if (!string.IsNullOrEmpty(OTieuChuanThamGiaKhoaHoc.ChaId) || dtCheck.Rows.Count == 0)
+                {
+                    DBService.Insert(ActionSqlParam.Trans, "DM_TieuChuanThamGiaKhoaHoc",
+                        new DbParam[]{
+                    new DbParam("ID",OTieuChuanThamGiaKhoaHoc.Id),
+                    new DbParam("MA",OTieuChuanThamGiaKhoaHoc.Ma),
+                    new DbParam("TEN",OTieuChuanThamGiaKhoaHoc.Ten),
+                    new DbParam("MOTA",OTieuChuanThamGiaKhoaHoc.MoTa),
+                    new DbParam("HIEULUC",OTieuChuanThamGiaKhoaHoc.HieuLuc),
+                    new DbParam("STT",OTieuChuanThamGiaKhoaHoc.Stt),
+                    new DbParam("NGAYTAO",OTieuChuanThamGiaKhoaHoc.NgayTao),
+                    new DbParam("TUNGAY",OTieuChuanThamGiaKhoaHoc.TuNgay),
+                    new DbParam("DENNGAY",OTieuChuanThamGiaKhoaHoc.DenNgay),
+                    new DbParam("GHICHU",OTieuChuanThamGiaKhoaHoc.GhiChu),
+                    new DbParam("CHAID",OTieuChuanThamGiaKhoaHoc.ChaId)
+                });
+                }
+                else throw new Exception("Mã đã tồn tại không thể tạo được bản ghi mới");
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+
+        public override void Save(ActionSqlParamCls ActionSqlParam, string ID, DM_TieuChuanThamGiaKhoaHocCls OTieuChuanThamGiaKhoaHoc)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                OTieuChuanThamGiaKhoaHoc.Id = ID;
+                DBService.Update(ActionSqlParam.Trans, "DM_TieuChuanThamGiaKhoaHoc", "ID", ID,
+                    new DbParam[]{
+                    new DbParam("MA",OTieuChuanThamGiaKhoaHoc.Ma),
+                    new DbParam("TEN",OTieuChuanThamGiaKhoaHoc.Ten),
+                    new DbParam("MOTA",OTieuChuanThamGiaKhoaHoc.MoTa),
+                    new DbParam("HIEULUC",OTieuChuanThamGiaKhoaHoc.HieuLuc),
+                    new DbParam("STT",OTieuChuanThamGiaKhoaHoc.Stt),
+                    new DbParam("NGAYTAO",OTieuChuanThamGiaKhoaHoc.NgayTao),
+                    new DbParam("TUNGAY",OTieuChuanThamGiaKhoaHoc.TuNgay),
+                    new DbParam("DENNGAY",OTieuChuanThamGiaKhoaHoc.DenNgay),
+                    new DbParam("GHICHU",OTieuChuanThamGiaKhoaHoc.GhiChu),
+                    new DbParam("CHAID",OTieuChuanThamGiaKhoaHoc.ChaId)
+                });
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+
+        public override void Delete(ActionSqlParamCls ActionSqlParam, string ID)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                string DelQuery = " Delete from DM_TieuChuanThamGiaKhoaHoc where ID=" + ActionSqlParam.SpecialChar + "ID";
+                DBService.ExecuteNonQuery(ActionSqlParam.Trans, DelQuery,
+                    new DbParam[]
+                {
+                    new DbParam("ID", ID)
+                });
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+
+        public override DM_TieuChuanThamGiaKhoaHocCls CreateModel(ActionSqlParamCls ActionSqlParam, string ID)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                DataSet dsResult =
+                        DBService.GetDataSet(ActionSqlParam.Trans, "select * from DM_TieuChuanThamGiaKhoaHoc where (ID=" + ActionSqlParam.SpecialChar + "Id or MA =" + ActionSqlParam.SpecialChar + "Id)  ", new DbParam[]{
+                    new DbParam("Id",ID)
+                });
+                DM_TieuChuanThamGiaKhoaHocCls OTieuChuanThamGiaKhoaHoc = null;
+                if (dsResult.Tables[0].Rows.Count > 0)
+                {
+                    OTieuChuanThamGiaKhoaHoc = DM_TieuChuanThamGiaKhoaHocParser.ParseFromDataRow(dsResult.Tables[0].Rows[0]);
+                }
+                dsResult.Clear();
+                dsResult.Dispose();
+
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return OTieuChuanThamGiaKhoaHoc;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+
+        public override string Duplicate(ActionSqlParamCls ActionSqlParam, string ID)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            string NewID = System.Guid.NewGuid().ToString();
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                DM_TieuChuanThamGiaKhoaHocCls OTieuChuanThamGiaKhoaHoc = CreateModel(ActionSqlParam, ID);
+                OTieuChuanThamGiaKhoaHoc.Id = NewID;
+                Add(ActionSqlParam, OTieuChuanThamGiaKhoaHoc);
+
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return NewID;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+
+        public override long Count(ActionSqlParamCls ActionSqlParam, DM_TieuChuanThamGiaKhoaHocFilterCls OTieuChuanThamGiaKhoaHocFilter)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+            if (!HasTrans)
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            try
+            {
+                if (OTieuChuanThamGiaKhoaHocFilter == null)
+                    OTieuChuanThamGiaKhoaHocFilter = new DM_TieuChuanThamGiaKhoaHocFilterCls();
+                string Query = " select COUNT (*) from DM_TieuChuanThamGiaKhoaHoc where 1=1 ";
+
+                if (!string.IsNullOrEmpty(OTieuChuanThamGiaKhoaHocFilter.Keyword))
+                    Query += " and (UPPER(MA) like UPPER('%" + OTieuChuanThamGiaKhoaHocFilter.Keyword + "%') OR UPPER(TEN) like UPPER('%" + OTieuChuanThamGiaKhoaHocFilter.Keyword + "%')) ";
+                if (OTieuChuanThamGiaKhoaHocFilter.HieuLuc != (int)eSearch.SearchAll)
+                    Query += " and HIEULUC=" + OTieuChuanThamGiaKhoaHocFilter.HieuLuc;
+
+                DataSet dsResult = DBService.GetDataSet(ActionSqlParam.Trans, Query);
+                long count = DM_TieuChuanThamGiaKhoaHocParser.CountFromDataTable(dsResult.Tables[0]);
+
+                dsResult.Clear();
+                dsResult.Dispose();
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return count;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+
+        public override DM_TieuChuanThamGiaKhoaHocCls[] ReadingWithPaging(ActionSqlParamCls ActionSqlParam, DM_TieuChuanThamGiaKhoaHocFilterCls OTieuChuanThamGiaKhoaHocFilter)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+            if (!HasTrans)
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            try
+            {
+                if (OTieuChuanThamGiaKhoaHocFilter == null)
+                    OTieuChuanThamGiaKhoaHocFilter = new DM_TieuChuanThamGiaKhoaHocFilterCls();
+                var skip = OTieuChuanThamGiaKhoaHocFilter.PageIndex * OTieuChuanThamGiaKhoaHocFilter.PageSize;
+                string Query = " select * from DM_TieuChuanThamGiaKhoaHoc where 4=4";
+
+                if (!string.IsNullOrEmpty(OTieuChuanThamGiaKhoaHocFilter.Keyword))
+                    Query += " and (UPPER(MA) like UPPER('%" + OTieuChuanThamGiaKhoaHocFilter.Keyword + "%') OR UPPER(TEN) like UPPER('%" + OTieuChuanThamGiaKhoaHocFilter.Keyword + "%')) ";
+                if (OTieuChuanThamGiaKhoaHocFilter.HieuLuc != (int)eSearch.SearchAll)
+                    Query += " and HIEULUC = " + OTieuChuanThamGiaKhoaHocFilter.HieuLuc;
+
+                Query += " ORDER BY STT " +
+                    "OFFSET " + skip.ToString() + " ROWS " +
+                    "FETCH NEXT " + OTieuChuanThamGiaKhoaHocFilter.PageSize + " ROWS ONLY";
+
+
+                DataSet dsResult = DBService.GetDataSet(ActionSqlParam.Trans, Query);
+                DM_TieuChuanThamGiaKhoaHocCls[] TieuChuanThamGiaKhoaHocs = DM_TieuChuanThamGiaKhoaHocParser.ParseFromDataTable(dsResult.Tables[0]);
+
+                dsResult.Clear();
+                dsResult.Dispose();
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return TieuChuanThamGiaKhoaHocs;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+
+        public override DM_TieuChuanThamGiaKhoaHocCls CheckCode(ActionSqlParamCls ActionSqlParam, string MaTieuChuanThamGiaKhoaHoc)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+            try
+            {
+                if (!HasTrans)
+                {
+                    ActionSqlParam.Trans = DBService.BeginTransaction();
+                }
+                DataSet dsResult =
+                    DBService.GetDataSet(ActionSqlParam.Trans, "select * from DM_TieuChuanThamGiaKhoaHoc where UPPER(MA)=UPPER('" + MaTieuChuanThamGiaKhoaHoc + "')", new DbParam[] { });
+                DM_TieuChuanThamGiaKhoaHocCls OTieuChuanThamGiaKhoaHoc = null;
+                if (dsResult.Tables[0].Rows.Count > 0)
+                {
+                    OTieuChuanThamGiaKhoaHoc = DM_TieuChuanThamGiaKhoaHocParser.ParseFromDataRow(dsResult.Tables[0].Rows[0]);
+                }
+                dsResult.Clear();
+                dsResult.Dispose();
+
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return OTieuChuanThamGiaKhoaHoc;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+    }
+}

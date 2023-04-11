@@ -1,0 +1,458 @@
+﻿using OneTSQ.Core.Model;
+using OneTSQ.Utility;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using OneTSQ.Model;
+
+namespace OneTSQ.Gui.WebParts
+{
+   public class DanhSachPhieuADR: WebPartTemplate
+    {
+        public override string WebPartId
+        {
+            get
+            {
+                return "danhssachphieuadr";
+            }
+        }
+        public override string WebPartTitle
+        {
+            get
+            {
+                return "Danh sách phiếu ADR";
+            }
+        }
+        public override string Description
+        {
+            get
+            {
+                return "Danh sách phiếu ADR";
+
+            }
+        }
+
+        public override void RegAjaxPro(RenderInfoCls ORenderInfo, System.Web.UI.Page Page)
+        {
+            AjaxPro.Utility.RegisterTypeForAjax(typeof(DanhSachPhieuADR), Page);
+        }
+
+        public override AjaxOut CheckPermission(RenderInfoCls ORenderInfo)
+        {
+            SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+            bool HasPermission = true;
+            AjaxOut RetAjaxOut = new AjaxOut();
+            RetAjaxOut.RetBoolean = HasPermission;
+
+            return RetAjaxOut;
+        }
+
+        public override AjaxOut Draw(SiteParam OSiteParam, RenderInfoCls ORenderInfo)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+            try
+            {
+                OwnerUserCls user = WebSessionUtility.GetCurrentLoginUser(OSiteParam);
+                AjaxOut RetAjaxOutCheckPermission = CheckPermission(ORenderInfo);
+                string userId = WebSessionUtility.GetCurrentLoginUser(OSiteParam).OwnerUserId;
+                bool XemPermission = false;
+                //XemPermission = user.IsSystemAdmin == 1 || PermissionUtility.CheckPermission(ORenderInfo, new DM_NhomKhoaHocPermission().PermissionFunctionCode,
+                //    DM_NhomKhoaHocCls.ePermission.Xem.ToString(), new DM_NhomKhoaHocPermission().PermissionFunctionCode,
+                //    DM_NhomKhoaHocPermission.StaticPermissionFunctionId, userId, user.OwnerUserId, false);
+                //if (!XemPermission)
+                //{
+                //    RetAjaxOut.HtmlContent = WebScreen.GetPanelInfo(OSiteParam, WebLanguage.GetLanguage(OSiteParam, "Không có quyền truy cập tính năng này"), false);
+                //    return RetAjaxOut;
+                //}
+                string SessionId = System.Guid.NewGuid().ToString();
+                string LoginName = WebSessionUtility.GetCurrentLoginUser(OSiteParam).LoginName;
+                string filtemplate = WebConfig.GetWebHttpRoot() + "/temp/ImportDM_NHOMKHOAHOC.xlsx";
+                RetAjaxOut.HtmlContent =
+                      WebEnvironments.ProcessHtml(
+                        "<div id=\"divListForm\">\r\n" +
+                        " <div class=\"ibox float-e-margins\"> \r\n" +
+
+                        "     <div class=\"ibox-title\"> \r\n" +
+                        "         <h5>" + WebLanguage.GetLanguage(OSiteParam, "Danh sách phản ứng có hại của thuốc") + "</h5> \r\n" +
+                        "     </div> \r\n" +
+
+                        "     <div class=\"ibox-content\"> \r\n" +
+                        "         <div id=\"divProcessing\" class=\"processing\"></div>\r\n" +
+                        "         <div id=\"divDM_NhomKhoaHocContent\">" + ServerSideDrawSearchResult(ORenderInfo, "", null, 0).HtmlContent + "</div>\r\n" +
+                        "     </div> \r\n" +
+
+                        " </div> \r\n" +
+                        "</div>\r\n" +
+
+                        "<div id=\"divActionForm\" style=\"display:none\"></div>\r\n" +
+
+                        "<div id=\"divFormModal\" class=\"modal immodal\" style=\"overflow: hidden\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"largeModal\" aria-hidden=\"true\" data-backdrop=\"static\">\r\n" +
+                        "    <div class=\"modal-dialog\">\r\n" +
+                        "       <div class=\"modal-content\">\r\n" +
+                        "           <div class=\"panel-heading\">\r\n" +
+                        "               <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\r\n" +
+                        "               <h2 class=\"modal-title\" id=\"ModalTitle\"></h2>\r\n" +
+                        "           </div> \r\n" +
+                        "           <div class=\"modal-body\" id=\"divModalContent\"></div> \r\n" +
+                        "        </div> \r\n" +
+                        "    </div> \r\n" +
+                        "</div> \r\n"
+                        ) +
+
+                      WebEnvironments.ProcessJavascript(
+                        "<script language=\"javascript\">\r\n" +
+                        "   var _currentPageIndex=0;\r\n" +
+
+                        "    $(document).ready(function() \r\n" +
+                        "    {\r\n" +
+                        "       $(\".hieuluc_select\").select2({\r\n" +
+                        "           placeholder: \"" + WebLanguage.GetLanguage(OSiteParam, "Trạng thái") + "\",\r\n" +
+                        "           allowClear: true\r\n" +
+                        "       });\r\n" +
+                        "       $(\".noibaocao_select\").select2({\r\n" +
+                        "           placeholder: \"" + WebLanguage.GetLanguage(OSiteParam, "Nơi báo cáo") + "\",\r\n" +
+                        "           allowClear: true\r\n" +
+                        "       });\r\n" +
+                        "       $(\".kqxuly_select\").select2({\r\n" +
+                        "           placeholder: \"" + WebLanguage.GetLanguage(OSiteParam, "Kết quả sau khi xử lý") + "\",\r\n" +
+                        "           allowClear: true\r\n" +
+                        "       });\r\n" +
+                        "       $(\".thoigian_select\").select2({\r\n" +
+                        "           placeholder: \"" + WebLanguage.GetLanguage(OSiteParam, "Trong ngày") + "\",\r\n" +
+                        "           allowClear: true\r\n" +
+                        "       });\r\n" +
+
+                        "    });\r\n" +
+
+                        "   function CallExPortForm()\r\n" +
+                        "   {\r\n" +
+                        "       RenderInfo=CreateRenderInfo();\r\n" +
+                        "       AjaxOut  = OneTSQ.WebParts.DM_NhomKhoaHoc.ServerSidePrint(CreateRenderInfo()).value;\r\n" +
+                        "       if(AjaxOut.Error)\r\n" +
+                        "       {\r\n" +
+                        "           callSweetAlert(AjaxOut.InfoMessage);\r\n" +
+                        "           return;\r\n" +
+                        "       }\r\n" +
+                        "       window.open(AjaxOut.RetUrl, 'Download');\r\n" +
+                        "       callSweetAlert(\"" + WebLanguage.GetLanguage(OSiteParam, "Xuất thành công") + "!\");\r\n" +
+                        "   }\r\n" +
+
+                        "   function checkCurrency(e){\r\n" +
+                        "        if(event.which != 8 && isNaN(String.fromCharCode(e.which))){\r\n" +
+                        "           event.preventDefault(); \r\n" +
+                        "        }\r\n" +
+                        "   }\r\n" +
+
+                        "   function NextPage(PageIndex)\r\n" +
+                        "   {\r\n" +
+                        "       _currentPageIndex = PageIndex;\r\n" +
+                        "       RealCallReading();\r\n" +
+                        "   }\r\n" +
+
+                        "   function FilterSearch()\r\n" +
+                        "   {\r\n" +
+                        "       NextPage(0);\r\n" +
+                        "   }\r\n" +
+
+                        "   function RealCallReading()\r\n" +
+                        "   {\r\n" +
+                        "       Keyword = document.getElementById('txtKeyword').value;\r\n" +
+                        "       HieuLuc = document.getElementById('cbFilterHieuLuc').value;\r\n" +
+                        "       OneTSQ.WebParts.DM_NhomKhoaHoc.ServerSideDrawSearchResult(CreateRenderInfo(), Keyword, HieuLuc, _currentPageIndex, CallBackReading);\r\n" +
+                        "   }\r\n" +
+
+                        "   function CallBackReading(res)\r\n" +
+                        "   {\r\n" +
+                        "       document.getElementById('divProcessing').innerHTML='';\r\n" +
+                        "       document.getElementById('divDM_NhomKhoaHocContent').innerHTML = res.value.HtmlContent;\r\n" +
+                        "       $('.confirm').focus(); " +
+                        "   }\r\n" +
+
+                        "   function CloseModal()\r\n" +
+                        "   {\r\n" +
+                        "       $('#divFormModal').modal('hide');\r\n" +
+                        "   }\r\n" +
+
+                        "   function ServerSideDrawAddForm()\r\n" +
+                        "   {\r\n" +
+                        "       AjaxOut = OneTSQ.WebParts.DM_NhomKhoaHoc.ServerSideDrawAddForm(CreateRenderInfo()).value;\r\n" +
+                        "       if(AjaxOut.Error) { \r\n" +
+                        "           callGallAlert(AjaxOut.InfoMessage);\r\n" +
+                        "           return;\r\n" +
+                        "       }\r\n" +
+                        "       document.getElementById('ModalTitle').innerHTML = '<span class=\"fa fa-pencil-square-o\">" + WebLanguage.GetLanguage(OSiteParam, " Thêm mới Nhóm khóa học") + " </span>';\r\n" +
+                        "       document.getElementById('divModalContent').innerHTML = AjaxOut.HtmlContent; \r\n" +
+                        "       $('#divFormModal').modal('show');\r\n" +
+                        "       document.getElementById('txtMa').focus();\r\n" +
+                        "   }\r\n" +
+
+                        "   function ServerSideDrawUpdateForm(Id)\r\n" +
+                        "   {\r\n" +
+                        "       AjaxOut = OneTSQ.WebParts.DM_NhomKhoaHoc.ServerSideDrawUpdateForm(CreateRenderInfo(), Id).value;\r\n" +
+                        "       if(AjaxOut.Error) { \r\n" +
+                        "           callGallAlert(AjaxOut.InfoMessage);\r\n" +
+                        "           return;\r\n" +
+                        "       }\r\n" +
+                        "       document.getElementById('ModalTitle').innerHTML = '<span class=\"fa fa-pencil-square-o\">" + WebLanguage.GetLanguage(OSiteParam, " Sửa thông tin Nhóm khóa học") + " </span>';\r\n" +
+                        "       document.getElementById('divModalContent').innerHTML = AjaxOut.HtmlContent; \r\n" +
+                        "       $('#divFormModal').modal('show');\r\n" +
+                        "       document.getElementById('txtMa').focus();\r\n" +
+                        "   }\r\n" +
+
+                        "   function ServerSideAdd()\r\n" +
+                        "   {\r\n" +
+                        "       Ma = document.getElementById('txtMa').value.trim();\r\n" +
+                        "       Ten = document.getElementById('txtTen').value.trim();\r\n" +
+                        "       MoTa = document.getElementById('txtMoTa').value.trim() || null;\r\n" +
+                        "       HieuLuc = $('#rdHieuLuc input:radio:checked').val();\r\n" +
+
+                        "       Stt = document.getElementById('nbStt').value.trim() || null; \r\n" +
+                        "       if(Stt != null) { \r\n" +
+                        "           if(Stt == \"0\")\r\n" +
+                        "            Stt = 0; \r\n" +
+                        "           else\r\n" +
+                        "            Stt = parseInt(Stt); \r\n" +
+                        "       } \r\n" +
+
+                        "       if(Ma == '' || Ten == '' || Stt == null || Stt < 0 || Stt > 999999999)\r\n" +
+                        "           return;\r\n" +
+
+                        "       AjaxOut = OneTSQ.WebParts.DM_NhomKhoaHoc.ServerSideAdd(CreateRenderInfo(), Ma, Ten, Stt, MoTa, HieuLuc).value;\r\n" +
+                        "       if(AjaxOut.Error) {\r\n" +
+                        "           callGallAlert(AjaxOut.InfoMessage);\r\n" +
+                        "           return;\r\n" +
+                        "       }\r\n" +
+                        "       callSweetAlert(\"" + WebLanguage.GetLanguage(OSiteParam, "Thêm mới Nhóm khóa học thành công!") + "\");\r\n" +
+                        "       NextPage(_currentPageIndex);\r\n" +
+                        "       CloseModal();\r\n" +
+                        "   }\r\n" +
+
+                        "   function ServerSideUpdate(Id)\r\n" +
+                        "   {\r\n" +
+                        "       Ma = document.getElementById('txtMa').value.trim();\r\n" +
+                        "       Ten = document.getElementById('txtTen').value.trim();\r\n" +
+                        "       MoTa = document.getElementById('txtMoTa').value.trim() || null;\r\n" +
+                        "       HieuLuc = $('#rdHieuLuc input:radio:checked').val();\r\n" +
+
+                        "       Stt = document.getElementById('nbStt').value.trim() || null; \r\n" +
+                        "       if(Stt != null) { \r\n" +
+                        "           if(Stt == \"0\")\r\n" +
+                        "            Stt = 0; \r\n" +
+                        "           else\r\n" +
+                        "            Stt = parseInt(Stt); \r\n" +
+                        "       } \r\n" +
+
+                        "       if(Ma == '' || Ten == '' || Stt == null || Stt < 0 || Stt > 999999999)\r\n" +
+                        "           return;\r\n" +
+
+                        "       AjaxOut = OneTSQ.WebParts.DM_NhomKhoaHoc.ServerSideUpdate(CreateRenderInfo(), Id, Ma, Ten, Stt, MoTa, HieuLuc).value;\r\n" +
+                        "       if(AjaxOut.Error) {\r\n" +
+                        "           callGallAlert(AjaxOut.InfoMessage);\r\n" +
+                        "           return;\r\n" +
+                        "       }\r\n" +
+                        "       callSweetAlert(\"" + WebLanguage.GetLanguage(OSiteParam, "Sửa thông tin Nhóm khóa học thành công!") + "\");\r\n" +
+                        "       NextPage(_currentPageIndex);\r\n" +
+                        "       CloseModal();\r\n" +
+                        "   }\r\n" +
+
+                        "   function ServerSideDelete(id)\r\n" +
+                        "   {\r\n" +
+                        "       RenderInfo=CreateRenderInfo();\r\n" +
+                        "       swal({ \r\n" +
+                        "               title: \"" + WebLanguage.GetLanguageConfirmDelete(OSiteParam) + "\", \r\n" +
+                        "               text: \"" + "" + WebLanguage.GetLanguage(OSiteParam, "Đang thực hiện xóa bản ghi này ra khỏi hệ thống") + "" + "!\", \r\n" +
+                        "               type: \"warning\", \r\n" +
+                        "               showCancelButton: true, \r\n" +
+                        "               confirmButtonColor: \"#DD6B55\", \r\n" +
+                        "               confirmButtonText: \"" + "Thực hiện xóa" + "\", \r\n" +
+                        "               cancelButtonText: \"" + "Hủy bỏ" + "\", \r\n" +
+                        "               closeOnConfirm: false \r\n" +
+                        "           }, function () { \r\n" +
+                        "           AjaxOut = OneTSQ.WebParts.DM_NhomKhoaHoc.ServerSideDelete(RenderInfo, id).value;\r\n" +
+                        "           if(AjaxOut.Error) { \r\n" +
+                        "           callGallAlert(AjaxOut.InfoMessage);\r\n" +
+                        "               return;\r\n" +
+                        "           }\r\n" +
+                        "       callSweetAlert(\"" + WebLanguage.GetLanguage(OSiteParam, "Xóa thông tin Nhóm khóa học thành công") + "!\");\r\n" +
+                        "       NextPage(_currentPageIndex);\r\n" +
+                        "       }); \r\n" +
+                        "   }\r\n" +
+ "</script>\r\n");
+
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+
+        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+        public static AjaxOut ServerSideDrawSearchResult(RenderInfoCls ORenderInfo, string Keyword, string HieuLuc, int currentPageIndex)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+            try
+            {
+                SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+                WebSession.CheckSessionTimeOut(ORenderInfo);
+
+                //DM_NhomKhoaHocFilterCls OPositionFilter = new DM_NhomKhoaHocFilterCls()
+                //{
+                //    Keyword = Keyword,
+                //    HieuLuc = !string.IsNullOrEmpty(HieuLuc) && HieuLuc != null ? int.Parse(HieuLuc) : (int)eSearch.SearchAll,
+                //    PageIndex = currentPageIndex,
+                //    PageSize = 20
+                //};
+
+                //DM_NhomKhoaHocCls[] Positions = CallBussinessUtility.CreateBussinessProcess().CreateDM_NhomKhoaHocProcess().ReadingWithPaging(ORenderInfo, OPositionFilter);
+                //var countPosition = CallBussinessUtility.CreateBussinessProcess().CreateDM_NhomKhoaHocProcess().Count(ORenderInfo, OPositionFilter);
+                //ReturnPaging RetPaging = WebPaging.GetPaging((int)countPosition, currentPageIndex, OPositionFilter.PageSize, 10, "NextPage");
+
+                //var nextpage = string.Empty;
+                //if (countPosition > 18) nextpage = RetPaging.PagingText;
+                var Positions = "";
+                var Html = new StringBuilder();
+                if (Positions.Length == 0)
+                {
+                    Html.Append("   <div class=\"search-result-info\"></div>\r\n" +
+                     "         <div class=\"table-responsive\"> \r\n" +
+                     "             <table id=\"sample\" class=\"table table-striped table-bordered table-hover\"> \r\n" +
+                     "                 <thead> \r\n" +
+                     "                 <tr> \r\n" +
+                     "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "STT") + "</th> \r\n" +
+                     "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Mã đơn vị báo cáo") + "</th> \r\n" +
+                     "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Nơi báo cáo") + "</th> \r\n" +
+                     "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Ngày báo cáo") + "</th> \r\n" +
+                     "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Người lập") + "</th> \r\n" +
+                     "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Mã BN") + "</th> \r\n" +
+                     "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Họ tên bệnh nhân") + "</th> \r\n" +
+                     "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Giới tính") + "</th> \r\n" +
+                     "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Năm sinh") + "</th> \r\n" +
+                     "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Cân nặng (kg)") + "</th> \r\n" +
+                     "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Ngày xuất hiện phản ứng") + "</th> \r\n" +
+                     "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Kết quả sau khi xử trí phản ứng") + "</th> \r\n" +
+                     "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Trạng thái") + "</th> \r\n" +
+                     "                 </tr> \r\n" +
+                     "                 </thead> \r\n" +
+                     "             </table> \r\n" +
+                     "       </div>\r\n");
+                }
+                else
+                {
+                    Html.Append(
+                        "   <div class=\"search-result-info\"></div>\r\n" +
+                        "         <div class=\"table-responsive\"> \r\n" +
+                        "             <table id=\"sample\" class=\"table table-striped table-bordered table-hover dataTables-autosort\"> \r\n" +
+                        "                 <thead> \r\n" +
+                        "                 <tr> \r\n" +
+                        "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "STT") + "</th> \r\n" +
+                        "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Mã đơn vị báo cáo") + "</th> \r\n" +
+                        "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Nơi báo cáo") + "</th> \r\n" +
+                        "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Ngày báo cáo") + "</th> \r\n" +
+                        "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Người lập") + "</th> \r\n" +
+                        "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Mã BN") + "</th> \r\n" +
+                        "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Họ tên bệnh nhân") + "</th> \r\n" +
+                        "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Giới tính") + "</th> \r\n" +
+                        "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Năm sinh") + "</th> \r\n" +
+                        "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Cân nặng (kg)") + "</th> \r\n" +
+                        "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Ngày xuất hiện phản ứng") + "</th> \r\n" +
+                        "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Kết quả sau khi xử trí phản ứng") + "</th> \r\n" +
+                        "                     <th> " + WebLanguage.GetLanguage(OSiteParam, "Trạng thái") + "</th> \r\n" +
+                        "                 </tr> \r\n" +
+                        "                 </thead> \r\n" +
+                        "                 <tbody> \r\n");
+                    //for (int iIndex = 0; iIndex < Positions.Length; iIndex++)
+                    //{
+                    //    Html.Append(
+                    //        "                 <tr> \r\n" +
+                    //(iIndex + 1).ToString("#,##0") //STT tự tăng
+                    //        "                     <td title=\"" + Positions[iIndex].Ma + "\">" + Positions[iIndex].Ma + "</td> \r\n" +
+                    //        "                     <td title=\"" + Positions[iIndex].Ten + "\">" + Positions[iIndex].Ten + "</td> \r\n" +
+                    //        "                     <td title=\"" + Positions[iIndex].MoTa + "\" style=\"max-width: 100px; word-wrap: break-word;\">" + Positions[iIndex].MoTa + "</td> \r\n" +
+                    //        "                     <td >" + Model.Common.HieuLucs[Positions[iIndex].HieuLuc] + " </ td > \r\n" +
+                    //        "                     <td title=\"" + Positions[iIndex].NgayTao + "\">" + Positions[iIndex].NgayTao.ToString("dd/MM/yyyy") + "</td> \r\n" +
+                    //        "                     <td title=\"" + Positions[iIndex].TuNgay + "\">" + (Positions[iIndex].TuNgay != null ? Positions[iIndex].TuNgay.Value.ToString("dd/MM/yyyy, HH:mm") : string.Empty) + "</td> \r\n" +
+                    //        "                     <td title=\"" + Positions[iIndex].DenNgay + "\">" + (Positions[iIndex].DenNgay != null ? Positions[iIndex].DenNgay.Value.ToString("dd/MM/yyyy, HH:mm") : string.Empty) + "</td> \r\n" +
+                    //        "                     <td title=\"" + Positions[iIndex].Stt + "\">" + Positions[iIndex].Stt.ToString("N0") + "</td> \r\n" +
+                    //        "                     <td class=\"td-center\" style=\"text-align:center;\"><a title=\"" + "" + WebLanguage.GetLanguage(OSiteParam, "Sửa Nhóm khóa học") + "" + "\" href=\"javascript:ServerSideDrawUpdateForm('" + Positions[iIndex].Id + "');\"><i class=\"" + WebScreen.GetEditGridIcon() + "\"></i></a> &nbsp; <a title=\"" + "Xóa Nhóm khóa học" + "\" href=\"javascript:ServerSideDelete('" + Positions[iIndex].Id + "');\"><i class=\"" + WebScreen.GetDeleteGridIcon() + "\"></i></a></td> \r\n" +
+                    //        //"                     <td class=\"td-center\"><a title=\"" + "Xóa Nhóm khóa học" + "\" href=\"javascript:ServerSideDelete('" + Positions[iIndex].Id + "');\"><i class=\"" + WebScreen.GetDeleteGridIcon() + "\"></i></a></td> \r\n" +
+                    //        "                 </tr> \r\n");
+                    //}
+                    //Html.Append(
+                    //    "                 </tbody> \r\n" +
+                    //    "             </table> \r\n" +
+                    //    "       </div>\r\n" +
+                    //    "                   <div class=\"\">\r\n" +
+                    //    "                        <div class=\"col-md-2\" style=\"margin-top:20px;padding-left: 0px;\">\r\n" +
+                    //    "                       <lable>" + WebLanguage.GetLanguage(OSiteParam, "Số bản ghi") + ": " + RetPaging.EndIndex + "" + "/ " + "" + countPosition + "</lable>\r\n" +
+                    //    "                        </div>\r\n" +
+                    //    "                       <div class=\"col-md-10\" style=\"margin-top:20px;\">\r\n" +
+                    //    "                       " + nextpage + "" +
+                    //    "                       </div>\r\n" +
+                    //    "                   </div>\r\n");
+                }
+                RetAjaxOut.HtmlContent = Html.ToString();
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+
+        #region divFilter
+        public override string divFilter
+        {
+            get
+            {
+                return "<div class=\"col-md-2\" style=\"padding-top: 6px; padding-bottom: 6px;\">\r\n" +
+                       "    <input id=\"txtKeyword\" placeholder=\"Tìm kiếm\" onkeypress=\"timkiem(event);\" class=\"form-control\" >\r\n" +
+                       "</div>\r\n" +
+                       
+
+                        "<div class=\"col-md-2\" style=\"padding-top: 6px; padding-bottom: 6px;\">\r\n" +
+                       "    <select id=\"cbFilterNoiBaoCao\"  class=\"form-control noibaocao_select\">\r\n" +
+                       "        <option></option>\r\n" +
+                       //"        <option value=\"" + (int)eHieuLuc.Co + "\">" + Model.Common.HieuLucs[(int)eHieuLuc.Co] + "</option>\r\n" +
+                       //"        <option value=\"" + (int)eHieuLuc.Khong + "\">" + Model.Common.HieuLucs[(int)eHieuLuc.Khong] + "</option>\r\n" +
+                       "    </select>\r\n" +
+                       "</div>\r\n" +
+
+                        "<div class=\"col-md-2\" style=\"padding-top: 6px; padding-bottom: 6px;\">\r\n" +
+                       "    <select id=\"cbFilterKQXuLy\"  class=\"form-control kqxuly_select\">\r\n" +
+                       "        <option></option>\r\n" +
+                       //"        <option value=\"" + (int)eHieuLuc.Co + "\">" + Model.Common.HieuLucs[(int)eHieuLuc.Co] + "</option>\r\n" +
+                       //"        <option value=\"" + (int)eHieuLuc.Khong + "\">" + Model.Common.HieuLucs[(int)eHieuLuc.Khong] + "</option>\r\n" +
+                       "    </select>\r\n" +
+                       "</div>\r\n" +
+
+                       "<div class=\"col-md-2\" style=\"padding-top: 6px; padding-bottom: 6px;\">\r\n" +
+                       "    <select id=\"cbFilterHieuLuc\"  class=\"form-control hieuluc_select\">\r\n" +
+                       "        <option></option>\r\n" +
+                       "        <option value=\"" + (int)eHieuLuc.Co + "\">" + Model.Common.HieuLucs[(int)eHieuLuc.Co] + "</option>\r\n" +
+                       "        <option value=\"" + (int)eHieuLuc.Khong + "\">" + Model.Common.HieuLucs[(int)eHieuLuc.Khong] + "</option>\r\n" +
+                       "    </select>\r\n" +
+                       "</div>\r\n" +
+
+                       "<div class=\"col-md-2\" style=\"padding-top: 6px; padding-bottom: 6px;\">\r\n" +
+                       "    <select id=\"cbFilterThoiGian\"  class=\"form-control thoigian_select\">\r\n" +
+                       "        <option></option>\r\n" +
+                       //"        <option value=\"" + (int)eHieuLuc.Co + "\">" + Model.Common.HieuLucs[(int)eHieuLuc.Co] + "</option>\r\n" +
+                       //"        <option value=\"" + (int)eHieuLuc.Khong + "\">" + Model.Common.HieuLucs[(int)eHieuLuc.Khong] + "</option>\r\n" +
+                       "    </select>\r\n" +
+                       "</div>\r\n" +
+
+                       "<div class=\"col-md-2\" style=\"padding-top: 6px; padding-bottom: 6px;\">\r\n" +
+                       "       <button type=\"button\" style=\"margin-top: 0px; height: 28px;background-color: #e26614;color:white;\" class=\"btn btn-sm btn-primary\" onclick=\"javascript:FilterSearch();\" onkeypress=\"timkiem(event);\"> Tìm kiếm </button>\r\n" +
+                       "</div>\r\n";
+            }
+        }
+        #endregion
+    }
+}

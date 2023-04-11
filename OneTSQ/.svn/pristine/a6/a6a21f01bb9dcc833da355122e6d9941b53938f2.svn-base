@@ -1,0 +1,84 @@
+﻿using FlexCel.Report;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using OneTSQ.Call.Bussiness.Utility;
+using OneTSQ.Core.Call.Bussiness.Utility;
+using OneTSQ.Model;
+using OneTSQ.ReportUtility;
+using OneTSQ.Core.Model;
+
+namespace OneTSQ.WebParts
+{
+    [ObjectReport(ID = "4E85073B-4A66-457C-A86A-07DA4D34DD84", Type = OneTSQ.ReportUtility.Report.eType.Flexcel, Name = "PhieuBCSuCoYKhoa", Title = "Phiếu báo cáo sự cố y khoa", ReportPath = @"\ReportTemplates\PhieuBCSuCoYKhoa.xlsx")]
+    public class PhieuBCSuCoYKhoa : ObjectReport<PhieuBaoCaoSuCoYKhoa>
+    {        
+        protected override FlexCelReport OnFlexcelBuild(RenderInfoCls ORenderInfo, string BaoCaoSuCoId)
+        {
+            FlexCelReport flexCelReport = new FlexCelReport();
+            PhieuBaoCaoSuCoYKhoaCls BaoCaoSuCo = CallBussinessUtility.CreateBussinessProcess().CreatePhieuBaoCaoSuCoYKhoaProcess().CreateModel(ORenderInfo, BaoCaoSuCoId);
+            if (BaoCaoSuCo == null)
+                BaoCaoSuCo = new PhieuBaoCaoSuCoYKhoaCls();                  
+            var chuyenkhoa = OneMES3.DM.Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreateChuyenKhoaProcess().CreateModel(Model.Common.CreateRenderInfo(ORenderInfo), BaoCaoSuCo.KHOAPHONG_ID);          
+            flexCelReport.SetValue("DonViDaoTao", "BỆNH VIỆN YHCT NGHỆ AN");
+            flexCelReport.SetValue("TuNguyen", BaoCaoSuCo.HINHTHUC_ID == (int)PhieuBaoCaoSuCoYKhoaCls.eHinhThuc.TuNguyen ? "x" : null);
+            flexCelReport.SetValue("BatBuoc", BaoCaoSuCo.HINHTHUC_ID == (int)PhieuBaoCaoSuCoYKhoaCls.eHinhThuc.BatBuoc ? "x" : null);
+            flexCelReport.SetValue("MaSoPhieu", BaoCaoSuCo.MASOPHIEU);
+            flexCelReport.SetValue("NgayBaoCao", (BaoCaoSuCo.NGAYBAOCAO == null ? null : BaoCaoSuCo.NGAYBAOCAO.Value.ToString("dd/MM/yyyy")));
+            flexCelReport.SetValue("HoTen", string.IsNullOrEmpty(BaoCaoSuCo.HOTEN) ? null : BaoCaoSuCo.HOTEN);
+            flexCelReport.SetValue("MaBN", BaoCaoSuCo.MABN );
+            flexCelReport.SetValue("NgaySinh", (BaoCaoSuCo.NGAYSINH == null ? null : BaoCaoSuCo.NGAYSINH.Value.ToString("dd/MM/yyyy")));
+            flexCelReport.SetValue("GioiTinh", (BaoCaoSuCo.GIOITINH == null ? null : Common.BenhNhan.GioiTinhs[BaoCaoSuCo.GIOITINH.Value]));
+            flexCelReport.SetValue("NguoiBenh", BaoCaoSuCo.HINHTHUC_ID == (int)PhieuBaoCaoSuCoYKhoaCls.eDoiTuong.NguoiBenh ? "x" : null);
+            flexCelReport.SetValue("NguoiNha", BaoCaoSuCo.HINHTHUC_ID == (int)PhieuBaoCaoSuCoYKhoaCls.eDoiTuong.NguoiNha ? "x" : null);
+            flexCelReport.SetValue("NhanVienYTe", BaoCaoSuCo.HINHTHUC_ID == (int)PhieuBaoCaoSuCoYKhoaCls.eDoiTuong.NhanVienYTe ? "x" : null);
+            flexCelReport.SetValue("TrangThietBi", BaoCaoSuCo.HINHTHUC_ID == (int)PhieuBaoCaoSuCoYKhoaCls.eDoiTuong.TrangThietBi ? "x" : null);
+            flexCelReport.SetValue("ChuyenKhoa", chuyenkhoa == null ? BaoCaoSuCo.KHOAPHONG_ID : chuyenkhoa.Ten);
+            flexCelReport.SetValue("ViTriXayRa", string.IsNullOrEmpty(BaoCaoSuCo.VITRIXAYRA) ? null : BaoCaoSuCo.VITRIXAYRA);
+            flexCelReport.SetValue("ViTriCuThe", string.IsNullOrEmpty(BaoCaoSuCo.VITRICUTHE) ? null : BaoCaoSuCo.VITRICUTHE);
+            flexCelReport.SetValue("NgayXayRa", (BaoCaoSuCo.THOIGIANXAYRA == null ? null : BaoCaoSuCo.THOIGIANXAYRA.Value.ToString("dd/MM/yyyy")));
+            flexCelReport.SetValue("MoTaNgan", string.IsNullOrEmpty(BaoCaoSuCo.MOTASUCO) ? null : BaoCaoSuCo.MOTASUCO);
+            flexCelReport.SetValue("DeXuatGiaiPhap", string.IsNullOrEmpty(BaoCaoSuCo.DEXUATGIAIPHAP) ? null : BaoCaoSuCo.DEXUATGIAIPHAP);
+            flexCelReport.SetValue("DieuTri", string.IsNullOrEmpty(BaoCaoSuCo.DIEUTRIXULYDUOCTHUCHIEN) ? null : BaoCaoSuCo.DIEUTRIXULYDUOCTHUCHIEN);
+            flexCelReport.SetValue("Co1", BaoCaoSuCo.THONGBAOCHOBACSI == (int)PhieuBaoCaoSuCoYKhoaCls.eTraLoi.Co ? "x" : null);
+            flexCelReport.SetValue("Khong1", BaoCaoSuCo.THONGBAOCHOBACSI == (int)PhieuBaoCaoSuCoYKhoaCls.eTraLoi.Khong ? "x" : null);
+            flexCelReport.SetValue("KhongGhiNhan1", BaoCaoSuCo.THONGBAOCHOBACSI == (int)PhieuBaoCaoSuCoYKhoaCls.eTraLoi.KhongGhiNhan ? "x" : null);
+            flexCelReport.SetValue("Co2", BaoCaoSuCo.GHINHANVAOHOSO == (int)PhieuBaoCaoSuCoYKhoaCls.eTraLoi.Co ? "x" : null);
+            flexCelReport.SetValue("Khong2", BaoCaoSuCo.GHINHANVAOHOSO == (int)PhieuBaoCaoSuCoYKhoaCls.eTraLoi.Khong ? "x" : null);
+            flexCelReport.SetValue("KhongGhiNhan2", BaoCaoSuCo.GHINHANVAOHOSO == (int)PhieuBaoCaoSuCoYKhoaCls.eTraLoi.KhongGhiNhan ? "x" : null);
+            flexCelReport.SetValue("Co3", BaoCaoSuCo.THONGBAOCHONGUOINHA == (int)PhieuBaoCaoSuCoYKhoaCls.eTraLoi.Co ? "x" : null);
+            flexCelReport.SetValue("Khong3", BaoCaoSuCo.THONGBAOCHONGUOINHA == (int)PhieuBaoCaoSuCoYKhoaCls.eTraLoi.Khong ? "x" : null);
+            flexCelReport.SetValue("KhongGhiNhan3", BaoCaoSuCo.THONGBAOCHONGUOINHA == (int)PhieuBaoCaoSuCoYKhoaCls.eTraLoi.KhongGhiNhan ? "x" : null);
+            flexCelReport.SetValue("Co4", BaoCaoSuCo.THONGBAOCHONGUOIBENH == (int)PhieuBaoCaoSuCoYKhoaCls.eTraLoi.Co ? "x" : null);
+            flexCelReport.SetValue("Khong4", BaoCaoSuCo.THONGBAOCHONGUOIBENH == (int)PhieuBaoCaoSuCoYKhoaCls.eTraLoi.Khong ? "x" : null);
+            flexCelReport.SetValue("KhongGhiNhan4", BaoCaoSuCo.THONGBAOCHONGUOIBENH == (int)PhieuBaoCaoSuCoYKhoaCls.eTraLoi.KhongGhiNhan ? "x" : null);
+            flexCelReport.SetValue("ChuaXayRa", BaoCaoSuCo.PHANLOAISUCO == (int)PhieuBaoCaoSuCoYKhoaCls.ePhanLoai.ChuaXayRa ? "x" : null);
+            flexCelReport.SetValue("DaXayRa", BaoCaoSuCo.PHANLOAISUCO == (int)PhieuBaoCaoSuCoYKhoaCls.ePhanLoai.DaXayRa ? "x" : null);
+            flexCelReport.SetValue("Nang", BaoCaoSuCo.MUCDOANHHUONG == (int)PhieuBaoCaoSuCoYKhoaCls.eDanhGia.Nang ? "x" : null);
+            flexCelReport.SetValue("TrungBinh", BaoCaoSuCo.MUCDOANHHUONG == (int)PhieuBaoCaoSuCoYKhoaCls.eDanhGia.TrungBinh ? "x" : null);
+            flexCelReport.SetValue("Nhe", BaoCaoSuCo.MUCDOANHHUONG == (int)PhieuBaoCaoSuCoYKhoaCls.eDanhGia.Nhe ? "x" : null);
+            flexCelReport.SetValue("TrangThietBi", BaoCaoSuCo.HINHTHUC_ID == (int)PhieuBaoCaoSuCoYKhoaCls.eDoiTuong.TrangThietBi ? "x" : null);
+            flexCelReport.SetValue("HoTenNguoiBC", string.IsNullOrEmpty(BaoCaoSuCo.HOTENNGUOIBAOCAO) ? null : BaoCaoSuCo.HOTENNGUOIBAOCAO);
+            flexCelReport.SetValue("SDT", string.IsNullOrEmpty(BaoCaoSuCo.SODIENTHOAI) ? null : BaoCaoSuCo.SODIENTHOAI);
+            flexCelReport.SetValue("Email", string.IsNullOrEmpty(BaoCaoSuCo.EMAIL) ? null : BaoCaoSuCo.EMAIL);
+            flexCelReport.SetValue("DieuDuong", BaoCaoSuCo.DOITUONGBAOCAO == (int)PhieuBaoCaoSuCoYKhoaCls.eDoiTuongBC.DieuDuong ? "x" : null);
+            flexCelReport.SetValue("BacSi", BaoCaoSuCo.DOITUONGBAOCAO == (int)PhieuBaoCaoSuCoYKhoaCls.eDoiTuongBC.BacSi ? "x" : null);
+            flexCelReport.SetValue("NBBaoCao", BaoCaoSuCo.DOITUONGBAOCAO == (int)PhieuBaoCaoSuCoYKhoaCls.eDoiTuongBC.NguoiBenh ? "x" : null);
+            flexCelReport.SetValue("NNBaoCao", BaoCaoSuCo.DOITUONGBAOCAO == (int)PhieuBaoCaoSuCoYKhoaCls.eDoiTuongBC.NguoiNha ? "x" : null);
+            flexCelReport.SetValue("Khac", BaoCaoSuCo.DOITUONGBAOCAO == (int)PhieuBaoCaoSuCoYKhoaCls.eDoiTuongBC.Khac ? "x" : null);
+            flexCelReport.SetValue("GhiChuDieuDuong", string.IsNullOrEmpty(BaoCaoSuCo.GHICHUDIEUDUONG) ? null : BaoCaoSuCo.GHICHUDIEUDUONG);
+            flexCelReport.SetValue("GhiChuBacSi", string.IsNullOrEmpty(BaoCaoSuCo.GHICHUBACSI) ? null : BaoCaoSuCo.GHICHUBACSI);
+            flexCelReport.SetValue("GhiChuKhac", string.IsNullOrEmpty(BaoCaoSuCo.GHICHUKHAC) ? null : BaoCaoSuCo.GHICHUKHAC);
+            flexCelReport.SetValue("NguoiChungKien1", string.IsNullOrEmpty(BaoCaoSuCo.NGUOICHUNGKIEN1) ? null : BaoCaoSuCo.NGUOICHUNGKIEN1);
+            flexCelReport.SetValue("NguoiChungKien2", string.IsNullOrEmpty(BaoCaoSuCo.NGUOICHUNGKIEN2) ? null : BaoCaoSuCo.NGUOICHUNGKIEN2);
+            return flexCelReport;
+        }
+        public string StripHTML(string html)
+        {
+            var regex = new System.Text.RegularExpressions.Regex("<[^>]+>", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            return System.Web.HttpUtility.HtmlDecode((regex.Replace(html, "")));
+        }
+    }
+}

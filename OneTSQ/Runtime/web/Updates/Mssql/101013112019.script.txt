@@ -1,0 +1,5 @@
+﻿ALTER TABLE XetNghiem ADD DungDichCoDinh nvarchar(255);
+ALTER TABLE XetNghiem ADD ThoiGianCoDinh datetime;
+ALTER TABLE XetNghiem ADD TomTatBenhSu nvarchar(2000);
+ALTER TABLE XetNghiem ADD PhuongPhapDieuTri nvarchar(2000);
+ALTER TABLE XetNghiem ADD LichSuSinhThiet nvarchar(2000);

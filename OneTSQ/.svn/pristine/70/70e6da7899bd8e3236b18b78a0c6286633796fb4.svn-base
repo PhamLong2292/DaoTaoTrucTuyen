@@ -1,0 +1,87 @@
+﻿using OneTSQ.Call.Bussiness.Template;
+using OneTSQ.Core.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OneTSQ.Call.Bussiness.Sql
+{
+    public class CoreSqlProcess : BussinessProcessTemplate
+    {
+        public override string Id
+        {
+            get
+            {
+                return "CoreSqlProcess";
+            }
+        }
+        public override string ServiceName
+        {
+            get
+            {
+                return "MSSQL SERVICE";
+            }
+        }
+
+        #region Danh mục
+        public override ICommonProcess CreateCommonProcess()
+        {
+            return new CommonProcessBll();
+        }
+        public override IDM_NhomKhoaHocProcess CreateDM_NhomKhoaHocProcess()
+        {
+            return new DM_NhomKhoaHocProcessBll();
+        }
+        public override IDM_TenKhoaHocProcess CreateDM_TenKhoaHocProcess()
+        {
+            return new DM_TenKhoaHocProcessBll();
+        }
+        public override IDM_TieuChuanThamGiaKhoaHocProcess CreateDM_TieuChuanThamGiaKhoaHocProcess()
+        {
+            return new DM_TieuChuanThamGiaKhoaHocProcessBll();
+        }
+        public override IDM_GiayToDiChuyenGiaoProcess CreateDM_GiayToDiChuyenGiaoProcess()
+        {
+            return new DM_GiayToDiChuyenGiaoProcessBll();
+        }
+        public override IDM_TieuChiThoiGianDaoTaoTtProcess CreateTieuChiThoiGianDaoTaoTtProcess()
+        {
+            return new DM_TieuChiThoiGianDaoTaoTtProcessBll();
+        }
+        public override IDM_TrangThietBiTruyenHinhTtProcess CreateTrangThietBiTruyenHinhTtProcess()
+        {
+            return new DM_TrangThietBiTruyenHinhTtProcessBll();
+        }
+        public override IDM_TieuChiThoiLuongDaoTaoTtProcess CreateTieuChiThoiLuongDaoTaoTtProcess()
+        {
+            return new DM_TieuChiThoiLuongDaoTaoTtProcessBll();
+        }
+        public override IBacSyOwnerUserProcess CreateBacSyOwnerUserProcess()
+        {
+            return new BacSyOwnerUserProcessBll();
+        }
+        public override IBacSyProcess CreateBacSyProcess()
+        {
+            return new BacSyProcessBll();
+        }
+        public override IDT_LichLyThuyetProcess CreateDT_LichLyThuyetProcess()
+        {
+            return new DT_LichLyThuyetProcessBll();
+        }
+        public override IDT_LichChuyenGiaoProcess CreateDT_LichChuyenGiaoProcess()
+        {
+            return new DT_LichChuyenGiaoProcessBll();
+        }
+        public override IDM_KyThuatChuyenGiaoProcess CreateKyThuatChuyenGiao()
+        {
+            return new DM_KyThuatChuyenGiaoProcessBll();
+        }
+        #endregion
+
+        #region Nghiệp vụ
+        #endregion
+    }
+}
+ 

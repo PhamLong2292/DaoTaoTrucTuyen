@@ -1,0 +1,100 @@
+﻿using Aspose.Words;
+using Aspose.Words.Reporting;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using OneTSQ.Call.Bussiness.Utility;
+using OneTSQ.Core.Call.Bussiness.Utility;
+using OneTSQ.Model;
+using OneTSQ.ReportUtility;
+using OneTSQ.Utility;
+using System.IO;
+using OneTSQ.Core.Model;
+
+namespace OneTSQ.WebParts
+{
+    [ObjectReport(ID = "747661B0-D7F2-4117-A3A7-A5220BE1CC7A", Type = OneTSQ.ReportUtility.Report.eType.Word, Name = "DT_KeHoachDaoTao", Title = "Kế hoạch đào tạo", ReportPath = "\\ReportTemplates\\DT_KeHoachDaoTao.docx")]
+    public class DT_KeHoachDaoTao : ObjectReport<DT_LopHoc>
+    {
+        protected override Document OnWordBuild(RenderInfoCls ORenderInfo, ref Document reportDocument, string khoaHocId)
+        {
+            SiteParam oSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+            DT_KhoaHocCls khoaHoc = CallBussinessUtility.CreateBussinessProcess().CreateDT_KhoaHocProcess().CreateModel(ORenderInfo, khoaHocId);
+            DT_KeHoachLopCls keHoachLop = CallBussinessUtility.CreateBussinessProcess().CreateDT_KeHoachLopProcess().CreateModel(ORenderInfo, khoaHocId);
+            if (keHoachLop == null)
+            {
+                keHoachLop = new DT_KeHoachLopCls();
+            }
+            BacSyCls lanhDao = null;
+            if (!string.IsNullOrEmpty(keHoachLop.LANHDAO_ID))
+            {
+                lanhDao = CallBussinessUtility.CreateBussinessProcess().CreateBacSyProcess().CreateModel(ORenderInfo, keHoachLop.LANHDAO_ID);
+            }
+            DateTime ngayIn = DateTime.Today;
+            reportDocument.MailMerge.Execute(new string[] { "DonViDaoTao" }, new object[] { "BỆNH VIỆN HỮU NGHỊ VIỆT ĐỨC" });
+            reportDocument.MailMerge.Execute(new string[] { "NgayIn" }, new object[] { "Hà Nội, ngày " + ngayIn.Day + " tháng " + ngayIn.Month + " năm " + ngayIn.Year });
+            reportDocument.MailMerge.Execute(new string[] { "TenKhoaHoc" }, new object[] { khoaHoc.TENKHOAHOC });
+            reportDocument.MailMerge.Execute(new string[] { "SoKhoaHoc" }, new object[] { khoaHoc.KHOA });
+            reportDocument.MailMerge.Execute(new string[] { "BatDau" }, new object[] { (keHoachLop.BATDAU == null ? null : keHoachLop.BATDAU.Value.ToString("dd/MM/yyyy")) });
+            reportDocument.MailMerge.Execute(new string[] { "KetThuc" }, new object[] { (keHoachLop.KETTHUC == null ? null : keHoachLop.KETTHUC.Value.ToString("dd/MM/yyyy")) });
+            reportDocument.MailMerge.Execute(new string[] { "GioTiepDon" }, new object[] { (keHoachLop.THOIGIANTIEPDON == null ? null : keHoachLop.THOIGIANTIEPDON.Value.ToString("HH") + "h" + keHoachLop.THOIGIANTIEPDON.Value.ToString("mm")) });
+            reportDocument.MailMerge.Execute(new string[] { "ThuTiepDon" }, new object[] { (keHoachLop.THOIGIANTIEPDON == null ? null : GetDayOfWeek(oSiteParam, keHoachLop.THOIGIANTIEPDON.Value.DayOfWeek)) });
+            reportDocument.MailMerge.Execute(new string[] { "NgayTiepDon" }, new object[] { (keHoachLop.THOIGIANTIEPDON == null ? null : keHoachLop.THOIGIANTIEPDON.Value.ToString("dd/MM/yyyy")) });
+            reportDocument.MailMerge.Execute(new string[] { "NoiTiepDon" }, new object[] { keHoachLop.DIADIEMTIEPDON });
+            reportDocument.MailMerge.Execute(new string[] { "BatDauLT" }, new object[] { (keHoachLop.BATDAULT == null ? null : keHoachLop.BATDAULT.Value.ToString("dd/MM/yyyy")) });
+            reportDocument.MailMerge.Execute(new string[] { "KetThucLT" }, new object[] { (keHoachLop.KETTHUCLT == null ? null : keHoachLop.KETTHUCLT.Value.ToString("dd/MM/yyyy")) });
+            reportDocument.MailMerge.Execute(new string[] { "DiaDiemLT" }, new object[] { keHoachLop.DIADIEMLT });
+            reportDocument.MailMerge.Execute(new string[] { "BatDauTH" }, new object[] { (keHoachLop.BATDAUTH == null ? null : keHoachLop.BATDAUTH.Value.ToString("dd/MM/yyyy")) });
+            reportDocument.MailMerge.Execute(new string[] { "KetThucTH" }, new object[] { (keHoachLop.KETTHUCTH == null ? null : keHoachLop.KETTHUCTH.Value.ToString("dd/MM/yyyy")) });
+            reportDocument.MailMerge.Execute(new string[] { "DiaDiemTH" }, new object[] { keHoachLop.DIADIEMTH });
+            reportDocument.MailMerge.Execute(new string[] { "SoLuongNhomTH" }, new object[] { keHoachLop.SOLUONGNHOMTH });
+            reportDocument.MailMerge.Execute(new string[] { "SoHVTrongNhomTH" }, new object[] { keHoachLop.SOHVTRONGNHOMTH });
+            reportDocument.MailMerge.Execute(new string[] { "GioDanhGiaTDT" }, new object[] { (keHoachLop.THOIGIANDANHGIATDT == null ? null : keHoachLop.THOIGIANDANHGIATDT.Value.ToString("HH") + "h" + keHoachLop.THOIGIANDANHGIATDT.Value.ToString("mm")) });
+            reportDocument.MailMerge.Execute(new string[] { "NgayDanhGiaTDT" }, new object[] { (keHoachLop.THOIGIANDANHGIATDT == null ? null : keHoachLop.THOIGIANDANHGIATDT.Value.ToString("dd/MM/yyyy")) });
+            reportDocument.MailMerge.Execute(new string[] { "DiaDiemDanhGiaTDT" }, new object[] { keHoachLop.DIADIEMDANHGIATDT });
+            reportDocument.MailMerge.Execute(new string[] { "GioGiaiDapThacMac" }, new object[] { (keHoachLop.THOIGIANGIAIDAPTHACMAC == null ? null : keHoachLop.THOIGIANGIAIDAPTHACMAC.Value.ToString("HH") + "h" + keHoachLop.THOIGIANGIAIDAPTHACMAC.Value.ToString("mm")) });
+            reportDocument.MailMerge.Execute(new string[] { "NgayGiaiDapThacMac" }, new object[] { (keHoachLop.THOIGIANGIAIDAPTHACMAC == null ? null : keHoachLop.THOIGIANGIAIDAPTHACMAC.Value.ToString("dd/MM/yyyy")) });
+            reportDocument.MailMerge.Execute(new string[] { "DiaDiemGiaiDapThacMac" }, new object[] { keHoachLop.DIADIEMGIAIDAPTHACMAC });
+            reportDocument.MailMerge.Execute(new string[] { "BatDauThiLT" }, new object[] { (keHoachLop.BATDAUTHILT == null ? null : keHoachLop.BATDAUTHILT.Value.ToString("HH") + "h" + keHoachLop.BATDAUTHILT.Value.ToString("mm")) });
+            reportDocument.MailMerge.Execute(new string[] { "KetThucThiLT" }, new object[] { (keHoachLop.KETTHUCTHILT == null ? null : keHoachLop.KETTHUCTHILT.Value.ToString("HH") + "h" + keHoachLop.KETTHUCTHILT.Value.ToString("mm")) });
+            reportDocument.MailMerge.Execute(new string[] { "NgayThiLT" }, new object[] { (keHoachLop.KETTHUCTHILT == null ? null : keHoachLop.KETTHUCTHILT.Value.ToString("dd/MM/yyyy")) });
+            reportDocument.MailMerge.Execute(new string[] { "DiaDiemThiLT" }, new object[] { keHoachLop.DIADIEMTHILT });
+            reportDocument.MailMerge.Execute(new string[] { "BatDauThiVD" }, new object[] { (keHoachLop.BATDAUTHIVD == null ? null : keHoachLop.BATDAUTHIVD.Value.ToString("HH") + "h" + keHoachLop.BATDAUTHIVD.Value.ToString("mm")) });
+            reportDocument.MailMerge.Execute(new string[] { "KetThucThiVD" }, new object[] { (keHoachLop.KETTHUCTHIVD == null ? null : keHoachLop.KETTHUCTHIVD.Value.ToString("HH") + "h" + keHoachLop.KETTHUCTHIVD.Value.ToString("mm")) });
+            reportDocument.MailMerge.Execute(new string[] { "NgayThiVD" }, new object[] { (keHoachLop.KETTHUCTHIVD == null ? null : keHoachLop.KETTHUCTHIVD.Value.ToString("dd/MM/yyyy")) });
+            reportDocument.MailMerge.Execute(new string[] { "DiaDiemThiVD" }, new object[] { keHoachLop.DIADIEMTHIVD });
+            reportDocument.MailMerge.Execute(new string[] { "BatDauThiTH" }, new object[] { (keHoachLop.BATDAUTHITH == null ? null : keHoachLop.BATDAUTHITH.Value.ToString("HH") + "h" + keHoachLop.BATDAUTHITH.Value.ToString("mm")) });
+            reportDocument.MailMerge.Execute(new string[] { "KetThucThiTH" }, new object[] { (keHoachLop.KETTHUCTHITH == null ? null : keHoachLop.KETTHUCTHITH.Value.ToString("HH") + "h" + keHoachLop.KETTHUCTHITH.Value.ToString("mm")) });
+            reportDocument.MailMerge.Execute(new string[] { "NgayThiTH" }, new object[] { (keHoachLop.KETTHUCTHITH == null ? null : keHoachLop.KETTHUCTHITH.Value.ToString("dd/MM/yyyy")) });
+            reportDocument.MailMerge.Execute(new string[] { "DiaDiemThiTH" }, new object[] { keHoachLop.DIADIEMTHITH });
+            reportDocument.MailMerge.Execute(new string[] { "GioBeGiang" }, new object[] { (keHoachLop.THOIGIANBEGIANG == null ? null : keHoachLop.THOIGIANBEGIANG.Value.ToString("HH") + "h" + keHoachLop.THOIGIANBEGIANG.Value.ToString("mm")) });
+            reportDocument.MailMerge.Execute(new string[] { "NgayBeGiang" }, new object[] { (keHoachLop.THOIGIANBEGIANG == null ? null : keHoachLop.THOIGIANBEGIANG.Value.ToString("dd/MM/yyyy")) });
+            reportDocument.MailMerge.Execute(new string[] { "DiaDiemBeGiang" }, new object[] { keHoachLop.DIADIEMBEGIANG });
+            reportDocument.MailMerge.Execute(new string[] { "NguoiLap" }, new object[] { keHoachLop.NGUOILAP });
+            reportDocument.MailMerge.Execute(new string[] { "LanhDao" }, new object[] { (lanhDao == null ? null : lanhDao.HOTEN) });
+
+            reportDocument.MailMerge.CleanupOptions = MailMergeCleanupOptions.RemoveUnusedRegions | MailMergeCleanupOptions.RemoveEmptyParagraphs;
+            return reportDocument;
+        }
+        private string GetDayOfWeek(SiteParam oSiteParam, DayOfWeek dayOfWeek)
+        {
+            if (dayOfWeek == DayOfWeek.Monday)
+                return WebLanguage.GetLanguage(oSiteParam, "Thứ hai");
+            else if (dayOfWeek == DayOfWeek.Tuesday)
+                return WebLanguage.GetLanguage(oSiteParam, "Thứ ba");
+            else if (dayOfWeek == DayOfWeek.Wednesday)
+                return WebLanguage.GetLanguage(oSiteParam, "Thứ tư");
+            else if (dayOfWeek == DayOfWeek.Thursday)
+                return WebLanguage.GetLanguage(oSiteParam, "Thứ năm");
+            else if (dayOfWeek == DayOfWeek.Friday)
+                return WebLanguage.GetLanguage(oSiteParam, "Thứ sáu");
+            else if (dayOfWeek == DayOfWeek.Saturday)
+                return WebLanguage.GetLanguage(oSiteParam, "Thứ bảy");
+            else if (dayOfWeek == DayOfWeek.Sunday)
+                return WebLanguage.GetLanguage(oSiteParam, "Chủ nhật");
+            return null;
+        }
+    }
+}

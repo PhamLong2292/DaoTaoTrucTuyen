@@ -1,0 +1,179 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F0DB3105-05E7-4C92-8B52-848A2176F5C2}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Office.Task.Services</RootNamespace>
+    <AssemblyName>Office.Task.Services</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="OneTSQ.Bussiness.Utility">
+      <HintPath>..\CoreDlls\OneTSQ.Bussiness.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Call.Bussiness.Template">
+      <HintPath>..\CoreDlls\OneTSQ.Call.Bussiness.Template.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Call.Bussiness.Utility">
+      <HintPath>..\CoreDlls\OneTSQ.Call.Bussiness.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Model">
+      <HintPath>..\CoreDlls\OneTSQ.Model.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Utilities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\OneTSQ.Utilities.dll</HintPath>
+    </Reference>
+    <Reference Include="Oracle.ManagedDataAccess">
+      <HintPath>..\packages\Oracle.ManagedDataAccess.12.1.24160719\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Web References\AwsEmailWs\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\SMS247\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\AwsEmailWs\email.wsdl" />
+    <None Include="Web References\AwsEmailWs\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\SMS247\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\SMS247\sms.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OneTSQ.Bussiness.Sql\OneTSQ.Bussiness.Sql.csproj">
+      <Project>{c65ce934-9a24-4970-aa22-f88c884e2e69}</Project>
+      <Name>OneTSQ.Bussiness.Sql</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Bussiness.Template\OneTSQ.Bussiness.Template.csproj">
+      <Project>{91133486-ed5d-4967-b028-2c112ad1b0cc}</Project>
+      <Name>OneTSQ.Bussiness.Template</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Core.Model\OneTSQ.Core.Model.csproj">
+      <Project>{d5bacfee-5b6b-41bc-a3ac-15b691e29923}</Project>
+      <Name>OneTSQ.Core.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Database.Service.Sql\OneTSQ.Database.Service.Sql.csproj">
+      <Project>{51fac77f-d7f8-4612-b5b6-7982eb6b1b9a}</Project>
+      <Name>OneTSQ.Database.Service.Sql</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Database.Service\OneTSQ.Database.Service.csproj">
+      <Project>{3af1f7e2-28fd-4652-8a08-48ac865e9d27}</Project>
+      <Name>OneTSQ.Database.Service</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Utility\OneTSQ.Utility.csproj">
+      <Project>{eacf5059-e789-4e50-ba75-6e4487d50b0a}</Project>
+      <Name>OneTSQ.Utility</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferences Include="Web References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferenceUrl Include="https://sms247.vn/app/services/api/email.asmx">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\AwsEmailWs\</RelPath>
+      <UpdateFromURL>https://sms247.vn/app/services/api/email.asmx</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>Office_Task_Services_AwsEmailWs_Email</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="https://sms247.vn/app/services/api/sms.asmx">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\SMS247\</RelPath>
+      <UpdateFromURL>https://sms247.vn/app/services/api/sms.asmx</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>Office_Task_Services_SMS247_sms</CachedSettingsPropName>
+    </WebReferenceUrl>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Web References\SMS247\sms.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Web References\AwsEmailWs\email.disco" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy $(TargetPath) E:\OneTSQ\Runtime\web\bin
+copy $(TargetPath) E:\OneTSQ\CoreDlls
+</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

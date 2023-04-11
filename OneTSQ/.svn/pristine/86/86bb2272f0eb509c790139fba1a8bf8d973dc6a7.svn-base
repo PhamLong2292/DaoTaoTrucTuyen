@@ -1,0 +1,236 @@
+﻿using OneTSQ.Core.Model;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using OneTSQ.Model;
+
+namespace OneTSQ.Model
+{
+    public class PhieuKhaoSatBenhVienVeTinhCls
+    {
+        public string ID;
+        public int? TRANGTHAI;
+        public string MA;
+        public DateTime? THOIGIAN;
+        public string BENHVIEN_ID;
+        public string TENKHOA;
+        public DateTime? NGAYTHANHLAP;
+        public int? SOLUONGBACSI;
+        public int? SOLUONGYSY;
+        public int? SOLUONGDUOCSI;
+        public int? SOLUONGDIEUDUONG;
+        public int? SOLUONGKTV;
+        public int? SOLUONGKHAC;
+        public int? SOGIUONGKEHOACH;
+        public int? SOGIUONGTHUCTE;
+        public int? SOBUONGBENH;
+        public int? SOPKTHUTHUAT;
+        public int? SOLANKHAMYHCT;
+        public int? SOBNNOITRU;
+        public int? SOLANTHUTHUAT;
+        public string TRANGTHIETBI;
+        
+        public enum eTrangThai
+        {
+            Moi = 0,
+            HoanTat = 1,
+        }   
+        public enum TacVu
+        {
+            Luu = 0,
+            hoantat = 1,
+            Xoa = 2,
+        }
+      
+    }
+}
+
+public class PhieuKhaoSatBenhVienVeTinhParser
+{
+    public readonly static Dictionary<int, string> TrangThais = new Dictionary<int, string>()
+        {
+            { (int)PhieuKhaoSatBenhVienVeTinhCls.eTrangThai.Moi, "Mới" },
+            { (int)PhieuKhaoSatBenhVienVeTinhCls.eTrangThai.HoanTat, "Hoàn tất" }
+        };
+    public readonly static Dictionary<int, string> sColorTrangThai = new Dictionary<int, string>()
+        {
+            { (int)PhieuKhaoSatBenhVienVeTinhCls.eTrangThai.Moi, "<span style=\"background-color:orange;color:white;\" class=\"badge\" >Mới</span>" },
+            { (int)PhieuKhaoSatBenhVienVeTinhCls.eTrangThai.HoanTat, "<span style=\"background-color:#71e038cf; color:black;\" class=\"badge\">Hoàn Tất</span>" },
+        };  
+
+    public static PhieuKhaoSatBenhVienVeTinhCls CreateInstance()
+    {
+        PhieuKhaoSatBenhVienVeTinhCls OPhieuKhaoSatBenhVienVeTinh = new PhieuKhaoSatBenhVienVeTinhCls();
+        return OPhieuKhaoSatBenhVienVeTinh;
+    }
+
+
+    public static PhieuKhaoSatBenhVienVeTinhCls ParseFromDataRow(DataRow dr)
+    {
+        PhieuKhaoSatBenhVienVeTinhCls OPhieuKhaoSatBenhVienVeTinh = new PhieuKhaoSatBenhVienVeTinhCls();
+        OPhieuKhaoSatBenhVienVeTinh.ID = CoreXmlUtility.GetString(dr, "ID", true);
+        OPhieuKhaoSatBenhVienVeTinh.TRANGTHAI = CoreXmlUtility.GetIntOrNull(dr, "TRANGTHAI", true);
+        OPhieuKhaoSatBenhVienVeTinh.MA = CoreXmlUtility.GetString(dr, "MA", true);
+        OPhieuKhaoSatBenhVienVeTinh.THOIGIAN = CoreXmlUtility.GetDateOrNull(dr, "THOIGIAN", true);
+        OPhieuKhaoSatBenhVienVeTinh.BENHVIEN_ID = CoreXmlUtility.GetString(dr, "BENHVIEN_ID", true);
+        OPhieuKhaoSatBenhVienVeTinh.TENKHOA = CoreXmlUtility.GetString(dr, "TENKHOA", true);
+        OPhieuKhaoSatBenhVienVeTinh.NGAYTHANHLAP = CoreXmlUtility.GetDateOrNull(dr, "NGAYTHANHLAP", true);      
+        OPhieuKhaoSatBenhVienVeTinh.SOLUONGBACSI = CoreXmlUtility.GetIntOrNull(dr, "SOLUONGBACSI", true);
+        OPhieuKhaoSatBenhVienVeTinh.SOLUONGYSY = CoreXmlUtility.GetIntOrNull(dr, "SOLUONGYSY", true);
+        OPhieuKhaoSatBenhVienVeTinh.SOLUONGDUOCSI = CoreXmlUtility.GetIntOrNull(dr, "SOLUONGDUOCSI", true);
+        OPhieuKhaoSatBenhVienVeTinh.SOLUONGDIEUDUONG = CoreXmlUtility.GetIntOrNull(dr, "SOLUONGDIEUDUONG", true);
+        OPhieuKhaoSatBenhVienVeTinh.SOLUONGKTV = CoreXmlUtility.GetIntOrNull(dr, "SOLUONGKTV", true);
+        OPhieuKhaoSatBenhVienVeTinh.SOLUONGKHAC = CoreXmlUtility.GetIntOrNull(dr, "SOLUONGKHAC", true);
+        OPhieuKhaoSatBenhVienVeTinh.SOGIUONGKEHOACH = CoreXmlUtility.GetIntOrNull(dr, "SOGIUONGKEHOACH", true);
+        OPhieuKhaoSatBenhVienVeTinh.SOGIUONGTHUCTE = CoreXmlUtility.GetIntOrNull(dr, "SOGIUONGTHUCTE", true);
+        OPhieuKhaoSatBenhVienVeTinh.SOBUONGBENH = CoreXmlUtility.GetIntOrNull(dr, "SOBUONGBENH", true);
+        OPhieuKhaoSatBenhVienVeTinh.SOPKTHUTHUAT = CoreXmlUtility.GetIntOrNull(dr, "SOPKTHUTHUAT", true);
+        OPhieuKhaoSatBenhVienVeTinh.SOLANKHAMYHCT = CoreXmlUtility.GetIntOrNull(dr, "SOLANKHAMYHCT", true);
+        OPhieuKhaoSatBenhVienVeTinh.SOBNNOITRU = CoreXmlUtility.GetIntOrNull(dr, "SOBNNOITRU", true);
+        OPhieuKhaoSatBenhVienVeTinh.SOLANTHUTHUAT = CoreXmlUtility.GetIntOrNull(dr, "SOLANTHUTHUAT", true);
+        OPhieuKhaoSatBenhVienVeTinh.TRANGTHIETBI = CoreXmlUtility.GetString(dr, "TRANGTHIETBI", true);
+        return OPhieuKhaoSatBenhVienVeTinh;
+    }
+
+    public static PhieuKhaoSatBenhVienVeTinhCls[] ParseFromDataTable(DataTable dtTable)
+    {
+        PhieuKhaoSatBenhVienVeTinhCls[] PhieuKhaoSatBenhVienVeTinhs = new PhieuKhaoSatBenhVienVeTinhCls[dtTable.Rows.Count];
+        for (int iIndex = 0; iIndex < dtTable.Rows.Count; iIndex++)
+        {
+            PhieuKhaoSatBenhVienVeTinhs[iIndex] = ParseFromDataRow(dtTable.Rows[iIndex]);
+        }
+        return PhieuKhaoSatBenhVienVeTinhs;
+    }
+
+
+    public static PhieuKhaoSatBenhVienVeTinhCls[] ParseFromMultiXml(string XmlData, string XmlDataSchema)
+    {
+        DataSet ds = CoreXmlUtility.GetDataSetFromXml(XmlData, XmlDataSchema);
+        PhieuKhaoSatBenhVienVeTinhCls[] PhieuKhaoSatBenhVienVeTinhs = ParseFromDataTable(ds.Tables[0]);
+        return PhieuKhaoSatBenhVienVeTinhs;
+    }
+
+
+    public static PhieuKhaoSatBenhVienVeTinhCls ParseFromXml(string XmlData, string XmlDataSchema)
+    {
+        DataSet ds = CoreXmlUtility.GetDataSetFromXml(XmlData, XmlDataSchema);
+        if (ds.Tables[0].Rows.Count == 0) return null;
+        PhieuKhaoSatBenhVienVeTinhCls OPhieuKhaoSatBenhVienVeTinh = ParseFromDataRow(ds.Tables[0].Rows[0]);
+        return OPhieuKhaoSatBenhVienVeTinh;
+    }
+
+
+    public static XmlCls GetXml(PhieuKhaoSatBenhVienVeTinhCls[] PhieuKhaoSatBenhVienVeTinhs)
+    {
+        DataSet ds = new DataSet();
+        ds.Tables.Add("info");
+        ds.Tables["info"].Columns.Add("ID");
+        ds.Tables["info"].Columns.Add("TRANGTHAI", typeof(int?));
+        ds.Tables["info"].Columns.Add("MA");
+        ds.Tables["info"].Columns.Add("THOIGIAN", typeof(DateTime?));
+        ds.Tables["info"].Columns.Add("BENHVIEN_ID");
+        ds.Tables["info"].Columns.Add("TENKHOA");
+        ds.Tables["info"].Columns.Add("NGAYTHANHLAP", typeof(DateTime?));
+        ds.Tables["info"].Columns.Add("SOLUONGBACSI", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOLUONGYSY", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOLUONGDUOCSI", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOLUONGDIEUDUONG", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOLUONGKTV", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOLUONGKHAC", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOGIUONGKEHOACH", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOGIUONGTHUCTE", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOBUONGBENH", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOPKTHUTHUAT", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOLANKHAMYHCT", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOBNNOITRU", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOLANTHUTHUAT", typeof(int?));
+        ds.Tables["info"].Columns.Add("TRANGTHIETBI");       
+        for (int iIndex = 0; iIndex < PhieuKhaoSatBenhVienVeTinhs.Length; iIndex++)
+        {
+            ds.Tables["info"].Rows.Add(new object[]
+            {
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].ID,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].TRANGTHAI,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].MA,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].THOIGIAN,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].BENHVIEN_ID,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].TENKHOA,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].NGAYTHANHLAP,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].SOLUONGBACSI,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].SOLUONGYSY,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].SOLUONGDUOCSI,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].SOLUONGDIEUDUONG,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].SOLUONGKTV,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].SOLUONGKHAC,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].SOGIUONGKEHOACH,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].SOGIUONGTHUCTE,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].SOBUONGBENH,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].SOPKTHUTHUAT,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].SOLANKHAMYHCT,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].SOBNNOITRU,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].SOLANTHUTHUAT,
+                PhieuKhaoSatBenhVienVeTinhs[iIndex].TRANGTHIETBI,              
+            });
+        }
+        XmlCls OXml = new XmlCls();
+        OXml.XmlData = ds.GetXml();
+        OXml.XmlDataSchema = ds.GetXmlSchema();
+        return OXml;
+    }
+
+
+    public static XmlCls GetXml(PhieuKhaoSatBenhVienVeTinhCls OPhieuKhaoSatBenhVienVeTinh)
+    {
+        DataSet ds = new DataSet();
+        ds.Tables.Add("info");
+        ds.Tables["info"].Columns.Add("ID");
+        ds.Tables["info"].Columns.Add("TRANGTHAI", typeof(int?));
+        ds.Tables["info"].Columns.Add("MA");
+        ds.Tables["info"].Columns.Add("THOIGIAN", typeof(DateTime?));
+        ds.Tables["info"].Columns.Add("BENHVIEN_ID");
+        ds.Tables["info"].Columns.Add("TENKHOA");
+        ds.Tables["info"].Columns.Add("NGAYTHANHLAP", typeof(DateTime?));
+        ds.Tables["info"].Columns.Add("SOLUONGBACSI", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOLUONGYSY", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOLUONGDUOCSI", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOLUONGDIEUDUONG", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOLUONGKTV", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOLUONGKHAC", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOGIUONGKEHOACH", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOGIUONGTHUCTE", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOBUONGBENH", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOPKTHUTHUAT", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOLANKHAMYHCT", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOBNNOITRU", typeof(int?));
+        ds.Tables["info"].Columns.Add("SOLANTHUTHUAT", typeof(int?));
+        ds.Tables["info"].Columns.Add("TRANGTHIETBI");
+        ds.Tables["info"].Rows.Add(new object[]
+        {
+                OPhieuKhaoSatBenhVienVeTinh.ID,
+                OPhieuKhaoSatBenhVienVeTinh.TRANGTHAI,
+                OPhieuKhaoSatBenhVienVeTinh.MA,
+                OPhieuKhaoSatBenhVienVeTinh.THOIGIAN,
+                OPhieuKhaoSatBenhVienVeTinh.BENHVIEN_ID,
+                OPhieuKhaoSatBenhVienVeTinh.TENKHOA,
+                OPhieuKhaoSatBenhVienVeTinh.NGAYTHANHLAP,
+                OPhieuKhaoSatBenhVienVeTinh.SOLUONGBACSI,
+                OPhieuKhaoSatBenhVienVeTinh.SOLUONGYSY,
+                OPhieuKhaoSatBenhVienVeTinh.SOLUONGDUOCSI,
+                OPhieuKhaoSatBenhVienVeTinh.SOLUONGDIEUDUONG,
+                OPhieuKhaoSatBenhVienVeTinh.SOLUONGKTV,
+                OPhieuKhaoSatBenhVienVeTinh.SOLUONGKHAC,
+                OPhieuKhaoSatBenhVienVeTinh.SOGIUONGKEHOACH,
+                OPhieuKhaoSatBenhVienVeTinh.SOGIUONGTHUCTE,
+                OPhieuKhaoSatBenhVienVeTinh.SOBUONGBENH,
+                OPhieuKhaoSatBenhVienVeTinh.SOPKTHUTHUAT,
+                OPhieuKhaoSatBenhVienVeTinh.SOLANKHAMYHCT,
+                OPhieuKhaoSatBenhVienVeTinh.SOBNNOITRU,
+                OPhieuKhaoSatBenhVienVeTinh.SOLANTHUTHUAT,
+                OPhieuKhaoSatBenhVienVeTinh.TRANGTHIETBI,             
+        });
+        XmlCls OXml = new XmlCls();
+        OXml.XmlData = ds.GetXml();
+        OXml.XmlDataSchema = ds.GetXmlSchema();
+        return OXml;
+    }
+}

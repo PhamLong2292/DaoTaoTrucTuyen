@@ -1,0 +1,70 @@
+﻿using OneTSQ.Call.Bussiness.Template;
+using OneTSQ.Core.Model;
+using OneTSQ.Utility;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OneTSQ.Call.Bussiness.Ws
+{
+    public class CoreWsProcess : BussinessProcessTemplate
+    {
+        public override string Id
+        {
+            get
+            {
+                return "CoreSqlProcess";
+            }
+        }
+        public override string ServiceName
+        {
+            get
+            {
+                return "WS SERVICE";
+            }
+        }
+
+        #region Danh muc
+        public override IDT_LichChuyenGiaoChiTietProcess CreateDT_LichChuyenGiaoChiTietProcess()
+        {
+            return new DT_LichChuyenGiaoChiTietProcessBll();
+        }
+        public override IBacSyProcess CreateBacSyProcess()
+        {
+            return new BacSyProcessBll();
+        }
+        public override IBacSyOwnerUserProcess CreateBacSyOwnerUserProcess()
+        {
+            return new BacSyOwnerUserProcessBll();
+        }
+        public override IDT_HocVienProcess CreateDT_HocVienProcess()
+        {
+            return new DT_HocVienProcessBll();
+        }
+        public override IDT_KeHoachLopProcess CreateDT_KeHoachLopProcess()
+        {
+            return new DT_KeHoachLopProcessBll();
+        }
+        public override IDT_KetQuaChuyenGiaoProcess CreateDT_KetQuaChuyenGiaoProcess()
+        {
+            return new DT_KetQuaChuyenGiaoProcessBll();
+        }
+        public override IDT_LichThucHanhProcess CreateDT_LichThucHanhProcess()
+        {
+            return new DT_LichThucHanhProcessBll();
+        }
+        public override IDT_LichThucHanhChiTietProcess CreateDT_LichThucHanhChiTietProcess()
+        {
+            return new DT_LichThucHanhChiTietProcessBll();
+        }
+        #endregion
+
+        #region Nghiep vu
+
+        #endregion
+
+    }
+}
+ 

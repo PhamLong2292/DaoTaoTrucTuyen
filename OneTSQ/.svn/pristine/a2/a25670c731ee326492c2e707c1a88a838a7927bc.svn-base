@@ -1,0 +1,58 @@
+﻿using OneTSQ.Bussiness.Template;
+using OneTSQ.Core.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OneTSQ.Bussiness.Sql
+{
+    public class SqlBussinessProcess : BussinessProcessTemplate
+    {
+        public override string Id
+        {
+            get
+            {
+                return "SqlBussinessProcess";
+            }
+        }
+        public override string ServiceName
+        {
+            get
+            {
+                return "MSSQL SERVICE";
+            }
+        }
+
+        #region Danh mục
+        public override ICommonProcess CreateCommonProcess()
+        {
+            return new CommonProcessBll();
+        }
+        public override IDM_NhomKhoaHocProcess CreateDM_NhomKhoaHocProcess()
+        {
+            return new DM_NhomKhoaHocProcessBll();
+        }
+        public override IDM_TenKhoaHocProcess CreateDM_TenKhoaHocProcess()
+        {
+            return new DM_TenKhoaHocProcessBll();
+        }
+        public override IDM_TieuChuanThamGiaKhoaHocProcess CreateDM_TieuChuanThamGiaKhoaHocProcess()
+        {
+            return new DM_TieuChuanThamGiaKhoaHocProcessBll();
+        }
+        public override IDM_GiayToDiChuyenGiaoProcess CreateDM_GiayToDiChuyenGiaoProcess()
+        {
+            return new DM_GiayToDiChuyenGiaoProcessBll();
+        }
+        public override IDM_TieuChiThoiGianDaoTaoTtProcess CreateTieuChiThoiGianDaoTaoTtProcess()
+        {
+            return new DM_TieuChiThoiGianDaoTaoTtProcessBll();
+        }
+        #endregion
+
+        #region Nghiệp vụ
+        #endregion
+    }
+}

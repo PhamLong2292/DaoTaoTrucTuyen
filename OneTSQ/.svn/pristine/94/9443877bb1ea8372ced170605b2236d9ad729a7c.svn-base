@@ -1,0 +1,92 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Data;
+using OneTSQ.Model;
+using OneTSQ.Call.Bussiness.Template;
+using OneTSQ.Utility;
+using OneTSQ.Bussiness.Utility;
+using OneTSQ.Core.Model;
+using OneTSQ.Database.Service;
+
+namespace OneTSQ.Call.Bussiness.Sql
+{
+    public class DeCuongProcessBll : DeCuongTemplate
+    {
+        public override string ServiceId
+        {
+            get
+            {
+                return "SqlDeCuongProcessBll";
+            }
+        }
+
+
+        public override DeCuongCls[] Reading(RenderInfoCls ORenderInfo, DeCuongFilterCls ODeCuongFilter)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            return OneTSQBussinessUtility.CreateBussinessProcess().CreateDeCuongProcess().Reading(ActionSqlParam, ODeCuongFilter);
+        }      
+        public override DeCuongCls[] PageReading(RenderInfoCls ORenderInfo, DeCuongFilterCls ODeCuongFilter, ref long recordTotal)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            return OneTSQBussinessUtility.CreateBussinessProcess().CreateDeCuongProcess().PageReading(ActionSqlParam, ODeCuongFilter, ref recordTotal);
+        }
+
+
+        public override void Add(RenderInfoCls ORenderInfo, DeCuongCls ODeCuong)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            OneTSQBussinessUtility.CreateBussinessProcess().CreateDeCuongProcess().Add(ActionSqlParam, ODeCuong);
+        }
+
+
+        public override void Save(RenderInfoCls ORenderInfo, string DeCuongId, DeCuongCls ODeCuong)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            OneTSQBussinessUtility.CreateBussinessProcess().CreateDeCuongProcess().Save(ActionSqlParam, DeCuongId, ODeCuong);
+        }
+
+
+        public override void Delete(RenderInfoCls ORenderInfo, string DeCuongId)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            OneTSQBussinessUtility.CreateBussinessProcess().CreateDeCuongProcess().Delete(ActionSqlParam, DeCuongId);
+        }
+
+
+        public override DeCuongCls CreateModel(RenderInfoCls ORenderInfo, string DeCuongId)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            return OneTSQBussinessUtility.CreateBussinessProcess().CreateDeCuongProcess().CreateModel(ActionSqlParam, DeCuongId);
+        }
+
+
+        public override string Duplicate(RenderInfoCls ORenderInfo, string DeCuongId)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            return OneTSQBussinessUtility.CreateBussinessProcess().CreateDeCuongProcess().Duplicate(ActionSqlParam, DeCuongId);
+        }    
+        public override long Count(RenderInfoCls ORenderInfo, DeCuongFilterCls ODeCuongFilter)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            return OneTSQBussinessUtility.CreateBussinessProcess().CreateDeCuongProcess().Count(ActionSqlParam, ODeCuongFilter);
+        }
+
+        public override void UpdateLichXetDuyetID(RenderInfoCls ORenderInfo, string DelQuery, DbParam[] Params = null)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            OneTSQBussinessUtility.CreateBussinessProcess().CreateDeCuongProcess().UpdateLichXetDuyetID(ActionSqlParam, DelQuery, Params);
+        }
+    }
+}

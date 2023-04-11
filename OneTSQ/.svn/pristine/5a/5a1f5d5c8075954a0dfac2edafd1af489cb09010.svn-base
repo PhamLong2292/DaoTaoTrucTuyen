@@ -1,0 +1,62 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Data;
+using OneTSQ.Core.Model;using OneTSQ.Model;
+using OneTSQ.Call.Bussiness.Template;
+using OneTSQ.Utility;
+using OneTSQ.Bussiness.Utility;
+
+namespace OneTSQ.Call.Bussiness.Sql
+{
+    public class DanhMucChiSoKiemTraProcessBll : DanhMucChiSoKiemTraTemplate
+    {
+        public override string ServiceId
+        {
+            get
+            {
+                return "SqlDanhMucChiSoKiemTraProcessBll";
+            }
+        }
+
+        public override void Add(RenderInfoCls ORenderInfo, DanhMucChiSoKiemTraCls ODanhMucChiSoKiemTra)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucChiSoKiemTraProcess().Add(ActionSqlParam, ODanhMucChiSoKiemTra);
+        }
+
+        public override void Delete(RenderInfoCls ORenderInfo, string ChiSoId, string KiemTraId)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucChiSoKiemTraProcess().Delete(ActionSqlParam, ChiSoId, KiemTraId);
+        }
+
+        public override DanhMucChiSoKiemTraCls CreateModel(RenderInfoCls ORenderInfo, string Id)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            return OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucChiSoKiemTraProcess().CreateModel(ActionSqlParam, Id);
+        }
+
+        public override string[] ChiSoIdByKiemTraId(RenderInfoCls ORenderInfo, string KiemTraid)
+        {
+            ActionSqlParamCls ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            return OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucChiSoKiemTraProcess().ChiSoIdByKiemTraId(ActionSqlParam, KiemTraid);
+        }
+
+        public override string[] KiemTraIdByChiSoId(RenderInfoCls ORenderInfo, string chisoid)
+        {
+            ActionSqlParamCls ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            return OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucChiSoKiemTraProcess().KiemTraIdByChiSoId(ActionSqlParam, chisoid);
+        }
+
+        public override DanhMucChiSoKiemTraCls[] ReadingChiSoByKiemTra(RenderInfoCls ORenderInfo, string KiemTraid)
+        {
+            ActionSqlParamCls ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            return OneLISBussinessUtility.CreateBussinessProcess().CreateDanhMucChiSoKiemTraProcess().ReadingChiSoByKiemTra(ActionSqlParam, KiemTraid);
+        }
+    }
+}

@@ -1,0 +1,60 @@
+﻿using OneTSQ.Core.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OneTSQ.Call.Bussiness.Template
+{
+    public interface IBussinessProcess
+    {
+        string Id { get; }
+        string ServiceName { get; }
+
+        #region Danh mục
+        ICommonProcess CreateCommonProcess();
+        IDM_NhomKhoaHocProcess CreateDM_NhomKhoaHocProcess();
+        IDM_TenKhoaHocProcess CreateDM_TenKhoaHocProcess();
+        IDM_TieuChuanThamGiaKhoaHocProcess CreateDM_TieuChuanThamGiaKhoaHocProcess();
+        IDM_GiayToDiChuyenGiaoProcess CreateDM_GiayToDiChuyenGiaoProcess();
+        IDM_TieuChiThoiGianDaoTaoTtProcess CreateTieuChiThoiGianDaoTaoTtProcess();
+        IDM_TrangThietBiTruyenHinhTtProcess CreateTrangThietBiTruyenHinhTtProcess();
+        IDM_TieuChiThoiLuongDaoTaoTtProcess CreateTieuChiThoiLuongDaoTaoTtProcess();
+        IDM_ChuyenKhoaDaoTaoTtProcess CreateChuyenKhoaDaoTaoTtProcess();
+        IDT_LichChuyenGiaoChiTietProcess CreateDT_LichChuyenGiaoChiTietProcess();
+        IDM_KyThuatChuyenGiaoProcess CreateKyThuatChuyenGiaoProcess();
+        #endregion
+
+        #region Nghiệp vụ
+        #endregion
+    }
+
+    public class BussinessProcessTemplate : IBussinessProcess
+    {
+        public virtual string Id { get { return null; } }
+        public virtual string ServiceName { get { return null; } }
+
+        #region Danh mục
+        public virtual ICommonProcess CreateCommonProcess() { return null; }
+        public virtual IDM_NhomKhoaHocProcess CreateDM_NhomKhoaHocProcess() { return null; }
+        public virtual IDM_TenKhoaHocProcess CreateDM_TenKhoaHocProcess() { return null; }
+        public virtual IDM_TieuChuanThamGiaKhoaHocProcess CreateDM_TieuChuanThamGiaKhoaHocProcess() { return null; }
+        public virtual IDM_GiayToDiChuyenGiaoProcess CreateDM_GiayToDiChuyenGiaoProcess() { return null; }
+        public virtual IDM_TieuChiThoiGianDaoTaoTtProcess CreateTieuChiThoiGianDaoTaoTtProcess() { return null; }
+        public virtual IDM_TrangThietBiTruyenHinhTtProcess CreateTrangThietBiTruyenHinhTtProcess() { return null; }
+        public virtual IDM_TieuChiThoiLuongDaoTaoTtProcess CreateTieuChiThoiLuongDaoTaoTtProcess() { return null; }
+        public virtual IBacSyOwnerUserProcess CreateBacSyOwnerUserProcess() { return null; }
+        public virtual IBacSyProcess CreateBacSyProcess() { return null; }
+        public virtual IDT_LichChuyenGiaoProcess CreateDT_LichChuyenGiaoProcess() { return null; }
+        public virtual IDT_LichLyThuyetProcess CreateDT_LichLyThuyetProcess() { return null; }
+        public virtual IDM_KyThuatChuyenGiaoProcess CreateKyThuatChuyenGiaoProcess() { return null; }
+        public virtual IDM_ChuyenKhoaDaoTaoTtProcess CreateChuyenKhoaDaoTaoTtProcess() { return null; }
+        public virtual IDT_LichChuyenGiaoChiTietProcess CreateDT_LichChuyenGiaoChiTietProcess() { return null; }
+        #endregion
+
+        #region Nghiệp vụ
+        #endregion
+    }
+}
+ 

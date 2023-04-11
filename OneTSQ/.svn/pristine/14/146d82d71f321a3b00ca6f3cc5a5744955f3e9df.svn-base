@@ -1,0 +1,30 @@
+﻿-- Tạo bảng danh mục phương pháp xét nghiệm
+CREATE TABLE [dbo].[DanhMucPhuongPhap](
+	[ID] [varchar](36) NOT NULL,
+	[Ma] [varchar](255) NOT NULL,
+	[Ten] [nvarchar](255) NOT NULL,
+	[MieuTa] [nvarchar](2048) NULL,
+	[STT] [int] NULL,
+	[HieuLuc] [bit] NULL,
+ CONSTRAINT [PK_DanhMucPhuongPhap] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+-- Tạo bảng danh mục quy trình xét nghiệm
+CREATE TABLE [dbo].[DanhMucQuyTrinhXetNghiem](
+	[ID] [varchar](36) NOT NULL,
+	[Ma] [varchar](255) NOT NULL,
+	[Ten] [nvarchar](255) NOT NULL,
+	[MieuTa] [nvarchar](MAX) NULL,
+	[STT] [int] NULL,
+	[HieuLuc] [bit] NULL,
+ CONSTRAINT [PK_DanhMucQuyTrinhXetNghiem] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO

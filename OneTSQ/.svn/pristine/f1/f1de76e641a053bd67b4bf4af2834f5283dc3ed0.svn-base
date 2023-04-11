@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B80DA888-D45C-4BDF-94F9-261D64DD1EDD}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OneTSQ.UploadUtility</RootNamespace>
+    <AssemblyName>OneTSQ.UploadUtility</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AjaxPro.2">
+      <HintPath>..\CoreDlls\AjaxPro.2.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Bussiness.Template">
+      <HintPath>..\CoreDlls\OneTSQ.Bussiness.Template.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Bussiness.Utility">
+      <HintPath>..\CoreDlls\OneTSQ.Bussiness.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Call.Bussiness.Template">
+      <HintPath>..\CoreDlls\OneTSQ.Call.Bussiness.Template.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Call.Bussiness.Utility">
+      <HintPath>..\CoreDlls\OneTSQ.Call.Bussiness.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.Call.Bussiness.Template, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\OneTSQ.Core.Call.Bussiness.Template.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.Call.Bussiness.Utility">
+      <HintPath>..\CoreDlls\OneTSQ.Core.Call.Bussiness.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Model">
+      <HintPath>..\CoreDlls\OneTSQ.Model.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.TempService">
+      <HintPath>..\CoreDlls\OneTSQ.TempService.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Utilities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\OneTSQ.Utilities.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Utility, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\OneTSQ.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.WebServiceUtility">
+      <HintPath>..\CoreDlls\OneTSQ.WebServiceUtility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.WebSession">
+      <HintPath>..\CoreDlls\OneTSQ.WebSession.dll</HintPath>
+    </Reference>
+    <Reference Include="Spire.XLS">
+      <HintPath>..\CoreDlls\Spire.XLS.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ProcessImportHandlerUtility.cs" />
+    <Compile Include="ProcessUploadHandlerUtility.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UploadMediaToServer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OneTSQ.Core.Model\OneTSQ.Core.Model.csproj">
+      <Project>{d5bacfee-5b6b-41bc-a3ac-15b691e29923}</Project>
+      <Name>OneTSQ.Core.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.MediaService\OneTSQ.MediaService.csproj">
+      <Project>{6adb76ae-869a-47ee-a9cb-3e86a2d23611}</Project>
+      <Name>OneTSQ.MediaService</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy $(TargetPath) E:\OneTSQ\Runtime\web\bin
+copy $(TargetPath) E:\OneTSQ\CoreDlls
+
+</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

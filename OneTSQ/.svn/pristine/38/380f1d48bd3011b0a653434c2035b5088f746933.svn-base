@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{69C9D595-0157-4618-A501-CAC1A4EC3525}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OneTSQ.Model</RootNamespace>
+    <AssemblyName>OneTSQ.Model</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ONEMES3.SYS.Core.Model">
+      <HintPath>..\CoreDlls\ONEMES3.SYS.Core.Model.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.Model">
+      <HintPath>..\Runtime\web\bin\OneTSQ.Core.Model.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Utilities">
+      <HintPath>..\Runtime\web\bin\OneTSQ.Utilities.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Utility, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Runtime\web\bin\OneTSQ.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Common\Common.cs" />
+    <Compile Include="Dictionary\BacSy.cs" />
+    <Compile Include="Dictionary\BacSyOwnerUser.cs" />
+    <Compile Include="Dictionary\DM_ChuyenKhoaDaoTaoTt.cs" />
+    <Compile Include="Dictionary\DM_GiayToDiChuyenGiao.cs" />
+    <Compile Include="Dictionary\DM_KyThuatChuyenGiao.cs" />
+    <Compile Include="Dictionary\DM_NhomKhoaHocCls.cs" />
+    <Compile Include="Dictionary\DM_TenKhoaHoc.cs" />
+    <Compile Include="Dictionary\DM_TieuChiThoiGianDaoTaoTt.cs" />
+    <Compile Include="Dictionary\DM_TieuChiThoiLuongDaoTaoTt.cs" />
+    <Compile Include="Dictionary\DM_TieuChuanThamGiaKhoaHoc.cs" />
+    <Compile Include="Dictionary\DM_TrangThietBiTruyenHinhTt.cs" />
+    <Compile Include="Dictionary\DM_YKienBenhVien.cs" />
+    <Compile Include="Dictionary\DT_LichChuyenGiao.cs" />
+    <Compile Include="Dictionary\DT_LichChuyenGiaoChiTiet.cs" />
+    <Compile Include="Dictionary\DT_LichLyThuyet.cs" />
+    <Compile Include="Dictionary\Filters\BacSyFilter.cs" />
+    <Compile Include="Dictionary\Filters\BacSyOwnerUserFilter.cs" />
+    <Compile Include="Dictionary\Filters\DM_ChuyenKhoaDaoTaoTtFilter.cs" />
+    <Compile Include="Dictionary\Filters\DM_GiayToDiChuyenGiaoFilter.cs" />
+    <Compile Include="Dictionary\Filters\DM_KyThuatChuyenGiaoFilter.cs" />
+    <Compile Include="Dictionary\Filters\DM_NhomKhoaHocFilter.cs" />
+    <Compile Include="Dictionary\Filters\DM_TenKhoaHocFilters.cs" />
+    <Compile Include="Dictionary\Filters\DM_TieuChiThoiGianDaoTaoTtFilter.cs" />
+    <Compile Include="Dictionary\Filters\DM_TieuChiThoiLuongDaoTaoTtFilter.cs" />
+    <Compile Include="Dictionary\Filters\DM_TieuChuanThamGiaKhoaHocFilter.cs" />
+    <Compile Include="Dictionary\Filters\DM_TrangThietBiTruyenHinhTtFilter.cs" />
+    <Compile Include="Dictionary\Filters\DM_YKienBenhVienFilter.cs" />
+    <Compile Include="Dictionary\Filters\DT_LichChuyenGiaoChiTietFilter.cs" />
+    <Compile Include="Dictionary\Filters\DT_LichChuyenGiaoFilter.cs" />
+    <Compile Include="Dictionary\Filters\DT_LichLyThuyetFilter.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Model\Filter\" />
+    <Folder Include="Report\" />
+    <Folder Include="Updates\Mssql\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy $(TargetPath) E:\OneTSQ\Runtime\web\bin
+copy $(TargetPath) E:\OneTSQ\CoreDlls
+
+</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

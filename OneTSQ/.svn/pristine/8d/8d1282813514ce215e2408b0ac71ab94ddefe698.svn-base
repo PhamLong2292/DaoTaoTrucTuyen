@@ -1,0 +1,174 @@
+﻿using OneTSQ.Core.Model;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using OneTSQ.Model;
+
+namespace OneTSQ.Model
+{
+    public class LichXetDuyetCls
+    {
+        public string ID;
+        public string NGUOILAP_ID;
+        public DateTime? THOIGIAN;
+        public string NGUOIDUYET_ID;
+        public DateTime? THOIGIANDUYET;
+        public string CHUTRI_ID;
+        public string THUKY_ID;
+        public int? TRANGTHAI;
+        public DateTime? THOIGIANBATDAU;
+        public DateTime? THOIGIANKETTHUC;
+        public string GHICHU;
+        public string DIADIEMTHUCHIEN;
+        public enum eTrangThai
+        {
+            Moi = 0,
+            ChoXetDuyet = 1,
+            HoanTat = 2,
+        }  
+    }
+}
+
+public class LichXetDuyetParser
+{
+    public readonly static Dictionary<int, string> TrangThais = new Dictionary<int, string>()
+        {
+            { (int)LichXetDuyetCls.eTrangThai.Moi, "Mới" },
+            { (int)LichXetDuyetCls.eTrangThai.ChoXetDuyet, "Chờ duyệt" },
+            { (int)LichXetDuyetCls.eTrangThai.HoanTat, "Hoàn tất" }
+        };
+    public readonly static Dictionary<int, string> sColorTrangThai = new Dictionary<int, string>()
+        {
+            { (int)LichXetDuyetCls.eTrangThai.Moi, "<span style=\"background-color:orange;color:white;\" class=\"badge\" >Mới</span>" },
+            { (int)LichXetDuyetCls.eTrangThai.ChoXetDuyet, "<span style=\"background-color:violet; color:black;\" class=\"badge\">Chờ duyệt</span>" },            
+            { (int)LichXetDuyetCls.eTrangThai.HoanTat, "<span style=\"background-color:blue;color:white;\" class=\"badge\" >Hoàn tất</span>" }
+        };
+  
+    public static LichXetDuyetCls CreateInstance()
+    {
+        LichXetDuyetCls OLichXetDuyet = new LichXetDuyetCls();
+        return OLichXetDuyet;
+    }
+    public static LichXetDuyetCls ParseFromDataRow(DataRow dr)
+    {
+        LichXetDuyetCls OLichXetDuyet = new LichXetDuyetCls();
+        OLichXetDuyet.ID = CoreXmlUtility.GetString(dr, "ID", true);
+        OLichXetDuyet.NGUOILAP_ID = CoreXmlUtility.GetString(dr, "NGUOILAP_ID", true);
+        OLichXetDuyet.THOIGIAN = CoreXmlUtility.GetDateOrNull(dr, "THOIGIAN", true);
+        OLichXetDuyet.NGUOIDUYET_ID = CoreXmlUtility.GetString(dr, "NGUOIDUYET_ID", true);
+        OLichXetDuyet.THOIGIANDUYET = CoreXmlUtility.GetDateOrNull(dr, "THOIGIANDUYET", true);
+        OLichXetDuyet.CHUTRI_ID = CoreXmlUtility.GetString(dr, "CHUTRI_ID", true);
+        OLichXetDuyet.THUKY_ID = CoreXmlUtility.GetString(dr, "THUKY_ID", true);
+        OLichXetDuyet.TRANGTHAI = CoreXmlUtility.GetIntOrNull(dr, "TRANGTHAI", true);      
+        OLichXetDuyet.THOIGIANBATDAU = CoreXmlUtility.GetDateOrNull(dr, "THOIGIANBATDAU", true);
+        OLichXetDuyet.THOIGIANKETTHUC = CoreXmlUtility.GetDateOrNull(dr, "THOIGIANKETTHUC", true);
+        OLichXetDuyet.GHICHU = CoreXmlUtility.GetString(dr, "GHICHU", true);
+        OLichXetDuyet.DIADIEMTHUCHIEN = CoreXmlUtility.GetString(dr, "DIADIEMTHUCHIEN", true);
+        return OLichXetDuyet;
+    }
+
+    public static LichXetDuyetCls[] ParseFromDataTable(DataTable dtTable)
+    {
+        LichXetDuyetCls[] LichXetDuyets = new LichXetDuyetCls[dtTable.Rows.Count];
+        for (int iIndex = 0; iIndex < dtTable.Rows.Count; iIndex++)
+        {
+            LichXetDuyets[iIndex] = ParseFromDataRow(dtTable.Rows[iIndex]);
+        }
+        return LichXetDuyets;
+    }
+
+
+    public static LichXetDuyetCls[] ParseFromMultiXml(string XmlData, string XmlDataSchema)
+    {
+        DataSet ds = CoreXmlUtility.GetDataSetFromXml(XmlData, XmlDataSchema);
+        LichXetDuyetCls[] LichXetDuyets = ParseFromDataTable(ds.Tables[0]);
+        return LichXetDuyets;
+    }
+
+
+    public static LichXetDuyetCls ParseFromXml(string XmlData, string XmlDataSchema)
+    {
+        DataSet ds = CoreXmlUtility.GetDataSetFromXml(XmlData, XmlDataSchema);
+        if (ds.Tables[0].Rows.Count == 0) return null;
+        LichXetDuyetCls OLichXetDuyet = ParseFromDataRow(ds.Tables[0].Rows[0]);
+        return OLichXetDuyet;
+    }
+
+
+    public static XmlCls GetXml(LichXetDuyetCls[] LichXetDuyets)
+    {
+        DataSet ds = new DataSet();
+        ds.Tables.Add("info");
+        ds.Tables["info"].Columns.Add("ID");
+        ds.Tables["info"].Columns.Add("NGUOILAP_ID");
+        ds.Tables["info"].Columns.Add("THOIGIAN", typeof(DateTime?));
+        ds.Tables["info"].Columns.Add("NGUOIDUYET_ID");
+        ds.Tables["info"].Columns.Add("THOIGIANDUYET", typeof(DateTime?));
+        ds.Tables["info"].Columns.Add("CHUTRI_ID");
+        ds.Tables["info"].Columns.Add("THUKI_ID");
+        ds.Tables["info"].Columns.Add("TRANGTHAI", typeof(int));
+        ds.Tables["info"].Columns.Add("THOIGIANBATDAU", typeof(DateTime?));
+        ds.Tables["info"].Columns.Add("THOIGIANKETTHUC", typeof(DateTime?));
+        ds.Tables["info"].Columns.Add("GHICHU");
+        ds.Tables["info"].Columns.Add("DIADIEMTHUCHIEN");
+        for (int iIndex = 0; iIndex < LichXetDuyets.Length; iIndex++)
+        {
+            ds.Tables["info"].Rows.Add(new object[]
+            {
+                LichXetDuyets[iIndex].ID,
+                LichXetDuyets[iIndex].NGUOILAP_ID,
+                LichXetDuyets[iIndex].THOIGIAN,
+                LichXetDuyets[iIndex].NGUOIDUYET_ID,
+                LichXetDuyets[iIndex].THOIGIANDUYET,
+                LichXetDuyets[iIndex].CHUTRI_ID,
+                LichXetDuyets[iIndex].THUKY_ID,
+                LichXetDuyets[iIndex].TRANGTHAI,
+                LichXetDuyets[iIndex].THOIGIANBATDAU,
+                LichXetDuyets[iIndex].THOIGIANKETTHUC,
+                LichXetDuyets[iIndex].GHICHU,
+                LichXetDuyets[iIndex].DIADIEMTHUCHIEN,
+            });
+        }
+        XmlCls OXml = new XmlCls();
+        OXml.XmlData = ds.GetXml();
+        OXml.XmlDataSchema = ds.GetXmlSchema();
+        return OXml;
+    }
+
+
+    public static XmlCls GetXml(LichXetDuyetCls OLichXetDuyet)
+    {
+        DataSet ds = new DataSet();
+        ds.Tables["info"].Columns.Add("ID");
+        ds.Tables["info"].Columns.Add("NGUOILAP_ID");
+        ds.Tables["info"].Columns.Add("THOIGIAN", typeof(DateTime?));
+        ds.Tables["info"].Columns.Add("NGUOIDUYET_ID");
+        ds.Tables["info"].Columns.Add("THOIGIANDUYET", typeof(DateTime?));
+        ds.Tables["info"].Columns.Add("CHUTRI_ID");
+        ds.Tables["info"].Columns.Add("THUKI_ID");
+        ds.Tables["info"].Columns.Add("TRANGTHAI", typeof(int));
+        ds.Tables["info"].Columns.Add("THOIGIANBATDAU", typeof(DateTime?));
+        ds.Tables["info"].Columns.Add("THOIGIANKETTHUC", typeof(DateTime?));
+        ds.Tables["info"].Columns.Add("GHICHU");
+        ds.Tables["info"].Columns.Add("DIADIEMTHUCHIEN");
+        ds.Tables["info"].Rows.Add(new object[]
+        {
+                OLichXetDuyet.ID,
+                OLichXetDuyet.NGUOILAP_ID,
+                OLichXetDuyet.THOIGIAN,
+                OLichXetDuyet.NGUOIDUYET_ID,
+                OLichXetDuyet.THOIGIANDUYET,
+                OLichXetDuyet.CHUTRI_ID,
+                OLichXetDuyet.THUKY_ID,
+                OLichXetDuyet.TRANGTHAI,
+                OLichXetDuyet.THOIGIANBATDAU,
+                OLichXetDuyet.THOIGIANKETTHUC,
+                OLichXetDuyet.GHICHU,
+                OLichXetDuyet.DIADIEMTHUCHIEN,
+        });
+        XmlCls OXml = new XmlCls();
+        OXml.XmlData = ds.GetXml();
+        OXml.XmlDataSchema = ds.GetXmlSchema();
+        return OXml;
+    }
+}

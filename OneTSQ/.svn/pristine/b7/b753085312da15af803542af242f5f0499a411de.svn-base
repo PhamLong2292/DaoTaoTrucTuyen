@@ -1,0 +1,484 @@
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Data;
+using OneTSQ.Model;
+using OneTSQ.Bussiness.Template;
+using OneTSQ.Database.Service;
+using OneTSQ.Core.Model;
+
+namespace OneTSQ.Bussiness.Sql
+{
+    public class DangKyDeTaiProcessBll : DangKyDeTaiTemplate
+    {
+        public override string ServiceId
+        {
+            get
+            {
+                return "SqlDangKyDeTaiProcessBll";
+            }
+        }
+        public override DangKyDeTaiCls[] Reading(ActionSqlParamCls ActionSqlParam, DangKyDeTaiFilterCls ODangKyDeTaiFilter)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                if (ODangKyDeTaiFilter == null)
+                {
+                    ODangKyDeTaiFilter = new DangKyDeTaiFilterCls();
+                }
+                Collection<DbParam>
+                    ColDbParams = new Collection<DbParam>();
+                string Query = " select * from NCKH_DANGKYDETAI where 1=1 ";
+                if (!string.IsNullOrEmpty(ODangKyDeTaiFilter.NGUOIDUYET_ID))
+                {
+                    ColDbParams.Add(new DbParam("NGUOIDUYET_ID", ODangKyDeTaiFilter.NGUOIDUYET_ID));
+                    Query += " and NGUOIDUYET_ID = " + ActionSqlParam.SpecialChar + "NGUOIDUYET_ID ";
+                }
+                if (!string.IsNullOrEmpty(ODangKyDeTaiFilter.CHUNGHIEM_ID))
+                {
+                    ColDbParams.Add(new DbParam("CHUNGHIEM_ID", ODangKyDeTaiFilter.CHUNGHIEM_ID));
+                    Query += " and CHUNGHIEM_ID = " + ActionSqlParam.SpecialChar + "CHUNGHIEM_ID ";
+                }
+                if (!string.IsNullOrEmpty(ODangKyDeTaiFilter.CHUCDANH_ID))
+                {
+                    ColDbParams.Add(new DbParam("CHUCDANH_ID", ODangKyDeTaiFilter.CHUCDANH_ID));
+                    Query += " and CHUCDANH_ID = " + ActionSqlParam.SpecialChar + "CHUCDANH_ID ";
+                }
+                if (ODangKyDeTaiFilter.LOAIHINH != null)
+                {
+                    ColDbParams.Add(new DbParam("LOAIHINH", ODangKyDeTaiFilter.LOAIHINH));
+                    Query += " and LOAIHINH = " + ActionSqlParam.SpecialChar + "LOAIHINH ";
+                }
+                if (ODangKyDeTaiFilter.TrangThai != null)
+                {
+                    ColDbParams.Add(new DbParam("TRANGTHAI", ODangKyDeTaiFilter.TrangThai));
+                    Query += " and TRANGTHAI = " + ActionSqlParam.SpecialChar + "TRANGTHAI ";
+                }
+                Query += " order by THOIGIANDANGKY";
+
+                DataSet dsResult =
+                        DBService.GetDataSet(ActionSqlParam.Trans, Query, ColDbParams.ToArray());
+                DangKyDeTaiCls[] DangKyDeTais = DangKyDeTaiParser.ParseFromDataTable(dsResult.Tables[0]);
+
+                dsResult.Clear();
+                dsResult.Dispose();
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return DangKyDeTais;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override DangKyDeTaiCls[] PageReading(ActionSqlParamCls ActionSqlParam, DangKyDeTaiFilterCls ODangKyDeTaiFilter, ref long recordTotal)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                if (ODangKyDeTaiFilter == null)
+                {
+                    ODangKyDeTaiFilter = new DangKyDeTaiFilterCls();
+                }
+                Collection<DbParam>
+                    ColDbParams = new Collection<DbParam>();
+                string Query = "";
+                string recordTotalQuery = "";
+
+                Query = " select * from NCKH_DANGKYDETAI Where 1=1 ";
+                recordTotalQuery = " select count(1) from NCKH_DANGKYDETAI Where 1=1 ";
+                if (!string.IsNullOrEmpty(ODangKyDeTaiFilter.CHUNGHIEM_ID))
+                {
+                    ColDbParams.Add(new DbParam("CHUNGHIEM_ID", ODangKyDeTaiFilter.CHUNGHIEM_ID));
+                    Query += " and CHUNGHIEM_ID = " + ActionSqlParam.SpecialChar + "CHUNGHIEM_ID ";
+                    recordTotalQuery += " and CHUNGHIEM_ID = " + ActionSqlParam.SpecialChar + "CHUNGHIEM_ID ";
+                }
+                if (!string.IsNullOrEmpty(ODangKyDeTaiFilter.CHUCDANH_ID))
+                {
+                    ColDbParams.Add(new DbParam("CHUCDANH_ID", ODangKyDeTaiFilter.CHUCDANH_ID));
+                    Query += " and CHUCDANH_ID = " + ActionSqlParam.SpecialChar + "CHUCDANH_ID ";
+                    recordTotalQuery += " and CHUCDANH_ID = " + ActionSqlParam.SpecialChar + "CHUCDANH_ID ";
+                }
+                if (!string.IsNullOrEmpty(ODangKyDeTaiFilter.NGUOIDUYET_ID))
+                {
+                    ColDbParams.Add(new DbParam("NGUOIDUYET_ID", ODangKyDeTaiFilter.NGUOIDUYET_ID));
+                    Query += " and NGUOIDUYET_ID = " + ActionSqlParam.SpecialChar + "NGUOIDUYET_ID ";
+                    recordTotalQuery += " and NGUOIDUYET_ID = " + ActionSqlParam.SpecialChar + "NGUOIDUYET_ID ";
+                }
+                if (!string.IsNullOrEmpty(ODangKyDeTaiFilter.Keyword))
+                {
+                    Query += " and (UPPER(MA) like UPPER('%" + ODangKyDeTaiFilter.Keyword + "%') OR UPPER(TENDETAI) like UPPER(N'%" + ODangKyDeTaiFilter.Keyword + "%') OR UPPER(DIENTHOAI) like UPPER('%" + ODangKyDeTaiFilter.Keyword + "%'))";
+                    recordTotalQuery += " and (UPPER(MASOPHIEU) like UPPER('%" + ODangKyDeTaiFilter.Keyword + "%') OR UPPER(TENDETAI) like UPPER(N'%" + ODangKyDeTaiFilter.Keyword + "%') OR UPPER(DIENTHOAI) like UPPER('%" + ODangKyDeTaiFilter.Keyword + "%'))";
+                }
+                if (ODangKyDeTaiFilter.LOAIHINH != null)
+                {
+                    ColDbParams.Add(new DbParam("LOAIHINH", ODangKyDeTaiFilter.LOAIHINH));
+                    Query += " and LOAIHINH = " + ActionSqlParam.SpecialChar + "LOAIHINH ";
+                }
+                if (ODangKyDeTaiFilter.TrangThai != null)
+                {
+                    ColDbParams.Add(new DbParam("TRANGTHAI", ODangKyDeTaiFilter.TrangThai));
+                    Query += " and TRANGTHAI = " + ActionSqlParam.SpecialChar + "TRANGTHAI ";
+                    recordTotalQuery += " and TRANGTHAI = " + ActionSqlParam.SpecialChar + "TRANGTHAI ";
+                }
+                Query += " ORDER BY THOIGIANDANGKY " +
+                " OFFSET " + (ODangKyDeTaiFilter.PageIndex * ODangKyDeTaiFilter.PageSize) + " ROWS " +
+                " FETCH NEXT " + ODangKyDeTaiFilter.PageSize + " ROWS ONLY ";
+
+                DataSet dsResult =
+                        DBService.GetDataSet(ActionSqlParam.Trans, Query, ColDbParams.ToArray());
+                DangKyDeTaiCls[] DangKyDeTais = DangKyDeTaiParser.ParseFromDataTable(dsResult.Tables[0]);
+                recordTotal = long.Parse(DBService.GetDataSet(ActionSqlParam.Trans, recordTotalQuery, ColDbParams.ToArray()).Tables[0].Rows[0][0].ToString());
+
+                dsResult.Clear();
+                dsResult.Dispose();
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return DangKyDeTais;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override void Add(ActionSqlParamCls ActionSqlParam, DangKyDeTaiCls ODangKyDeTai)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                if (string.IsNullOrEmpty(ODangKyDeTai.ID))
+                {
+                    ODangKyDeTai.ID = System.Guid.NewGuid().ToString();
+                }
+                DBService.Insert(ActionSqlParam.Trans, "NCKH_DANGKYDETAI",
+                    new DbParam[]{
+                    new DbParam("ID",ODangKyDeTai.ID),
+                    new DbParam("LOAIHINH",ODangKyDeTai.LOAIHINH),
+                    new DbParam("MA",ODangKyDeTai.MA),
+                    new DbParam("TENDETAI",ODangKyDeTai.TENDETAI),
+                    new DbParam("CAPDETAI",ODangKyDeTai.CAPDETAI),
+                    new DbParam("CHUNHIEM_ID",ODangKyDeTai.CHUNHIEM_ID),
+                    new DbParam("CHUCDANH_ID",ODangKyDeTai.CHUCDANH_ID),
+                    new DbParam("DIENTHOAI",ODangKyDeTai.DIENTHOAI),
+                    new DbParam("EMAIL",ODangKyDeTai.EMAIL),
+                    new DbParam("THOIGIANDANGKY",ODangKyDeTai.THOIGIANDANGKY),
+                    new DbParam("THOIGIANDUYETDK",ODangKyDeTai.THOIGIANDUYETDK),
+                    new DbParam("NGUOIDUYET_ID",ODangKyDeTai.NGUOIDUYET_ID),
+                    new DbParam("KINHPHIDUKIEN",ODangKyDeTai.KINHPHIDUKIEN),
+                    new DbParam("YNGHIATHUCTIEN",ODangKyDeTai.YNGHIATHUCTIEN),
+                    new DbParam("YNGHIAKHOAHOC",ODangKyDeTai.YNGHIAKHOAHOC),
+                    new DbParam("TINHKHATHI",ODangKyDeTai.TINHKHATHI),
+                    new DbParam("MUCTIEU",ODangKyDeTai.MUCTIEU),
+                    new DbParam("NOIDUNGCHUYEU",ODangKyDeTai.NOIDUNGCHUYEU),
+                    new DbParam("PHUONGPHAPNGHIENCUU",ODangKyDeTai.PHUONGPHAPNGHIENCUU),
+                    new DbParam("DUKIENKETQUA",ODangKyDeTai.DUKIENKETQUA),
+                    new DbParam("KHANANGDIACHIAPDUNG",ODangKyDeTai.KHANANGDIACHIAPDUNG),                                           
+                    new DbParam("TRANGTHAI",ODangKyDeTai.TRANGTHAI),
+                    new DbParam("ISNEW",ODangKyDeTai.ISNEW)
+                });
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override void Save(ActionSqlParamCls ActionSqlParam, string ID, DangKyDeTaiCls ODangKyDeTai)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                DBService.Update(ActionSqlParam.Trans, "NCKH_DANGKYDETAI", "ID", ID,
+                    new DbParam[]{
+                    new DbParam("LOAIHINH",ODangKyDeTai.LOAIHINH),
+                    new DbParam("MA",ODangKyDeTai.MA),
+                    new DbParam("TENDETAI",ODangKyDeTai.TENDETAI),
+                    new DbParam("CAPDETAI",ODangKyDeTai.CAPDETAI),
+                    new DbParam("CHUNHIEM_ID",ODangKyDeTai.CHUNHIEM_ID),
+                    new DbParam("CHUCDANH_ID",ODangKyDeTai.CHUCDANH_ID),
+                    new DbParam("DIENTHOAI",ODangKyDeTai.DIENTHOAI),
+                    new DbParam("EMAIL",ODangKyDeTai.EMAIL),
+                    new DbParam("THOIGIANDANGKY",ODangKyDeTai.THOIGIANDANGKY),
+                    new DbParam("THOIGIANDUYETDK",ODangKyDeTai.THOIGIANDUYETDK),
+                    new DbParam("NGUOIDUYET_ID",ODangKyDeTai.NGUOIDUYET_ID),
+                    new DbParam("KINHPHIDUKIEN",ODangKyDeTai.KINHPHIDUKIEN),
+                    new DbParam("YNGHIATHUCTIEN",ODangKyDeTai.YNGHIATHUCTIEN),
+                    new DbParam("YNGHIAKHOAHOC",ODangKyDeTai.YNGHIAKHOAHOC),
+                    new DbParam("TINHKHATHI",ODangKyDeTai.TINHKHATHI),
+                    new DbParam("MUCTIEU",ODangKyDeTai.MUCTIEU),
+                    new DbParam("NOIDUNGCHUYEU",ODangKyDeTai.NOIDUNGCHUYEU),
+                    new DbParam("PHUONGPHAPNGHIENCUU",ODangKyDeTai.PHUONGPHAPNGHIENCUU),
+                    new DbParam("DUKIENKETQUA",ODangKyDeTai.DUKIENKETQUA),
+                    new DbParam("KHANANGDIACHIAPDUNG",ODangKyDeTai.KHANANGDIACHIAPDUNG),
+                    new DbParam("TRANGTHAI",ODangKyDeTai.TRANGTHAI),
+                    new DbParam("ISNEW",ODangKyDeTai.ISNEW)
+                    });
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override void Delete(ActionSqlParamCls ActionSqlParam, string ID)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                string DelQuery = " Delete from NCKH_DANGKYDETAI where ID=" + ActionSqlParam.SpecialChar + "ID";
+                DBService.ExecuteNonQuery(ActionSqlParam.Trans, DelQuery,
+                    new DbParam[]
+                    {
+                    new DbParam("ID", ID)
+                    });
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override DangKyDeTaiCls CreateModel(ActionSqlParamCls ActionSqlParam, string ID)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                DataSet dsResult =
+                        DBService.GetDataSet(ActionSqlParam.Trans, "select * from NCKH_DANGKYDETAI where (ID =" + ActionSqlParam.SpecialChar + "ID or MA =" + ActionSqlParam.SpecialChar + "ID)", new DbParam[]{
+                    new DbParam("ID",ID)
+                    });
+                DangKyDeTaiCls ODangKyDeTai = null;
+                if (dsResult.Tables[0].Rows.Count > 0)
+                {
+                    ODangKyDeTai = DangKyDeTaiParser.ParseFromDataRow(dsResult.Tables[0].Rows[0]);
+                }
+                dsResult.Clear();
+                dsResult.Dispose();
+
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return ODangKyDeTai;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override string Duplicate(ActionSqlParamCls ActionSqlParam, string ID)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            string NewID = System.Guid.NewGuid().ToString();
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                DangKyDeTaiCls ODangKyDeTai = CreateModel(ActionSqlParam, ID);
+                ODangKyDeTai.ID = NewID;
+                Add(ActionSqlParam, ODangKyDeTai);
+
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return NewID;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override long Count(ActionSqlParamCls ActionSqlParam, DangKyDeTaiFilterCls ODangKyDeTaiFilter)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                if (ODangKyDeTaiFilter == null)
+                {
+                    ODangKyDeTaiFilter = new DangKyDeTaiFilterCls();
+                }
+                Collection<DbParam>
+                    ColDbParams = new Collection<DbParam>();
+                string Query = " select count(1) from NCKH_DANGKYDETAI";
+                if (!string.IsNullOrEmpty(ODangKyDeTaiFilter.CHUNGHIEM_ID))
+                {
+                    ColDbParams.Add(new DbParam("CHUNGHIEM_ID", ODangKyDeTaiFilter.CHUNGHIEM_ID));
+                    Query += " and CHUNGHIEM_ID = " + ActionSqlParam.SpecialChar + "CHUNGHIEM_ID ";
+                }
+                if (!string.IsNullOrEmpty(ODangKyDeTaiFilter.CHUCDANH_ID))
+                {
+                    ColDbParams.Add(new DbParam("CHUCDANH_ID", ODangKyDeTaiFilter.CHUCDANH_ID));
+                    Query += " and CHUCDANH_ID = " + ActionSqlParam.SpecialChar + "CHUCDANH_ID";
+                }
+                if (!string.IsNullOrEmpty(ODangKyDeTaiFilter.NGUOIDUYET_ID))
+                {
+                    ColDbParams.Add(new DbParam("NGUOIDUYET_ID", ODangKyDeTaiFilter.NGUOIDUYET_ID));
+                    Query += " and NGUOIDUYET_ID = " + ActionSqlParam.SpecialChar + "NGUOIDUYET_ID";
+                }
+                if (ODangKyDeTaiFilter.LOAIHINH != null)
+                {
+                    ColDbParams.Add(new DbParam("LOAIHINH", ODangKyDeTaiFilter.LOAIHINH));
+                    Query += " and LOAIHINH = " + ActionSqlParam.SpecialChar + "LOAIHINH ";
+                }
+                if (ODangKyDeTaiFilter.TrangThai != null)
+                {
+                    ColDbParams.Add(new DbParam("TRANGTHAI", ODangKyDeTaiFilter.TrangThai));
+                    Query += " and TRANGTHAI = " + ActionSqlParam.SpecialChar + "TRANGTHAI ";
+                }
+                if (ODangKyDeTaiFilter.TuNgay != null)
+                {
+                    ColDbParams.Add(new DbParam("TUNGAY", ODangKyDeTaiFilter.TuNgay));
+                    Query += " and THOIGIANDANGKY >= " + ActionSqlParam.SpecialChar + "TUNGAY ";
+                }
+                if (ODangKyDeTaiFilter.TuNgay != null)
+                {
+                    ColDbParams.Add(new DbParam("DENNGAY", ODangKyDeTaiFilter.TuNgay));
+                    Query += " and THOIGIANDANGKY < " + ActionSqlParam.SpecialChar + "DENNGAY ";
+                }              
+                long result = long.Parse(DBService.GetDataSet(ActionSqlParam.Trans, Query, ColDbParams.ToArray()).Tables[0].Rows[0][0].ToString());
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+    }
+}

@@ -1,0 +1,150 @@
+﻿
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using OneTSQ.Utility;
+namespace OneTSQ.SpeechUtility
+{
+    public class SpeechUtility
+    {
+        private static SpeechUtility _instance = null;
+        public static SpeechUtility Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new SpeechUtility();
+                }
+                return _instance;
+            }
+        }
+        public static bool IsConnectedToInternet()
+        {
+            bool result;
+            try
+            {
+                IPHostEntry hostEntry = Dns.GetHostEntry("www.google.com");
+                result = true;
+            }
+            catch
+            {
+                result = false;
+            }
+            return result;
+        }
+
+        public static string GetLinkSpeechFromGoogle(string text)
+        {
+            if (IsConnectedToInternet())
+            {
+                Translator t = new Translator();
+                var textx = t.Speech(text, "vi");
+                if (text == "_Moi")
+                {
+                    textx = t.Speech("Xin mời bệnh nhân", "vi");
+                }
+                else if (text.StartsWith("_"))
+                {
+                    textx = t.Speech(text.Replace("_", " "), "vi");
+                }
+                if (!string.IsNullOrEmpty(t.TranslationSpeechUrl))
+                {
+                    return t.TranslationSpeechUrl;
+                }
+                else
+                    return null;
+            }
+            else return null;
+        }
+
+        public static string GetLinkFileMp3(string originalKey)
+        {
+            string result;
+            try
+            {
+                string arg = originalKey.ToString().Trim().Replace(" ", "_");
+                string text = "Speech\\" + string.Format("{0}Speech.mp3", arg);
+                string path = WebConfig.GetWebPathRoot() + text;
+                bool flag = !Directory.Exists(WebConfig.GetWebPathRoot() + "\\Speech");
+                if (flag)
+                {
+                    DirectoryInfo directoryInfo = Directory.CreateDirectory(WebConfig.GetWebPathRoot() + "\\Speech");
+                }
+                bool flag2 = File.Exists(path);
+                if (flag2)
+                {
+                    result = WebConfig.GetWebHttpRoot() + text.Replace("\\", "/");
+                }
+                else
+                {
+                    bool flag3 = IsConnectedToInternet();
+                    if (flag3)
+                    {
+                        Stream stream = SpeechUtility.DownloadFromGoogle(originalKey);
+                        bool flag4 = stream != null;
+                        if (flag4)
+                        {
+                            stream.Seek(0L, SeekOrigin.Begin);
+                            using (FileStream fileStream = File.Create(path))
+                            {
+                                stream.Seek(0L, SeekOrigin.Begin);
+                                stream.CopyTo(fileStream);
+                            }
+                            result = WebConfig.GetWebHttpRoot() + text.Replace("\\", "/");
+                        }
+                        else
+                        {
+                            result = null;
+                        }
+                    }
+                    else
+                    {
+                        result = null;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return result;
+        }
+
+        public static System.IO.Stream DownloadFromGoogle(string text)
+        {
+            Translator t = new Translator();
+            var textx = t.Speech(text, "vi");
+            if (text == "_Moi")
+            {
+                textx = t.Speech("Xin mời bệnh nhân", "vi");
+            }
+            else if (text.StartsWith("_"))
+            {
+                textx = t.Speech(text.Replace("_", " "), "vi");
+            }
+            if (!string.IsNullOrEmpty(t.TranslationSpeechUrl))
+            {
+                using (var client = new WebClientWithTimeout())
+                {
+                    client.Timeout = 10000;
+                    client.Headers[HttpRequestHeader.UserAgent] = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:7.0.1) Gecko/20100101 Firefox/7.0.1";
+                    byte[] mp3 = client.DownloadData(t.TranslationSpeechUrl);
+                    if (mp3 != null)
+                    {
+                        return new System.IO.MemoryStream(mp3);
+                    }
+                    else
+                        return null;
+                }
+            }
+            else
+                return null;
+        }
+    }
+}

@@ -1,0 +1,199 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OneTSQ.Model
+{
+    public class BenhNhan
+    {
+        public enum eHienThiNgaySinh
+        {
+            /// <summary>
+            /// giờ sinh = 1
+            /// </summary>
+            Gio = 1,
+            /// <summary>
+            /// ngày sinh = 2
+            /// </summary>
+            Ngay = 2,
+            /// <summary>
+            /// năm sinh = 4
+            /// </summary>
+            Nam = 4,
+        }
+        public enum eLoaiTuoi
+        {
+            /// <summary>
+            /// năm tuổi = 0
+            /// </summary>
+            NamTuoi = 0,
+            /// <summary>
+            /// tháng tuổi = 1
+            /// </summary>
+            ThangTuoi = 1,
+            /// <summary>
+            /// ngày tuổi = 2
+            /// </summary>
+            NgayTuoi = 2,
+            /// <summary>
+            /// giờ tuổi = 3
+            /// </summary>
+            GioTuoi = 3,
+            /// <summary>
+            /// ngày sinh = 4
+            /// </summary>
+            //NgaySinh = 4
+        }
+
+        public readonly static Dictionary<int, string> LoaiTuois = new Dictionary<int, string>()
+        {
+            { (int)eLoaiTuoi.NamTuoi, "Năm tuổi" },
+            { (int)eLoaiTuoi.ThangTuoi, "Tháng tuổi" },
+            { (int)eLoaiTuoi.NgayTuoi, "Ngày tuổi" },
+            { (int)eLoaiTuoi.GioTuoi, "Giờ tuổi" },
+            //{ (int)eLoaiTuoi.NgaySinh, "Ngày sinh" }
+        };
+        public enum eGioiTinh
+        {
+            /// <summary>
+            /// nam = 1
+            /// </summary>
+            Nam = 1,
+            /// <summary>
+            /// nữ = 2
+            /// </summary>
+            Nu = 2,
+        }
+        public readonly static Dictionary<int, string> GioiTinhs = new Dictionary<int, string>()
+        {
+            { (int)eGioiTinh.Nam, "Nam" },
+            { (int)eGioiTinh.Nu, "Nữ" }
+            //{ (int)eLoaiTuoi.NgaySinh, "Ngày sinh" }
+        };
+        public static int GetSoTuoi(DateTime ngaysinh, DateTime ngaytinh)
+        {
+            var namtuoi = ngaytinh.Year - ngaysinh.Year;
+            var thangtuoi = 12 * namtuoi + (ngaytinh.Month - ngaysinh.Month);
+            var ngaytuoi = ngaytinh.Subtract(ngaysinh).Days;
+            if (ngaytuoi < 1)
+                return 1;
+            else if (ngaytuoi < 30)
+                return ngaytuoi;
+            else if (thangtuoi < 73)
+                return thangtuoi;
+            else return namtuoi;
+        }
+        public static string GetTuoi(DateTime ngaysinh, DateTime ngaytinh)
+        {
+            var namtuoi = ngaytinh.Year - ngaysinh.Year;
+            var thangtuoi = 12 * namtuoi + (ngaytinh.Month - ngaysinh.Month);
+            var ngaytuoi = ngaytinh.Subtract(ngaysinh).Days;
+            if (ngaytuoi < 1)
+                return "1 (ng)";
+            else if (ngaytuoi < 30)
+                return ngaytuoi.ToString() + " (ng)";
+            else if (thangtuoi < 73)
+                return thangtuoi.ToString() + " (th)";
+            else return namtuoi.ToString() + " (t)";
+        }
+        public static int GetLoaiTuoi(DateTime ngaysinh, DateTime ngaytinh)
+        {
+            var namtuoi = ngaytinh.Year - ngaysinh.Year;
+            var thangtuoi = 12 * namtuoi + (ngaytinh.Month - ngaysinh.Month);
+            var ngaytuoi = ngaytinh.Subtract(ngaysinh).Days;
+            int loaiTuoi = (int)eLoaiTuoi.NamTuoi;
+            if (ngaytuoi < 30)
+                loaiTuoi = (int)eLoaiTuoi.NgayTuoi;
+            else if (thangtuoi < 73)
+                loaiTuoi = (int)eLoaiTuoi.ThangTuoi;
+            else
+                loaiTuoi = (int)eLoaiTuoi.NamTuoi;
+            return loaiTuoi;
+        }
+        /// <summary>
+        /// Trả về số tuổi
+        /// </summary>
+        /// <param name="NgaySinh"></param>
+        /// <param name="TgVaoVien"></param>
+        /// <param name="TgRaVien"></param>
+        /// <returns></returns>
+        public static int? iTinhTuoi(DateTime? NgaySinh, DateTime? TgVaoVien, DateTime? TgRaVien)
+        {
+            int? tuoi = null;
+            if (TgVaoVien == null)
+                TgVaoVien = DateTime.Now;
+            if (NgaySinh != null)
+                tuoi = GetSoTuoi(NgaySinh.Value, TgVaoVien.Value);
+            return tuoi;
+        }
+        /// <summary>
+        /// Trả về số tuổi và đơn vị tuổi
+        /// </summary>
+        /// <param name="NgaySinh"></param>
+        /// <param name="TgVaoVien"></param>
+        /// <param name="TgRaVien"></param>
+        /// <returns></returns>
+        public static string TinhTuoi(DateTime? NgaySinh, DateTime? TgVaoVien, DateTime? TgRaVien)
+        {
+            var tuoi = "";
+            if (TgVaoVien == null)
+                TgVaoVien = DateTime.Now;
+            if (NgaySinh != null)
+                tuoi = GetTuoi(NgaySinh.Value, TgVaoVien.Value);
+            return tuoi;
+        }
+        /// <summary>
+        /// Trả về số nguyên ứng với loại tuổi
+        /// </summary>
+        /// <param name="NgaySinh"></param>
+        /// <param name="TgVaoVien"></param>
+        /// <param name="TgRaVien"></param>
+        /// <returns></returns>
+        public static int GetLoaiTuoi(DateTime? NgaySinh, DateTime? TgVaoVien, DateTime? TgRaVien)
+        {
+            int loaiTuoi = (int)eLoaiTuoi.NamTuoi;
+            if (TgVaoVien == null)
+                TgVaoVien = DateTime.Now;
+            if (NgaySinh != null)
+                loaiTuoi = GetLoaiTuoi(NgaySinh.Value, TgVaoVien.Value);
+            return loaiTuoi;
+        }
+        public static DateTime? GetNgaySinh(int? Tuoi, int? LoaiTuoi, DateTime? TgVaoVien, DateTime? TgRaVien)
+        {
+            if (Tuoi == null)
+                return null;
+            if (LoaiTuoi == null)
+                LoaiTuoi = (int)BenhNhan.eLoaiTuoi.NamTuoi;
+            DateTime? ngaySinh = null;
+            if (TgVaoVien == null)
+                TgVaoVien = DateTime.Now;
+            if (TgRaVien == null || TgRaVien > DateTime.Now)
+                TgRaVien = DateTime.Now;
+            if (LoaiTuoi == (int)BenhNhan.eLoaiTuoi.NamTuoi)
+                ngaySinh = TgRaVien.Value.AddYears(0 - Tuoi.Value);
+            else if (LoaiTuoi == (int)BenhNhan.eLoaiTuoi.ThangTuoi)
+            {
+                if (Tuoi > 1)
+                    ngaySinh = TgRaVien.Value.AddMonths(0 - Tuoi.Value + 1).AddDays(-1);
+                else ngaySinh = TgRaVien.Value.AddMonths(0 - Tuoi.Value);
+            }
+            else if (LoaiTuoi == (int)BenhNhan.eLoaiTuoi.NgayTuoi)
+            {
+                if (Tuoi > 1)
+                    ngaySinh = TgRaVien.Value.AddDays(0 - Tuoi.Value + 1).AddHours(-1);
+                else ngaySinh = TgRaVien.Value.AddDays(0 - Tuoi.Value);
+            }
+            else if (LoaiTuoi == (int)BenhNhan.eLoaiTuoi.GioTuoi)
+                ngaySinh = TgRaVien.Value.AddHours(0 - Tuoi.Value + 1).AddMinutes(-1);
+            return ngaySinh;
+        }
+        public static int TinhTuoiWatson(DateTime? NgaySinh, DateTime? TgVaoVien)
+        {
+            if (TgVaoVien == null)
+                TgVaoVien = DateTime.Now;
+            return TgVaoVien.Value.Year - NgaySinh.Value.Year;
+        }
+    }
+}

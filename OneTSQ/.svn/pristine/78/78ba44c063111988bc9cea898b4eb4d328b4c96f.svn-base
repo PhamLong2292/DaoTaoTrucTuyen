@@ -1,0 +1,82 @@
+﻿using OneTSQ.Call.Bussiness.Utility;
+using OneTSQ.Model;
+using OneTSQ.Bussiness.Utility;
+using OneTSQ.Utility;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using OneTSQ.Core.Model;
+
+namespace OneTSQ.WebParts
+{
+
+    public class ChuyenNganhService : RemoteDataTemplate
+    {
+        public static string StaticServiceId
+        {
+            get
+            {
+                return "ChuyenNganhService";
+            }
+        }
+        public override string ServiceId
+        {
+            get
+            {
+                return StaticServiceId;
+            }
+        }
+
+        public override string ServiceName
+        {
+            get
+            {
+                return "Service Chuyên ngành";
+            }
+        }
+        public override AjaxOut Reading(RenderInfoCls ORenderInfo, int PageIndex, string Keyword)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+
+            try
+            {
+                OneMES3.DM.Model.ChuyenNganhFilterCls OChuyenNganhFilter = new OneMES3.DM.Model.ChuyenNganhFilterCls();
+                OChuyenNganhFilter.Keyword = Keyword;
+                OChuyenNganhFilter.PageIndex = PageIndex;
+                OChuyenNganhFilter.PageSize = 20;
+                OChuyenNganhFilter.HieuLuc = (int)eHieuLuc.Co;
+
+                var ajaxOut = OneMES3.DM.Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreateChuyenNganhProcess().Count(Model.Common.CreateRenderInfo(ORenderInfo), OChuyenNganhFilter);
+                int recordTotal = (int)ajaxOut;
+                //long recordTotal = 0;
+                var chuyenNganhs = OneMES3.DM.Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreateChuyenNganhProcess().PageReading(Model.Common.CreateRenderInfo(ORenderInfo), OChuyenNganhFilter, ref recordTotal);
+
+                Record ORecord = new Record();
+                ORecord.total_count = recordTotal;
+                ORecord.incomplete_results = true;
+                ORecord.items = new RecordItemCls[chuyenNganhs.Length];
+                for (int iIndex = 0; iIndex < chuyenNganhs.Length; iIndex++)
+                {
+                    ORecord.items[iIndex] = new RecordItemCls();
+                    ORecord.items[iIndex].id = chuyenNganhs[iIndex].Ma;
+                    ORecord.items[iIndex].text = chuyenNganhs[iIndex].Ten;
+
+                    ORecord.items[iIndex].Code = chuyenNganhs[iIndex].Ma;
+                    ORecord.items[iIndex].Name = chuyenNganhs[iIndex].Ten;
+                }
+
+                string json = JsonConvert.SerializeObject(ORecord, Formatting.Indented);
+                RetAjaxOut.HtmlContent = json;
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+    }
+}

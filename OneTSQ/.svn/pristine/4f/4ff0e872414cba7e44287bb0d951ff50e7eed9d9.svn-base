@@ -1,0 +1,179 @@
+﻿using OneTSQ.Bussiness.Utility;
+using OneTSQ.Call.Bussiness.Utility;
+using OneTSQ.Model;
+using OneTSQ.Utility;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+using System.Web;
+using OneTSQ.Core.Model;
+
+namespace OneTSQ.WebParts
+{
+    public class HinhAnhs : WebPartTemplate
+    {
+        public override string WebPartId
+        {
+            get
+            {
+                return "HinhAnhs";
+            }
+        }
+
+        public override string WebPartTitle
+        {
+            get
+            {
+                return "Danh sách hình ảnh";
+            }
+        }
+
+        public override string Description
+        {
+            get
+            {
+                return "Danh sách hình ảnh";
+            }
+        }
+
+        public override void RegAjaxPro(SiteParam OSiteParam, System.Web.UI.Page Page)
+        {
+            AjaxPro.Utility.RegisterTypeForAjax(typeof(HinhAnhs), Page);
+        }
+        public override bool NeedCheckPermission
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public override AjaxOut CheckPermission(RenderInfoCls ORenderInfo)
+        {
+            SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+            string UserId = WebSessionUtility.GetCurrentLoginUser(OSiteParam).OwnerUserId;
+            bool HasPermission = true;
+            AjaxOut RetAjaxOut = new AjaxOut();
+            RetAjaxOut.RetBoolean = HasPermission;
+
+            return RetAjaxOut;
+        }
+
+        public override AjaxOut Draw(SiteParam OSiteParam, RenderInfoCls ORenderInfo)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+            string caBenhId = WebEnvironments.Request("CaBenhId");
+
+            if (string.IsNullOrEmpty(caBenhId))
+            {
+                RetAjaxOut.HtmlContent = WebScreen.GetPanelInfo(OSiteParam, WebLanguage.GetLanguage(OSiteParam, "Bạn chưa chọn ca bệnh để xem."), false);
+                return RetAjaxOut;
+            }
+            CaBenhCls caBenh = CallBussinessUtility.CreateBussinessProcess().CreateCaBenhProcess().CreateModel(ORenderInfo, caBenhId);
+            try
+            {
+                AjaxOut RetAjaxOutCheckPermission = CheckPermission(ORenderInfo);
+                if (RetAjaxOutCheckPermission.RetBoolean == false)
+                {
+                    RetAjaxOut.HtmlContent = WebScreen.GetPanelInfo(OSiteParam, WebLanguage.GetLanguage(OSiteParam, "Không có quyền truy cập tính năng này"), false);
+                    return RetAjaxOut;
+                }
+                RetAjaxOut.HtmlContent =
+                #region javascript
+                    WebEnvironments.ProcessJavascript(
+                    "<script language=javascript>\r\n" +
+                    "   var imageTimer;\r\n" +
+                    "   $(document).ready(function() {\r\n" +
+                    "       document.title = '" + WebLanguage.GetLanguage(OSiteParam, "OneTMP: Danh sách hình ảnh") + "';\r\n" +
+                    //Set Height nội dung
+                    "       leftMenuHeight = $('.sidebar-collapse').height();\r\n" +
+                    "       windowHeight = $(window).height();\r\n" +
+                    "       var height = leftMenuHeight > windowHeight ? leftMenuHeight : windowHeight;\r\n" +
+                    //"       $('#divImageList').height(400); \r\n" +
+                    "       $('#divImageList').css('height', height-130);\r\n" +
+                    "   });\r\n" +
+                    "</script>\r\n") +
+                #endregion
+                #region html
+                        WebEnvironments.ProcessHtml(
+                        "<input type='hidden' id='hdCaBenhId' value='" + caBenh.ID + "'>\r\n" +
+                        "<div id=\"divImageList\" style='overflow-y:auto; width:100%;'>\r\n" +
+                         DrawImageList(ORenderInfo, caBenhId).HtmlContent +
+                        "</div>\r\n"
+                        );
+                #endregion
+
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+
+        #region Vẽ giao diện
+        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+        public static AjaxOut DrawImageList(RenderInfoCls ORenderInfo, string caBenhId)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+            try
+            {
+                SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+                WebSession.CheckSessionTimeOut(ORenderInfo);
+                CaBenhCls caBenh = CallBussinessUtility.CreateBussinessProcess().CreateCaBenhProcess().CreateModel(ORenderInfo, caBenhId);
+                if (caBenh == null)
+                {
+                    //RetAjaxOut.HtmlContent = WebScreen.GetPanelInfo(OSiteParam, WebLanguage.GetLanguage(OSiteParam, "Ca bệnh này đã bị xóa bởi người dùng khác."), false);
+                    return RetAjaxOut;
+                }
+                HinhAnhCls[] hinhAnhs = CallBussinessUtility.CreateBussinessProcess().CreateHinhAnhProcess().Reading(ORenderInfo, new HinhAnhFilterCls() { CABENHID = caBenhId });
+                string html = "";
+                foreach (var hinhAnh in hinhAnhs)
+                {
+                    if (hinhAnh.TYPE == (int)HinhAnh.eType.DICOM)//Anh DICOM
+                    {
+                        html += "<div style = 'float: left; margin-right:50px;'>\r\n" +
+                                    "<center><iframe src='" + hinhAnh.LINK + "' width='600px' height='500px'></iframe>\r\n" +
+                                    "<div style='height:50px; text-align:center;' class=\"valueString\"><a href='" + hinhAnh.LINK + "' title='" + WebLanguage.GetLanguage(OSiteParam, "Xem ảnh") + "' target='_blank'>" + (string.IsNullOrEmpty(hinhAnh.MODALITY) ? null : hinhAnh.MODALITY) + " | " + (hinhAnh.TIMEEX == null ? null : hinhAnh.TIMEEX.Value.ToString("HH:mm dd/MM/yyyy")) + "</a>\r\n" +
+                                    "<br>" + hinhAnh.MOTA + "</div>\r\n" +
+                                "</div>\r\n";
+                    }
+                    else if (hinhAnh.TYPE == (int)HinhAnh.eType.Video)
+                    {
+                        if (System.IO.File.Exists(hinhAnh.DUONGDAN))
+                        {
+                            html += "<div style = 'float: left; margin-right:50px;'>\r\n" +
+                                         string.Format("<a href='{0}' title='" + WebLanguage.GetLanguage(OSiteParam, "Xem video") + "' target='_blank'><div style='height: 500px; width: 600px;'><video height='100%' controls><source src='{0}'></video></div>\r\n", Path.Combine(System.Web.Configuration.WebConfigurationManager.AppSettings["UploadedImagePath"], hinhAnh.TENTEP)) +
+                                         "<div style='height:50px; text-align:center;' class=\"valueString\">" + hinhAnh.MOTA + "</div>\r\n" +
+                                    "</div>\r\n";
+                        }
+                    }
+                    else if (hinhAnh.TYPE == (int)HinhAnh.eType.NonDICOM)
+                    {
+                        if (System.IO.File.Exists(hinhAnh.DUONGDAN))
+                        {
+                            html += "<div style = 'float: left; margin-right:50px;'>\r\n" +
+                                         string.Format("<a href='{0}' title='" + WebLanguage.GetLanguage(OSiteParam, "Xem ảnh") + "' target='_blank'><img style = 'height: 500px;' src='{0}'>\r\n", Path.Combine(System.Web.Configuration.WebConfigurationManager.AppSettings["UploadedImagePath"], hinhAnh.TENTEP)) +
+                                         "<div style='height:50px; text-align:center;' class=\"valueString\">" + hinhAnh.MOTA + "</div>\r\n" +
+                                    "</div>\r\n";
+                        }
+                    }
+                }
+                RetAjaxOut.HtmlContent = WebEnvironments.ProcessHtml(html);
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+        #endregion
+    }
+}

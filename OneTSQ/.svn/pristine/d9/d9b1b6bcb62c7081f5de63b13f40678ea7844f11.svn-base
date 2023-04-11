@@ -1,0 +1,76 @@
+﻿using OneTSQ.Call.Bussiness.Utility;
+using OneTSQ.Model;
+using System;
+using Newtonsoft.Json;
+using OneTSQ.Core.Model;
+
+namespace OneTSQ.WebParts
+{
+
+    public class TrangThietBiTruyenHinhTtService : RemoteDataTemplate
+    {
+        public static string StaticServiceId
+        {
+            get
+            {
+                return "TrangThietBiTruyenHinhTtService";
+            }
+        }
+        public override string ServiceId
+        {
+            get
+            {
+                return StaticServiceId;
+            }
+        }
+
+        public override string ServiceName
+        {
+            get
+            {
+                return "Danh sách Trang thiết bị truyền hình trực tuyến";
+            }
+        }
+        public override AjaxOut Reading(RenderInfoCls ORenderInfo, int PageIndex, string Keyword)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+
+            try
+            {
+                DM_TrangThietBiTruyenHinhTtFilterCls
+                    TrangThietBiTruyenHinhTtFilter = new DM_TrangThietBiTruyenHinhTtFilterCls();
+                TrangThietBiTruyenHinhTtFilter.Keyword = Keyword;
+                TrangThietBiTruyenHinhTtFilter.PageIndex = PageIndex;
+                TrangThietBiTruyenHinhTtFilter.PageSize = 20;
+                TrangThietBiTruyenHinhTtFilter.HieuLuc = (int)Common.eHieuLuc.Co;
+
+                DM_TrangThietBiTruyenHinhTtCls[] TrangThietBiTruyenHinhTts = CallBussinessUtility.CreateBussinessProcess().CreateTrangThietBiTruyenHinhTtProcess().Reading(ORenderInfo, TrangThietBiTruyenHinhTtFilter);
+                long total_count = CallBussinessUtility.CreateBussinessProcess().CreateTrangThietBiTruyenHinhTtProcess().Count(ORenderInfo, TrangThietBiTruyenHinhTtFilter);
+
+                Record ORecord = new Record();
+                ORecord.total_count = total_count;
+                ORecord.incomplete_results = true;
+                ORecord.items = new RecordItemCls[TrangThietBiTruyenHinhTts.Length];
+                for (int iIndex = 0; iIndex < TrangThietBiTruyenHinhTts.Length; iIndex++)
+                {
+                    ORecord.items[iIndex] = new RecordItemCls();
+                    ORecord.items[iIndex].id = TrangThietBiTruyenHinhTts[iIndex].Ma;
+                    ORecord.items[iIndex].text = TrangThietBiTruyenHinhTts[iIndex].Ten;
+
+
+                    ORecord.items[iIndex].Code = TrangThietBiTruyenHinhTts[iIndex].Ma;
+                    ORecord.items[iIndex].Name = TrangThietBiTruyenHinhTts[iIndex].Ten;
+                }
+
+                string json = JsonConvert.SerializeObject(ORecord, Formatting.Indented);
+                RetAjaxOut.HtmlContent = json;
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+    }
+}

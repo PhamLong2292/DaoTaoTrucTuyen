@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9592A462-136B-4E11-860F-880B2249E51D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OneTSQ.ProcessCommand</RootNamespace>
+    <AssemblyName>OneTSQ.ProcessCommand</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="log4net">
+      <HintPath>..\Runtime\web\bin\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNetCore.Connections.Abstractions">
+      <HintPath>..\Libs\Microsoft.AspNetCore.Connections.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNetCore.Http.Connections.Client">
+      <HintPath>..\Libs\Microsoft.AspNetCore.Http.Connections.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNetCore.Http.Connections.Common">
+      <HintPath>..\Libs\Microsoft.AspNetCore.Http.Connections.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNetCore.SignalR.Client">
+      <HintPath>..\Libs\Microsoft.AspNetCore.SignalR.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNetCore.SignalR.Client.Core">
+      <HintPath>..\Libs\Microsoft.AspNetCore.SignalR.Client.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNetCore.SignalR.Common">
+      <HintPath>..\Libs\Microsoft.AspNetCore.SignalR.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNetCore.SignalR.Protocols.Json">
+      <HintPath>..\Libs\Microsoft.AspNetCore.SignalR.Protocols.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces">
+      <HintPath>..\Libs\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection">
+      <HintPath>..\Libs\Microsoft.Extensions.DependencyInjection.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
+      <HintPath>..\Libs\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Features">
+      <HintPath>..\Libs\Microsoft.Extensions.Features.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Logging">
+      <HintPath>..\Libs\Microsoft.Extensions.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Logging.Abstractions">
+      <HintPath>..\Libs\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Options">
+      <HintPath>..\Libs\Microsoft.Extensions.Options.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Primitives">
+      <HintPath>..\Libs\Microsoft.Extensions.Primitives.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Bussiness.Sql">
+      <HintPath>..\CoreDlls\OneTSQ.Bussiness.Sql.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Bussiness.Template">
+      <HintPath>..\CoreDlls\OneTSQ.Bussiness.Template.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Bussiness.Utility">
+      <HintPath>..\CoreDlls\OneTSQ.Bussiness.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Call.Bussiness.Sql">
+      <HintPath>..\CoreDlls\OneTSQ.Call.Bussiness.Sql.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Call.Bussiness.Template">
+      <HintPath>..\CoreDlls\OneTSQ.Call.Bussiness.Template.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Call.Bussiness.Utility">
+      <HintPath>..\CoreDlls\OneTSQ.Call.Bussiness.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Call.Bussiness.Ws">
+      <HintPath>..\CoreDlls\OneTSQ.Call.Bussiness.Ws.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.Bussiness.Sql">
+      <HintPath>..\CoreDlls\OneTSQ.Core.Bussiness.Sql.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.Bussiness.Template">
+      <HintPath>..\CoreDlls\OneTSQ.Core.Bussiness.Template.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.Bussiness.Utility">
+      <HintPath>..\CoreDlls\OneTSQ.Core.Bussiness.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.Call.Bussiness.Sql">
+      <HintPath>..\CoreDlls\OneTSQ.Core.Call.Bussiness.Sql.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.Call.Bussiness.Template">
+      <HintPath>..\CoreDlls\OneTSQ.Core.Call.Bussiness.Template.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.Call.Bussiness.Utility, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\OneTSQ.Core.Call.Bussiness.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.Call.Bussiness.Ws">
+      <HintPath>..\CoreDlls\OneTSQ.Core.Call.Bussiness.Ws.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.Gui.WebParts">
+      <HintPath>..\CoreDlls\OneTSQ.Core.Gui.WebParts.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.Model">
+      <HintPath>..\CoreDlls\OneTSQ.Core.Model.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Database.Service, Version=1.0.0.0, Culture=neutral, PublicKeyToken=3b6ee3c81ce7aaf6, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\OneTSQ.Database.Service.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Database.Service.Sql, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1e97593363f9782f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\OneTSQ.Database.Service.Sql.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Gui.WebParts">
+      <HintPath>..\CoreDlls\OneTSQ.Gui.WebParts.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Model">
+      <HintPath>..\CoreDlls\OneTSQ.Model.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Utilities, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\OneTSQ.Utilities.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Utility, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\OneTSQ.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneNet.PubSub.Client, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libs\OneNet.PubSub.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.IO">
+      <HintPath>C:\Users\Dell\Desktop\OneNet.PubSub.Client.Demo\Libs\System.IO.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\CoreDlls\OneTSQ.Database.Service.Oracle.dll" />
+    <Analyzer Include="..\CoreDlls\OneTSQ.Database.Service.Sql.dll" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy $(TargetPath) E:\OneTSQ\Runtime\web\bin
+copy $(TargetPath) E:\OneTSQ\CoreDlls</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,616 @@
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Data;
+using OneTSQ.Model;
+using OneTSQ.Bussiness.Template;
+using OneTSQ.Database.Service;
+using OneTSQ.Core.Model;
+
+namespace OneTSQ.Bussiness.Sql
+{
+    public class DT_KetQuaDaoTaoProcessBll : DT_KetQuaDaoTaoTemplate
+    {
+        public override string ServiceId
+        {
+            get
+            {
+                return "SqlDT_KetQuaDaoTaoProcessBll";
+            }
+        }
+        public override DT_KetQuaDaoTaoCls[] Reading(ActionSqlParamCls ActionSqlParam, DT_KetQuaDaoTaoFilterCls ODT_KetQuaDaoTaoFilter)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                if (ODT_KetQuaDaoTaoFilter == null)
+                {
+                    ODT_KetQuaDaoTaoFilter = new DT_KetQuaDaoTaoFilterCls();
+                }
+                Collection<DbParam>
+                    ColDbParams = new Collection<DbParam>();
+                string Query = " select * from DT_KetQuaDaoTao where 1=1 ";
+                if (!string.IsNullOrEmpty(ODT_KetQuaDaoTaoFilter.KhoaHocDangKy_Id))
+                {
+                    ColDbParams.Add(new DbParam("KHOAHOCDANGKY_ID", ODT_KetQuaDaoTaoFilter.KhoaHocDangKy_Id));
+                    Query += " and KHOAHOCDANGKY_ID = " + ActionSqlParam.SpecialChar + "KHOAHOCDANGKY_ID ";
+                }
+                if (!string.IsNullOrEmpty(ODT_KetQuaDaoTaoFilter.KhoaHocDuyet_Id))
+                {
+                    ColDbParams.Add(new DbParam("KHOAHOCDUYET_ID", ODT_KetQuaDaoTaoFilter.KhoaHocDuyet_Id));
+                    Query += " and KHOAHOCDUYET_ID = " + ActionSqlParam.SpecialChar + "KHOAHOCDUYET_ID ";
+                }
+                if (!string.IsNullOrEmpty(ODT_KetQuaDaoTaoFilter.HocVien_Id))
+                {
+                    ColDbParams.Add(new DbParam("HOCVIEN_ID", ODT_KetQuaDaoTaoFilter.HocVien_Id));
+                    Query += " and HOCVIEN_ID = " + ActionSqlParam.SpecialChar + "HOCVIEN_ID ";
+                }
+                if (ODT_KetQuaDaoTaoFilter.TrangThai != null)
+                {
+                    ColDbParams.Add(new DbParam("TRANGTHAI", ODT_KetQuaDaoTaoFilter.TrangThai));
+                    Query += " and TRANGTHAI = " + ActionSqlParam.SpecialChar + "TRANGTHAI ";
+                }
+                Query += " order by NGAYDANGKY";
+
+                DataSet dsResult =
+                        DBService.GetDataSet(ActionSqlParam.Trans, Query, ColDbParams.ToArray());
+                DT_KetQuaDaoTaoCls[] DT_KetQuaDaoTaos = DT_KetQuaDaoTaoParser.ParseFromDataTable(dsResult.Tables[0]);
+
+                dsResult.Clear();
+                dsResult.Dispose();
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return DT_KetQuaDaoTaos;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override DT_KetQuaDaoTaoCls[] ReadingDiemDanh(ActionSqlParamCls ActionSqlParam, DT_KetQuaDaoTaoFilterCls ODT_KetQuaDaoTaoFilter)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                if (ODT_KetQuaDaoTaoFilter == null)
+                {
+                    ODT_KetQuaDaoTaoFilter = new DT_KetQuaDaoTaoFilterCls();
+                }
+                Collection<DbParam>
+                    ColDbParams = new Collection<DbParam>();
+                string Query = " select DT_KetQuaDaoTao.*, " +
+                    " case when DIEMDANHLYTHUYET is null then (select count(*) from DT_DIEMDANHLYTHUYET join DT_LICHLYTHUYETCHITIET on DT_DIEMDANHLYTHUYET.LICHLYTHUYETCHITIET_ID = DT_LICHLYTHUYETCHITIET.ID where DT_DIEMDANHLYTHUYET.HOCVIEN_ID = DT_KetQuaDaoTao.HOCVIEN_ID and DT_LICHLYTHUYETCHITIET.LICHLYTHUYET_ID = DT_KetQuaDaoTao.KHOAHOCDUYET_ID) else DIEMDANHLYTHUYET end DIEMDANHLYTHUYET_TH, " +
+                    " case when DIEMDANHTHUCHANH is null then (select count(*) from DT_DIEMDANHTHUCHANH join DT_LICHTHUCHANHCHITIET on DT_DIEMDANHTHUCHANH.LICHTHUCHANHCHITIET_ID = DT_LICHTHUCHANHCHITIET.ID " +
+                                                                "join DT_LICHTHUCHANH on DT_LICHTHUCHANH.ID = DT_LICHTHUCHANHCHITIET.LICHTHUCHANH_ID " +
+                                                                "where DT_DIEMDANHTHUCHANH.HOCVIEN_ID = DT_KetQuaDaoTao.HOCVIEN_ID and DT_LICHTHUCHANH.KHOAHOC_ID = DT_KetQuaDaoTao.KHOAHOCDUYET_ID) else DIEMDANHTHUCHANH end DIEMDANHTHUCHANH_TH " +
+                    " from DT_KetQuaDaoTao where 1=1 ";
+                if (!string.IsNullOrEmpty(ODT_KetQuaDaoTaoFilter.KhoaHocDangKy_Id))
+                {
+                    ColDbParams.Add(new DbParam("KHOAHOCDANGKY_ID", ODT_KetQuaDaoTaoFilter.KhoaHocDangKy_Id));
+                    Query += " and KHOAHOCDANGKY_ID = " + ActionSqlParam.SpecialChar + "KHOAHOCDANGKY_ID ";
+                }
+                if (!string.IsNullOrEmpty(ODT_KetQuaDaoTaoFilter.KhoaHocDuyet_Id))
+                {
+                    ColDbParams.Add(new DbParam("KHOAHOCDUYET_ID", ODT_KetQuaDaoTaoFilter.KhoaHocDuyet_Id));
+                    Query += " and KHOAHOCDUYET_ID = " + ActionSqlParam.SpecialChar + "KHOAHOCDUYET_ID ";
+                }
+                if (!string.IsNullOrEmpty(ODT_KetQuaDaoTaoFilter.HocVien_Id))
+                {
+                    ColDbParams.Add(new DbParam("HOCVIEN_ID", ODT_KetQuaDaoTaoFilter.HocVien_Id));
+                    Query += " and HOCVIEN_ID = " + ActionSqlParam.SpecialChar + "HOCVIEN_ID ";
+                }
+                if (ODT_KetQuaDaoTaoFilter.DatTieuChuan != null)
+                {
+                    ColDbParams.Add(new DbParam("DATTIEUCHUAN", ODT_KetQuaDaoTaoFilter.DatTieuChuan));
+                    Query += " and DATTIEUCHUAN = " + ActionSqlParam.SpecialChar + "DATTIEUCHUAN ";
+                }
+                if (ODT_KetQuaDaoTaoFilter.TrangThai != null)
+                {
+                    ColDbParams.Add(new DbParam("TRANGTHAI", ODT_KetQuaDaoTaoFilter.TrangThai));
+                    Query += " and TRANGTHAI = " + ActionSqlParam.SpecialChar + "TRANGTHAI ";
+                }
+                Query += " order by NGAYDANGKY";
+
+                DataSet dsResult =
+                        DBService.GetDataSet(ActionSqlParam.Trans, Query, ColDbParams.ToArray());
+                DT_KetQuaDaoTaoCls[] DT_KetQuaDaoTaos = DT_KetQuaDaoTaoParser.ParseFromDataTable(dsResult.Tables[0]);
+
+                dsResult.Clear();
+                dsResult.Dispose();
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return DT_KetQuaDaoTaos;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override DT_KetQuaDaoTaoCls[] PageReading(ActionSqlParamCls ActionSqlParam, DT_KetQuaDaoTaoFilterCls ODT_KetQuaDaoTaoFilter, ref long recordTotal)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                if (ODT_KetQuaDaoTaoFilter == null)
+                {
+                    ODT_KetQuaDaoTaoFilter = new DT_KetQuaDaoTaoFilterCls();
+                }
+                Collection<DbParam>
+                    ColDbParams = new Collection<DbParam>();
+                string Query = "";
+                string recordTotalQuery = "";
+
+                Query = " select DT_KetQuaDaoTao.* from DT_KetQuaDaoTao left join DT_HocVien on DT_KetQuaDaoTao.hocvien_id = DT_HocVien.id where 1=1 " + ODT_KetQuaDaoTaoFilter.DataPermissionQuery;
+                recordTotalQuery = " select count(1) from DT_KetQuaDaoTao left join DT_HocVien on DT_KetQuaDaoTao.hocvien_id = DT_HocVien.id where 1=1 " + ODT_KetQuaDaoTaoFilter.DataPermissionQuery;
+                if (!string.IsNullOrEmpty(ODT_KetQuaDaoTaoFilter.KhoaHocDangKy_Id))
+                {
+                    ColDbParams.Add(new DbParam("KHOAHOCDANGKY_ID", ODT_KetQuaDaoTaoFilter.KhoaHocDangKy_Id));
+                    Query += " and KHOAHOCDANGKY_ID = " + ActionSqlParam.SpecialChar + "KHOAHOCDANGKY_ID ";
+                    recordTotalQuery += " and KHOAHOCDANGKY_ID = " + ActionSqlParam.SpecialChar + "KHOAHOCDANGKY_ID ";
+                }
+                if (!string.IsNullOrEmpty(ODT_KetQuaDaoTaoFilter.KhoaHocDuyet_Id))
+                {
+                    ColDbParams.Add(new DbParam("KHOAHOCDUYET_ID", ODT_KetQuaDaoTaoFilter.KhoaHocDuyet_Id));
+                    Query += " and KHOAHOCDUYET_ID = " + ActionSqlParam.SpecialChar + "KHOAHOCDUYET_ID ";
+                    recordTotalQuery += " and KHOAHOCDUYET_ID = " + ActionSqlParam.SpecialChar + "KHOAHOCDUYET_ID ";
+                }
+                if (!string.IsNullOrEmpty(ODT_KetQuaDaoTaoFilter.HocVien_Id))
+                {
+                    ColDbParams.Add(new DbParam("HOCVIEN_ID", ODT_KetQuaDaoTaoFilter.HocVien_Id));
+                    Query += " and HOCVIEN_ID = " + ActionSqlParam.SpecialChar + "HOCVIEN_ID ";
+                    recordTotalQuery += " and HOCVIEN_ID = " + ActionSqlParam.SpecialChar + "HOCVIEN_ID ";
+                }
+                if (!string.IsNullOrEmpty(ODT_KetQuaDaoTaoFilter.Keyword))
+                {
+                    ColDbParams.Add(new DbParam("Keyword", "%" + ODT_KetQuaDaoTaoFilter.Keyword.ToUpper() + "%"));
+                    ColDbParams.Add(new DbParam("Keyword1", "%" + ODT_KetQuaDaoTaoFilter.Keyword.ToUpper() + "%"));
+                    Query += " and (upper(DT_HocVien.MA) like " + ActionSqlParam.SpecialChar + "Keyword OR upper(DT_HocVien.HOTEN) like " + ActionSqlParam.SpecialChar + "Keyword1) ";
+                    recordTotalQuery += " and (upper(DT_HocVien.MA) like " + ActionSqlParam.SpecialChar + "Keyword OR upper(DT_HocVien.HOTEN) like " + ActionSqlParam.SpecialChar + "Keyword1) ";
+                }
+                if (!string.IsNullOrEmpty(ODT_KetQuaDaoTaoFilter.DonViCongTacMa))
+                {
+                    ColDbParams.Add(new DbParam("DONVICONGTAC_MA", ODT_KetQuaDaoTaoFilter.DonViCongTacMa));
+                    Query += " and DT_HocVien.DONVICONGTAC_MA = " + ActionSqlParam.SpecialChar + "DONVICONGTAC_MA ";
+                    recordTotalQuery += " and DT_HocVien.DONVICONGTAC_MA = " + ActionSqlParam.SpecialChar + "DONVICONGTAC_MA ";
+                }
+                if (ODT_KetQuaDaoTaoFilter.TrangThai != null)
+                {
+                    ColDbParams.Add(new DbParam("TRANGTHAI", ODT_KetQuaDaoTaoFilter.TrangThai));
+                    Query += " and DT_KetQuaDaoTao.TRANGTHAI = " + ActionSqlParam.SpecialChar + "TRANGTHAI ";
+                    recordTotalQuery += " and DT_KetQuaDaoTao.TRANGTHAI = " + ActionSqlParam.SpecialChar + "TRANGTHAI ";
+                }
+                Query += " ORDER BY DT_HocVien.DONVICONGTAC_MA, DT_KetQuaDaoTao.NGAYDANGKY " +
+                " OFFSET " + (ODT_KetQuaDaoTaoFilter.PageIndex * ODT_KetQuaDaoTaoFilter.PageSize) + " ROWS " +
+                " FETCH NEXT " + ODT_KetQuaDaoTaoFilter.PageSize + " ROWS ONLY ";
+
+                DataSet dsResult =
+                        DBService.GetDataSet(ActionSqlParam.Trans, Query, ColDbParams.ToArray());
+                DT_KetQuaDaoTaoCls[] DT_KetQuaDaoTaos = DT_KetQuaDaoTaoParser.ParseFromDataTable(dsResult.Tables[0]);
+                recordTotal = long.Parse(DBService.GetDataSet(ActionSqlParam.Trans, recordTotalQuery, ColDbParams.ToArray()).Tables[0].Rows[0][0].ToString());
+
+                dsResult.Clear();
+                dsResult.Dispose();
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return DT_KetQuaDaoTaos;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override void Add(ActionSqlParamCls ActionSqlParam, DT_KetQuaDaoTaoCls ODT_KetQuaDaoTao)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                if (string.IsNullOrEmpty(ODT_KetQuaDaoTao.ID))
+                {
+                    ODT_KetQuaDaoTao.ID = System.Guid.NewGuid().ToString();
+                }
+                DBService.Insert(ActionSqlParam.Trans, "DT_KetQuaDaoTao",
+                    new DbParam[]{
+                    new DbParam("ID",ODT_KetQuaDaoTao.ID),
+                    new DbParam("HOCVIEN_ID",ODT_KetQuaDaoTao.HOCVIEN_ID),
+                    new DbParam("KHOAHOCDANGKY_ID",ODT_KetQuaDaoTao.KHOAHOCDANGKY_ID),
+                    new DbParam("NGAYDANGKY",ODT_KetQuaDaoTao.NGAYDANGKY),
+                    new DbParam("NOPHOCPHI",ODT_KetQuaDaoTao.NOPHOCPHI),
+                    new DbParam("DATTIEUCHUAN",ODT_KetQuaDaoTao.DATTIEUCHUAN),
+                    new DbParam("KHOAHOCDUYET_ID",ODT_KetQuaDaoTao.KHOAHOCDUYET_ID),
+                    new DbParam("NGAYDUYET",ODT_KetQuaDaoTao.NGAYDUYET),
+                    new DbParam("DIEMDANHLYTHUYET",ODT_KetQuaDaoTao.DIEMDANHLYTHUYET),
+                    new DbParam("DIEMDANHTHUCHANH",ODT_KetQuaDaoTao.DIEMDANHTHUCHANH),
+                    new DbParam("DIEMTHILYTHUYET",ODT_KetQuaDaoTao.DIEMTHILYTHUYET),
+                    new DbParam("DIEMTHITHUCHANH",ODT_KetQuaDaoTao.DIEMTHITHUCHANH),
+                    new DbParam("XEPLOAI",ODT_KetQuaDaoTao.XEPLOAI),
+                    new DbParam("TIEUCHUAN",ODT_KetQuaDaoTao.TIEUCHUAN),
+                    new DbParam("TRANGTHAI",ODT_KetQuaDaoTao.TRANGTHAI),
+                    new DbParam("NGUOITAO_ID",ODT_KetQuaDaoTao.NGUOITAO_ID),
+                    new DbParam("NGAYTAO",ODT_KetQuaDaoTao.NGAYTAO),
+                    new DbParam("NGUOISUA_ID",ODT_KetQuaDaoTao.NGUOISUA_ID),
+                    new DbParam("NGAYSUA",ODT_KetQuaDaoTao.NGAYSUA)
+                });
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override void Save(ActionSqlParamCls ActionSqlParam, string ID, DT_KetQuaDaoTaoCls ODT_KetQuaDaoTao)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                DBService.Update(ActionSqlParam.Trans, "DT_KetQuaDaoTao", "ID", ID,
+                    new DbParam[]{
+                    new DbParam("HOCVIEN_ID",ODT_KetQuaDaoTao.HOCVIEN_ID),
+                    new DbParam("KHOAHOCDANGKY_ID",ODT_KetQuaDaoTao.KHOAHOCDANGKY_ID),
+                    new DbParam("NGAYDANGKY",ODT_KetQuaDaoTao.NGAYDANGKY),
+                    new DbParam("NOPHOCPHI",ODT_KetQuaDaoTao.NOPHOCPHI),
+                    new DbParam("DATTIEUCHUAN",ODT_KetQuaDaoTao.DATTIEUCHUAN),
+                    new DbParam("KHOAHOCDUYET_ID",ODT_KetQuaDaoTao.KHOAHOCDUYET_ID),
+                    new DbParam("NGAYDUYET",ODT_KetQuaDaoTao.NGAYDUYET),
+                    new DbParam("DIEMDANHLYTHUYET",ODT_KetQuaDaoTao.DIEMDANHLYTHUYET),
+                    new DbParam("DIEMDANHTHUCHANH",ODT_KetQuaDaoTao.DIEMDANHTHUCHANH),
+                    new DbParam("DIEMTHILYTHUYET",ODT_KetQuaDaoTao.DIEMTHILYTHUYET),
+                    new DbParam("DIEMTHITHUCHANH",ODT_KetQuaDaoTao.DIEMTHITHUCHANH),
+                    new DbParam("XEPLOAI",ODT_KetQuaDaoTao.XEPLOAI),
+                    new DbParam("TIEUCHUAN",ODT_KetQuaDaoTao.TIEUCHUAN),
+                    new DbParam("TRANGTHAI",ODT_KetQuaDaoTao.TRANGTHAI),
+                    new DbParam("NGUOITAO_ID",ODT_KetQuaDaoTao.NGUOITAO_ID),
+                    new DbParam("NGAYTAO",ODT_KetQuaDaoTao.NGAYTAO),
+                    new DbParam("NGUOISUA_ID",ODT_KetQuaDaoTao.NGUOISUA_ID),
+                    new DbParam("NGAYSUA",ODT_KetQuaDaoTao.NGAYSUA)
+                    });
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override void Delete(ActionSqlParamCls ActionSqlParam, string ID)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                string DelQuery = " Delete from DT_KetQuaDaoTao where ID=" + ActionSqlParam.SpecialChar + "ID";
+                DBService.ExecuteNonQuery(ActionSqlParam.Trans, DelQuery,
+                    new DbParam[]
+                    {
+                    new DbParam("ID", ID)
+                    });
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override DT_KetQuaDaoTaoCls CreateModel(ActionSqlParamCls ActionSqlParam, string ID)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                DataSet dsResult =
+                        DBService.GetDataSet(ActionSqlParam.Trans, "select * from DT_KetQuaDaoTao where ID=" + ActionSqlParam.SpecialChar + "ID ", new DbParam[]{
+                    new DbParam("ID",ID)
+                    });
+                DT_KetQuaDaoTaoCls ODT_KetQuaDaoTao = null;
+                if (dsResult.Tables[0].Rows.Count > 0)
+                {
+                    ODT_KetQuaDaoTao = DT_KetQuaDaoTaoParser.ParseFromDataRow(dsResult.Tables[0].Rows[0]);
+                }
+                dsResult.Clear();
+                dsResult.Dispose();
+
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return ODT_KetQuaDaoTao;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override string Duplicate(ActionSqlParamCls ActionSqlParam, string ID)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            string NewID = System.Guid.NewGuid().ToString();
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                DT_KetQuaDaoTaoCls ODT_KetQuaDaoTao = CreateModel(ActionSqlParam, ID);
+                ODT_KetQuaDaoTao.ID = NewID;
+                Add(ActionSqlParam, ODT_KetQuaDaoTao);
+
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return NewID;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        /// <summary>
+        /// Kiểm tra trùng thời gian khóa học đã đăng ký hoặc được duyệt của 1 học viên
+        /// </summary>
+        /// <param name="ActionSqlParam"></param>
+        /// <param name="HocVienId"></param>
+        /// <param name="TuNgay"></param>
+        /// <param name="DenNgay"></param>
+        /// <param name="KetQuaDaoTaoId">Là id của kết quả đào tạo được loại trừ khi tính toán thời gian trùng khóa học</param>
+        /// <returns></returns>
+        public override bool? IsTrungThoiGianHoc(ActionSqlParamCls ActionSqlParam, string HocVienId, DateTime TuNgay, DateTime DenNgay, string KetQuaDaoTaoId)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            string NewID = System.Guid.NewGuid().ToString();
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                string Query = " select count(*) from DT_KHOAHOC kh inner join DT_KETQUADAOTAO kqdt on (kqdt.trangthai = " + ActionSqlParam.SpecialChar + "TrangThaiDangKy1 and kqdt.khoahocdangky_id = kh.id) or (kqdt.trangthai > " + ActionSqlParam.SpecialChar + "TrangThaiDangKy2 and kqdt.khoahocduyet_id = kh.id) " +
+                                " where kh.trangthai <> " + ActionSqlParam.SpecialChar + "TrangThaiKhoaHoc and (" + ActionSqlParam.SpecialChar + "KetQuaDaoTaoId1 is null or kqdt.id <> " + ActionSqlParam.SpecialChar + "KetQuaDaoTaoId2) and kqdt.hocvien_id = " + ActionSqlParam.SpecialChar + "HocVienId and kh.ngaykhaigiangdukien < " + ActionSqlParam.SpecialChar + "DenNgay and kh.ngaybegiangdukien > " + ActionSqlParam.SpecialChar + "TuNgay ";
+
+                Collection<DbParam> ColDbParams = new Collection<DbParam>() {
+                new DbParam("TrangThaiDangKy1", (int)DT_KetQuaDaoTaoCls.eTrangThai.Moi),
+                new DbParam("TrangThaiDangKy2", (int)DT_KetQuaDaoTaoCls.eTrangThai.Moi),
+                new DbParam("TrangThaiKhoaHoc", (int)DT_KhoaHocCls.eTrangThai.KetThuc),
+                new DbParam("KetQuaDaoTaoId1", KetQuaDaoTaoId),
+                new DbParam("KetQuaDaoTaoId2", KetQuaDaoTaoId),
+                new DbParam("HocVienId", HocVienId),
+                new DbParam("DenNgay", DenNgay),
+                new DbParam("TuNgay", TuNgay)
+            };
+
+                DataSet dsResult = DBService.GetDataSet(ActionSqlParam.Trans, Query, ColDbParams.ToArray());
+                int result = int.Parse(dsResult.Tables[0].Rows[0][0].ToString());
+
+                dsResult.Clear();
+                dsResult.Dispose();
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return result > 0;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override long Count(ActionSqlParamCls ActionSqlParam, DT_KetQuaDaoTaoFilterCls ODT_KetQuaDaoTaoFilter)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                if (ODT_KetQuaDaoTaoFilter == null)
+                {
+                    ODT_KetQuaDaoTaoFilter = new DT_KetQuaDaoTaoFilterCls();
+                }
+                Collection<DbParam>
+                    ColDbParams = new Collection<DbParam>();
+                string Query = " select count(1) from DT_KetQuaDaoTao kqdt left join DT_KhoaHoc kh on kqdt.KHOAHOCDUYET_ID = kh.ID " +
+                    " left join DT_KeHoachLop khl on khl.id = kh.id where 1=1 ";
+                if (!string.IsNullOrEmpty(ODT_KetQuaDaoTaoFilter.KhoaHocDangKy_Id))
+                {
+                    ColDbParams.Add(new DbParam("KHOAHOCDANGKY_ID", ODT_KetQuaDaoTaoFilter.KhoaHocDangKy_Id));
+                    Query += " and kqdt.KHOAHOCDANGKY_ID = " + ActionSqlParam.SpecialChar + "KHOAHOCDANGKY_ID ";
+                }
+                if (!string.IsNullOrEmpty(ODT_KetQuaDaoTaoFilter.KhoaHocDuyet_Id))
+                {
+                    ColDbParams.Add(new DbParam("KHOAHOCDUYET_ID", ODT_KetQuaDaoTaoFilter.KhoaHocDuyet_Id));
+                    Query += " and kqdt.KHOAHOCDUYET_ID = " + ActionSqlParam.SpecialChar + "KHOAHOCDUYET_ID ";
+                }
+                if (!string.IsNullOrEmpty(ODT_KetQuaDaoTaoFilter.HocVien_Id))
+                {
+                    ColDbParams.Add(new DbParam("HOCVIEN_ID", ODT_KetQuaDaoTaoFilter.HocVien_Id));
+                    Query += " and kqdt.HOCVIEN_ID = " + ActionSqlParam.SpecialChar + "HOCVIEN_ID ";
+                }
+                if (ODT_KetQuaDaoTaoFilter.TrangThai != null)
+                {
+                    ColDbParams.Add(new DbParam("TRANGTHAI", ODT_KetQuaDaoTaoFilter.TrangThai));
+                    Query += " and kqdt.TRANGTHAI = " + ActionSqlParam.SpecialChar + "TRANGTHAI ";
+                }
+                if (ODT_KetQuaDaoTaoFilter.TuNgay != null)
+                {
+                    ColDbParams.Add(new DbParam("TUNGAY", ODT_KetQuaDaoTaoFilter.TuNgay));
+                    Query += " and khl.KETTHUC >= " + ActionSqlParam.SpecialChar + "TUNGAY ";
+                }
+                if (ODT_KetQuaDaoTaoFilter.TuNgay != null)
+                {
+                    ColDbParams.Add(new DbParam("DENNGAY", ODT_KetQuaDaoTaoFilter.TuNgay));
+                    Query += " and khl.KETTHUC < " + ActionSqlParam.SpecialChar + "DENNGAY ";
+                }
+                if (ODT_KetQuaDaoTaoFilter.LoaiDaoTao != null)
+                {
+                    ColDbParams.Add(new DbParam("LOAIDAOTAO", ODT_KetQuaDaoTaoFilter.LoaiDaoTao));
+                    Query += " and kh.LOAIDAOTAO = " + ActionSqlParam.SpecialChar + "LOAIDAOTAO";
+                }
+                if (ODT_KetQuaDaoTaoFilter.TrangThaiKhoaHoc != null)
+                {
+                    ColDbParams.Add(new DbParam("TRANGTHAIKHOAHOC", ODT_KetQuaDaoTaoFilter.TrangThaiKhoaHoc));
+                    Query += " and kh.TRANGTHAI = " + ActionSqlParam.SpecialChar + "TRANGTHAIKHOAHOC";
+                }
+                long result = long.Parse(DBService.GetDataSet(ActionSqlParam.Trans, Query, ColDbParams.ToArray()).Tables[0].Rows[0][0].ToString());
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+    }
+}

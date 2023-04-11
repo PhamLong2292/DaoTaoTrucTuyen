@@ -1,0 +1,323 @@
+﻿using OneTSQ.Core.Model;
+using OneTSQ.Utility;
+using OneTSQ.TempService;
+using OneTSQ.UploadUtility;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Data;
+using System.Web;
+using Spire.Xls;
+using System.Globalization;
+using OneTSQ.Core.Call.Bussiness.Utility;
+
+namespace OneTSQ.UploadUtility
+{
+    public class ProcessImportHandlerUtility
+    {
+        public enum eFileType
+        {
+            OWNER_USER = 1,
+        }
+        public static void ProcessRequestSessionImportFile(HttpContext context)
+        {
+            Collection<UploadHandlerResultCls>
+              ColUploadHandlerResults = new Collection<UploadHandlerResultCls> { };
+            UploadHandlerResultCls OUploadHandlerResult = new UploadHandlerResultCls();
+            string RealFile = "";
+            string Ext = "";
+            bool IsMulti = false;
+            try
+            {
+                RenderInfoCls ORenderInfo = WebEnvironments.ServerSideCreateRenderInfo();
+                //ORenderInfo.SiteId = "online.onenet";
+                //ORenderInfo.SiteLanguage = "vi";
+                //ORenderInfo.SiteAssetLevelId = "online.onenet";
+                //ORenderInfo.AssetLevelCode = "online.onenet";
+                //context.Response.ContentType = "text/plain";//"application/json";
+                if (context.Request.Files.Count > 1)
+                {
+                    IsMulti = true;
+                }
+                for (int iIndexFile = 0; iIndexFile < context.Request.Files.Count; iIndexFile++)
+                {
+                    HttpPostedFile hpf = context.Request.Files[iIndexFile] as HttpPostedFile;
+                    string FileName = string.Empty;
+                    if (HttpContext.Current.Request.Browser.Browser.ToUpper() == "IE")
+                    {
+                        string[] files = hpf.FileName.Split(new char[] { '\\' });
+                        FileName = files[files.Length - 1];
+                    }
+                    else
+                    {
+                        FileName = hpf.FileName;
+                    }
+                    if (hpf.ContentLength == 0)
+                        continue;
+
+                    RealFile = new System.IO.FileInfo(FileName).Name;
+                    Ext = new System.IO.FileInfo(FileName).Extension;
+                    string SiteId = context.Request["SiteId"];
+
+                    string SecurityCode = WebConfig.GetSecurityCode();
+                    string SessionId = context.Request["SessionId"];
+                    string LoginName = context.Request["LoginName"];
+                    string UserId = context.Request["UserId"];
+                    int filetype = Int32.Parse(context.Request["FileType"]);
+                    string WebPathRootTemp = WebConfig.GetWebPathRootTemp();
+                    string WebHttpRootTemp = WebConfig.GetWebHttpRootTemp();
+
+                    string MultiUpload = context.Request["MultiUpload"];
+                    //string message;
+                    if (string.IsNullOrEmpty(MultiUpload))
+                    {
+                        MultiUpload = "0";
+                    }
+                    switch (filetype)
+                    {
+                        case (int)eFileType.OWNER_USER:
+                            OUploadHandlerResult.InfoMessage = ImportOWNER_USER(ORenderInfo, hpf.InputStream);
+                            break;
+                        default:
+                            OUploadHandlerResult.InfoMessage = string.Format("Không hỗ trợ Import!");
+                            break;
+                    }
+                    ColUploadHandlerResults.Add(OUploadHandlerResult);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (IsMulti == false)
+                {
+                    OUploadHandlerResult.Error = true;
+                    OUploadHandlerResult.InfoMessage = ex.Message.ToString();
+                    string XmlInfo = UploadHandlerResultParser.GetXml(OUploadHandlerResult);
+                    context.Response.Write(XmlInfo);
+                    return;
+                }
+                else
+                {
+                    MultiUploadHandlerResultCls
+                        OMultiUploadHandlerResult = new MultiUploadHandlerResultCls();
+                    OMultiUploadHandlerResult.InfoMessage = ex.Message.ToString();
+                    OMultiUploadHandlerResult.Error = true;
+                    string XmlInfo = MultiUploadHandlerResultParser.GetXml(OMultiUploadHandlerResult);
+                    context.Response.Write(XmlInfo);
+                    return;
+                }
+            }
+            if (IsMulti == false)
+            {
+                string XmlInfo = UploadHandlerResultParser.GetXml(OUploadHandlerResult);
+                context.Response.Write(XmlInfo);
+            }
+            else
+            {
+                string XmlInfo = UploadHandlerResultParser.GetMultiXml(ColUploadHandlerResults.ToArray());
+                MultiUploadHandlerResultCls
+                    OMultiUploadHandlerResult = new MultiUploadHandlerResultCls();
+                OMultiUploadHandlerResult.XmlData = XmlInfo;
+                OMultiUploadHandlerResult.Error = false;
+
+                string XmlData = MultiUploadHandlerResultParser.GetXml(OMultiUploadHandlerResult);
+                context.Response.Write(XmlData);
+            }
+        }
+
+        private static string ImportOWNER_USER(RenderInfoCls ORenderInfo, System.IO.Stream stream)
+        {
+            Workbook workbook = new Workbook();
+            workbook.LoadFromStream(stream);
+            Worksheet worksheet = workbook.Worksheets[0];
+            int num = 0;
+            foreach (CellRange cellRange in worksheet.Rows)
+            {
+                bool flag = num > 0;
+                if (flag)
+                {
+                    bool flag2 = string.IsNullOrEmpty(cellRange.Cells[1].Value);
+                    string result;
+                    if (flag2)
+                    {
+                        result = "Mã không được trống dòng: " + (num + 1).ToString();
+                    }
+                    else
+                    {
+                        bool flag3 = string.IsNullOrEmpty(cellRange.Cells[2].Value);
+                        if (flag3)
+                        {
+                            result = "Tên không được trống dòng: " + (num + 1).ToString();
+                        }
+                        else
+                        {
+                            bool flag4 = string.IsNullOrEmpty(cellRange.Cells[3].Value);
+                            if (flag4)
+                            {
+                                result = "MK không được trống dòng: " + (num + 1).ToString();
+                            }
+                            else
+                            {
+                                bool flag5 = string.IsNullOrEmpty(cellRange.Cells[5].Value);
+                                if (flag5)
+                                {
+                                    result = "Mã khoa phòng không được trống dòng: " + (num + 1).ToString();
+                                }
+                                else
+                                {
+                                    bool flag6 = string.IsNullOrEmpty(cellRange.Cells[9].Value);
+                                    if (flag6)
+                                    {
+                                        result = "Vai trò không được trống dòng: " + (num + 1).ToString();
+                                    }
+                                    else
+                                    {
+                                        bool flag7 = string.IsNullOrEmpty(cellRange.Cells[10].Value);
+                                        if (!flag7)
+                                        {
+                                            goto IL_190;
+                                        }
+                                        result = "Menu không được trống dòng: " + (num + 1).ToString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return result;
+                }
+                IL_190:
+                num++;
+            }
+            for (int j = 1; j < worksheet.Rows.Length; j++)
+            {
+                CellRange cellRange2 = worksheet.Rows[j];
+                string text = "user";
+                string text2 = "sys.admin";
+                string value = cellRange2.Cells[1].Value;
+                string value2 = cellRange2.Cells[2].Value;
+                string value3 = cellRange2.Cells[3].Value;
+                string value4 = cellRange2.Cells[10].Value;
+                bool flag8 = !string.IsNullOrEmpty(value4);
+                if (flag8)
+                {
+                    MenuTemplateCls menuTemplateCls = CoreCallBussinessUtility.CreateBussinessProcess().CreateMenuTemplateProcess().CreateModel(ORenderInfo, value4);
+                    bool flag9 = menuTemplateCls != null;
+                    if (flag9)
+                    {
+                        text = menuTemplateCls.MenuTemplateId;
+                    }
+                }
+                string value5 = cellRange2.Cells[6].Value;
+                bool flag10 = !string.IsNullOrEmpty(value5);
+                if (flag10)
+                {
+                    DashboardCls dashboardCls = CoreCallBussinessUtility.CreateBussinessProcess().CreateDashboardProcess().CreateModel(ORenderInfo, value5);
+                    bool flag11 = dashboardCls != null;
+                    if (flag11)
+                    {
+                        text2 = dashboardCls.DashboardId;
+                    }
+                }
+                string value6 = cellRange2.Cells[9].Value;
+                string text3 = null;
+                bool flag12 = !string.IsNullOrEmpty(value6);
+                if (flag12)
+                {
+                    RoleCls roleCls = CoreCallBussinessUtility.CreateBussinessProcess().CreateRoleProcess().CreateModel(ORenderInfo, value6);
+                    bool flag13 = roleCls != null;
+                    if (flag13)
+                    {
+                        text3 = roleCls.RoleId;
+                    }
+                }
+                string value7 = cellRange2.Cells[4].Value;
+                string frkTitleId = null;
+                bool flag14 = !string.IsNullOrEmpty(value7);
+                if (flag14)
+                {
+                    TitleCls titleCls = CoreCallBussinessUtility.CreateBussinessProcess().CreateTitleProcess().CreateModel(ORenderInfo, value7);
+                    bool flag15 = titleCls != null;
+                    if (flag15)
+                    {
+                        frkTitleId = titleCls.TitleId;
+                    }
+                }
+                string value8 = cellRange2.Cells[5].Value;
+                string frkDepartmentId = null;
+                bool flag16 = !string.IsNullOrEmpty(value8);
+                if (flag16)
+                {
+                    DepartmentCls departmentCls = CoreCallBussinessUtility.CreateBussinessProcess().CreateDepartmentProcess().CreateModel(ORenderInfo, value8);
+                    bool flag17 = departmentCls != null;
+                    if (flag17)
+                    {
+                        frkDepartmentId = departmentCls.DepartmentId;
+                    }
+                }
+                bool flag18 = string.IsNullOrEmpty(value);
+                if (flag18)
+                {
+                    throw new Exception(WebLanguage.GetLanguage(ORenderInfo, "Mã người dùng không hợp lệ"));
+                }
+                bool flag19 = string.IsNullOrEmpty(value2);
+                if (flag19)
+                {
+                    throw new Exception(WebLanguage.GetLanguage(ORenderInfo, "Tên người dùng không hợp lệ"));
+                }
+                bool flag20 = string.IsNullOrEmpty(value3);
+                if (flag20)
+                {
+                    throw new Exception(WebLanguage.GetLanguage(ORenderInfo, "Mật khẩu chưa nhập"));
+                }
+                bool flag21 = string.IsNullOrEmpty(text);
+                if (flag21)
+                {
+                    throw new Exception(WebLanguage.GetLanguage(ORenderInfo, "Chưa chọn menu chức năng"));
+                }
+                bool flag22 = string.IsNullOrEmpty(text2);
+                if (flag22)
+                {
+                    throw new Exception(WebLanguage.GetLanguage(ORenderInfo, "Chưa chọn dashboard chức năng"));
+                }
+                string[] roleIds = new string[]
+                {
+                    text3
+                };
+                string[] itemOwnerIds = new string[]
+                {
+                    "sys"
+                };
+                OwnerUserCls ownerUserCls = new OwnerUserCls();
+                ownerUserCls.OwnerUserId = Guid.NewGuid().ToString();
+                bool flag23 = cellRange2.Cells.Length > 11;
+                if (flag23)
+                {
+                    bool flag24 = !string.IsNullOrEmpty(cellRange2.Cells[11].Value);
+                    if (flag24)
+                    {
+                        ownerUserCls.OwnerUserId = cellRange2.Cells[11].Value;
+                    }
+                }
+                ownerUserCls.LoginName = value;
+                ownerUserCls.FullName = value2;
+                ownerUserCls.frkOwnerId = "sys";
+                ownerUserCls.frkMenuTemplateId = text;
+                ownerUserCls.Password = value3;
+                ownerUserCls.frkTitleId = frkTitleId;
+                ownerUserCls.frkDepartmentId = frkDepartmentId;
+                ownerUserCls.RoleIds = roleIds;
+                ownerUserCls.frkLanguageId = "vi";
+                ownerUserCls.Mobile = cellRange2.Cells[7].Value;
+                ownerUserCls.Email = cellRange2.Cells[8].Value;
+                ownerUserCls.frkDashboardId = text2;
+                ownerUserCls.Active = 1;
+                ownerUserCls.ItemOwnerIds = itemOwnerIds;
+                ownerUserCls.WorkingOwnerId = "sys";
+                CoreCallBussinessUtility.CreateBussinessProcess().CreateOwnerUserProcess().Add(ORenderInfo, ownerUserCls);
+            }
+            return "Đã Import thành công!";
+        }
+    }
+}

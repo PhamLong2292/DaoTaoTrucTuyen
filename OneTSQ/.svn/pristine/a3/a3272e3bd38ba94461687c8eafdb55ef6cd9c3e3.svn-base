@@ -1,0 +1,31 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OneTSQ.Task.Services
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            
+            
+            if (System.Diagnostics.Process.GetProcessesByName(System.IO.Path.GetFileNameWithoutExtension(System.Reflection.Assembly.GetEntryAssembly().Location)).Count() > 1) return;
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Title = "OneTSQ Task Service";
+            Console.WriteLine("OneTSQ Task Service started ...");
+            Console.WriteLine("[Type \"exit\" and hit enter to stop the server]");
+            var command = string.Empty;
+
+            //new LoadChiDinhFromHisQueue().StartService();
+
+            while (command != "exit")
+            {
+                command = Console.ReadLine();
+            }
+
+        }
+    }
+}

@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{2E84367A-6D3F-4F87-9C31-B9896ABB6AED}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OneTSQ.Call.Bussiness.Template</RootNamespace>
+    <AssemblyName>OneTSQ.Call.Bussiness.Template</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="OneTSQ.Core.Model">
+      <HintPath>..\Runtime\web\bin\OneTSQ.Core.Model.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Database.Service">
+      <HintPath>..\CoreDlls\OneTSQ.Database.Service.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="IBussinessProcess.cs" />
+    <Compile Include="Process\Dictionary\DM_NhomKhoaHocTemplate.cs" />
+    <Compile Include="Process\Dictionary\DT_LichLyThuyetChiTietCls.cs" />
+    <Compile Include="Process\Dictionary\IBacSyOwnerUserTemplate.cs" />
+    <Compile Include="Process\Dictionary\IBacSyTemplate.cs" />
+    <Compile Include="Process\Dictionary\IBienBanHoiChanTemplate.cs" />
+    <Compile Include="Process\Dictionary\IBienBanHoiChanToanLichBacSyTemplate.cs" />
+    <Compile Include="Process\Dictionary\IBienBanHoiChanToanLichTemplate.cs" />
+    <Compile Include="Process\Dictionary\IBinhLuanHinhAnhTemplate.cs" />
+    <Compile Include="Process\Dictionary\IButPheTemplate.cs" />
+    <Compile Include="Process\Dictionary\ICaBenhTemplate.cs" />
+    <Compile Include="Process\Dictionary\IChuyenGiaHoiChanTemplate.cs" />
+    <Compile Include="Process\Dictionary\ICommonTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDM_ChuyenKhoaDaoTaoTtTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDM_GiayToDiChuyenGiaoTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDM_KyThuatChuyenGiaoTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDM_TenKhoaHocTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDM_TieuChiThoiGianDaoTaoTtTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDM_TieuChiThoiLuongDaoTaoTtTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDM_TieuChuanThamGiaKhoaHocTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDM_TrangThietBiTruyenHinhTtTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDM_YKienBenhVienTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDT_BcTongKetCongTacDaoTaoTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDT_DaoTaoVienTruongTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDT_DiemDanhLyThuyetTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDT_DiemDanhThucHanhTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDT_HocVienTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDT_KeHoachLopTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDT_KetQuaChuyenGiaoTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDT_KetQuaDaoTaoTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDT_KhoaHocTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDT_LichChuyenGiaoChiTietTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDT_LichChuyenGiaoTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDT_LichLyThuyetChiTietTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDT_LichLyThuyetTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDT_LichThucHanhChiTietTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDT_LichThucHanhTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDT_TaiLieuChuyenGiaoTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDT_TaiLieuTemplate.cs" />
+    <Compile Include="Process\Dictionary\IDT_VanBangTemplate.cs" />
+    <Compile Include="Process\Dictionary\IHinhAnhTemplate.cs" />
+    <Compile Include="Process\Dictionary\IKetQuaXetNghiemChiTietTemplate.cs" />
+    <Compile Include="Process\Dictionary\IKetQuaXetNghiemTemplate.cs" />
+    <Compile Include="Process\Dictionary\ILapLichTepDinhKemTemplate.cs" />
+    <Compile Include="Process\Dictionary\ILapLichThanhVienHoiChanTemplate.cs" />
+    <Compile Include="Process\Dictionary\ILichHoiChanTemplate.cs" />
+    <Compile Include="Process\Dictionary\INoiDungHoiChanTemplate.cs" />
+    <Compile Include="Process\Dictionary\IPhieuDanhGiaChatLuongDaoTaoTemplate.cs" />
+    <Compile Include="Process\Dictionary\ITaiLieuTemplate.cs" />
+    <Compile Include="Process\Dictionary\ITepDinhKemBlHinhAnhTemplate.cs" />
+    <Compile Include="Process\Dictionary\ITepDinhKemTemplate.cs" />
+    <Compile Include="Process\Dictionary\ITepTinTemplate.cs" />
+    <Compile Include="Process\Dictionary\IYKienChuyenGiaTemplate.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OneTSQ.Model\OneTSQ.Model.csproj">
+      <Project>{69c9d595-0157-4618-a501-cac1a4ec3525}</Project>
+      <Name>OneTSQ.Model</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy $(TargetPath) E:\OneTSQ\Runtime\web\bin
+copy $(TargetPath) E:\OneTSQ\CoreDlls
+
+</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

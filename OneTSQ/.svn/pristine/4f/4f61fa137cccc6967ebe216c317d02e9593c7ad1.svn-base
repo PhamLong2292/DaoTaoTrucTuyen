@@ -1,0 +1,855 @@
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using OneTSQ.Call.Bussiness.Utility;
+using OneTSQ.Core.Call.Bussiness.Utility;
+using OneTSQ.Model;
+using OneTSQ.Utility;
+using OneTSQ.CheckPermissionUtility;
+using OneTSQ.Permission;
+using OneMES3.DM.Model;
+using OneTSQ.Core.Model;
+
+namespace OneTSQ.WebParts
+{
+    public class PhieuPhanTichNguyenNhanSuCo : ObjectWebPartTemplate
+    {
+        public override string WebPartId { get { return StaticWebPartId; } }
+        public static string StaticWebPartId = "PhieuPhanTichNguyenNhanSuCo";
+        public override string WebPartTitle { get { return "Phiếu phân tích nguyên nhân sự cố"; } }
+        public override string Description { get { return "Phiếu phân tích nguyên nhân sự cố"; } }
+        public override string[] CheckPermissionWebPartIds
+        {
+            get
+            {
+                return new string[] { StaticWebPartId, PhieuPhanTichNguyenNhanSuCo.StaticWebPartId };
+            }
+        }
+        public override void RegAjaxPro(RenderInfoCls ORenderInfo, System.Web.UI.Page Page)
+        {
+            AjaxPro.Utility.RegisterTypeForAjax(typeof(PhieuPhanTichNguyenNhanSuCo), Page);
+        }
+        #region Vẽ giao diện
+        public override AjaxOut Draw(SiteParam OSiteParam, RenderInfoCls ORenderInfo)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+            try
+            {
+                OwnerUserCls user = WebSessionUtility.GetCurrentLoginUser(OSiteParam);
+                string SuCoYKhoaId = WebEnvironments.Request("id");
+                #region Html
+                string html =
+                    "<form action='javascript:SaveThongTin();'> \r\n" +
+                    "    <div id=\"divTopButton\" class='col-lg-12' style='margin-top: 10px; padding-bottom: 10px;'> \r\n" +
+                    "       <div style='float:left; padding:0;' class='col-md-10'> \r\n" +
+                    "           <input type='button' id='btnLuu' title='Lưu' class='btn btn-primary' value='" + WebLanguage.GetLanguage(OSiteParam, "Lưu") + "' onclick='javascript:Clear();' style='float:left; margin-left: 20px;'>\r\n" +
+                    "           <input type='submit' id='btnTai' title='Tải' class='btn btn-primary' value='" + WebLanguage.GetLanguage(OSiteParam, "Tải") + "' style='float:left; margin-left: 20px;'>\r\n" +
+                    "           <input type='button' id='btnHoanTat' title='Hoàn tất' class='btn btn-primary' value='" + WebLanguage.GetLanguage(OSiteParam, "Hoàn tất") + "' onclick=';' style='float:left; margin-left: 20px;'>\r\n" +
+                    "       </div> \r\n" +
+                    "       <div id='divPrintButton' style='margin-top:5px; float:right; padding:0;' class='col-md-2' > \r\n" +
+                    "       </div> \r\n" +
+                    "   </div>\r\n" +
+                    "   <div class='row'>\r\n" +
+                    "       <div class='col-lg-12'>\r\n" +
+                    "           <div class='ibox float-e-margins'>\r\n" +
+                    "               <div class='ibox-title'>\r\n" +
+                    "                   <h5>" + WebLanguage.GetLanguage(OSiteParam, "Chi tiết phiếu phân tích nguyên nhân sự cố") + "</h5>\r\n" +
+                    "               </div>\r\n" +
+                    "               <div class=\"ibox-content\" style=\"border: 0; \"> \r\n" +
+                                            DrawDangKy(ORenderInfo, SuCoYKhoaId).HtmlContent +
+                    "               </div>\r\n" +
+                    "           </div>\r\n" +
+                    "       </div>\r\n" +
+                    "   </div>\r\n" +
+                    "</form>\r\n" +
+                #region Phần hiển thị popup
+                    "<div id=\"divFormModal\" class=\"modal fade\" style=\"overflow: hidden\" role=\"dialog\" aria-labelledby=\"largeModal\" aria-hidden=\"true\" data-backdrop=\"static\">\r\n" +
+                    "    <div class=\"modal-dialog\" style='width:90%; height:90%;'>\r\n" +
+                    "       <div class=\"modal-content\" style='width:100%; height:100%; position: relative;'>\r\n" +
+                    "           <div class=\"panel-heading\">\r\n" +
+                    "               <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\r\n" +
+                    "               <h2 class=\"modal-title\" id=\"ModalTitle\"></h2>\r\n" +
+                    "           </div> \r\n" +
+                    "           <div class=\"modal-body\" id=\"divModalContent\" style='width:100%; padding-top:0; position: absolute; top:50px; bottom:0px;'></div> \r\n" +
+                    "        </div> \r\n" +
+                    "    </div> \r\n" +
+                    "</div> \r\n";
+                #endregion
+                #endregion Html
+                #region javaScript
+                string js =
+                    "<script language=\"javascript\">\r\n" +
+                    "   RenderInfo=CreateRenderInfo();\r\n" +
+                    "   var SuCoYKhoaId='" + SuCoYKhoaId + "';\r\n" +
+                    "   $(document).ready(function() \r\n" +
+                    "   {\r\n" +
+                    "     $('#divPrintButton').html(DrawPrintButton());\r\n" +
+                    "     $('.datepicker').datetimepicker({ \r\n" +
+                    "         format: 'DD/MM/YYYY' \r\n" +
+                    "     }); \r\n" +
+                    "     CallInitSelect2('cbbChucDanh', '" + WebEnvironments.GetRemoteProcessDataUrl(ChucDanhService.StaticServiceId) + "', '" + WebLanguage.GetLanguage(OSiteParam, "Chức danh") + "');\r\n" +
+                    "       ShowTrangThai();\r\n" +
+                    "   });\r\n" +
+                #region Truyền id đăng ký cho nút print
+                    "function OnWebPartLoad(reportID)\r\n" +
+                    "{\r\n" +
+                    "   SuCoYKhoaId = document.getElementById('hdSuCoYKhoaId').value;\r\n" +
+                    "   if(SuCoYKhoaId == '')\r\n" +
+                    "   {\r\n" +
+                    "       callGallAlert('" + WebLanguage.GetLanguage(OSiteParam, "Bạn cần lưu lại thông tin đăng ký trước khi in Đơn đăng ký học.") + "');\r\n" +
+                    "       return true;\r\n" +
+                    "   }\r\n" +
+                    "   return SuCoYKhoaId;\r\n" +
+                    "}\r\n" +
+                #endregion Truyền id đăng ký cho nút print
+                #region Show trạng thái 
+                    "function ShowTrangThai(){\r\n" +
+                    "     RenderInfo=CreateRenderInfo();\r\n" +
+                    "     $('#aTrangThai').html(OneTSQ.WebParts.PhieuPhanTichNguyenNhanSuCo.ShowTrangThai(RenderInfo, SuCoYKhoaId).value);\r\n" +
+                    "}\r\n" +
+                //Fill giá trị theo biểu thức vào trường mã 
+                    "   function txtMa_onkeydown(value){\r\n" +
+                    "       if($('#txtMa').val() == '') $('#txtMa').val(value);\r\n" +
+                    "   }\r\n" +
+                #endregion
+                #region Refresh form về trạng thái mới
+                    "function Clear()\r\n" +
+                    "{\r\n" +
+                    "   window.location.href = '" + WebScreen.BuildUrl(OSiteParam, WebSessionUtility.GetCurrentLoginUser(OSiteParam).OwnerCode, StaticWebPartId, new WebParamCls[] { }) + "';\r\n" +
+                    "}\r\n" +
+                #endregion Refresh form về trạng thái mới
+                #region Save Thông tin đăng ký
+                    "function SaveThongTin()\r\n" +
+                    "{\r\n" +
+                    "     var tieuChuan = [];\r\n" +
+                    "     $('.clsTieuChuan').each(function(index, element/*this*/) {\r\n" +
+                    "         if (element.checked){\r\n" +
+                    "             tieuChuan.push(element.id);\r\n" +
+                    "         }\r\n" +
+                    "     });\r\n" +
+                    "     SuCoYKhoaId = document.getElementById('hdSuCoYKhoaId').value;\r\n" +
+                    "     RenderInfo=CreateRenderInfo();\r\n" +
+                    "     AjaxOut = OneTSQ.WebParts.PhieuPhanTichNguyenNhanSuCo.SaveThongTin(RenderInfo, SuCoYKhoaId).value;\r\n" +
+                    "     if(AjaxOut.Error)\r\n" +
+                    "     {\r\n" +
+                    "           callGallAlert(AjaxOut.InfoMessage);\r\n" +
+                    "           return;\r\n" +
+                    "     }\r\n" +
+                    "     if(AjaxOut.RetExtraParam1 != '')\r\n" +
+                    "     {\r\n" +
+                    "           document.getElementById('hdSuCoYKhoaId').value = SuCoYKhoaId = AjaxOut.RetExtraParam1;\r\n" +
+                    "           $('#btnXoa').show();\r\n" +
+                    "           txtMa.disabled=true;\r\n" +
+                    "           AddHistory(SuCoYKhoaId, '" + WebPartTitle + "', 'Thêm mới', 'Tác vụ form');\r\n" +
+                    "     }\r\n" +
+                    "     else\r\n" +
+                    "           AddHistory(SuCoYKhoaId, '" + WebPartTitle + "', 'Cập nhật', 'Tác vụ form');\r\n" +
+                    "     toastr.info(AjaxOut.InfoMessage);\r\n" +
+                    "}\r\n" +
+                #endregion Save Thông tin đăng ký
+                #region Xóa Thông tin đăng ký
+                    "function DeleteThongTin()\r\n" +
+                    "{\r\n" +
+                    "   SuCoYKhoaId = document.getElementById('hdSuCoYKhoaId').value;\r\n" +
+                    "   swal({\r\n" +
+                    "           title: \"" + WebLanguage.GetLanguage(OSiteParam, "Thông báo") + "?\",\r\n" +
+                    "           text: \"" + WebLanguage.GetLanguage(OSiteParam, "Bạn có chắn chắn xóa đăng ký này không?") + "\",\r\n" +
+                    "           type: \"warning\",\r\n" +
+                    "           showCancelButton: true,\r\n" +
+                    "           confirmButtonClass: \"btn-danger\",\r\n" +
+                    "           confirmButtonText: \"" + WebLanguage.GetLanguage(OSiteParam, "Xóa") + "\",\r\n" +
+                    "           cancelButtonText: \"" + WebLanguage.GetLanguage(OSiteParam, "Hủy bỏ") + "\",\r\n" +
+                    "           closeOnConfirm: true,\r\n" +
+                    "           closeOnCancel: true\r\n" +
+                    "       },\r\n" +
+                    "       function(isConfirm) {\r\n" +
+                    "           if (isConfirm) {\r\n" +
+                    "               RenderInfo=CreateRenderInfo();\r\n" +
+                    "               AjaxOut = OneTSQ.WebParts.PhieuPhanTichNguyenNhanSuCo.DeleteThongTin(RenderInfo, SuCoYKhoaId).value;\r\n" +
+                    "               if(AjaxOut.Error)\r\n" +
+                    "               {\r\n" +
+                    "                   callGallAlert(AjaxOut.InfoMessage);\r\n" +
+                    "                   return;\r\n" +
+                    "               }\r\n" +
+                    "               DeleteHistory(SuCoYKhoaId);\r\n" +
+                    "               window.location.href = AjaxOut.RetUrl;\r\n" +
+                    "           }\r\n " +
+                    "       });\r\n" +
+                    "}\r\n" +
+                #endregion Xóa Thông tin đăng ký
+
+                #region Bắt sự kiện thay đổi textbox mã số
+                    "   function txtMa_onchange(sender){\r\n" +
+                    "       SuCoYKhoaId = document.getElementById('hdSuCoYKhoaId').value;\r\n" +
+                    "       maHocVien = sender.value;\r\n" +
+                    "       if(SuCoYKhoaId == '' && maHocVien != '')\r\n" +//Nếu đăng ký chưa được tạo thì load động thông tin học viên theo mã được nhập
+                    "       {\r\n" +
+                    "           RenderInfo=CreateRenderInfo();\r\n" +
+                    "           AjaxOut = OneTSQ.WebParts.PhieuPhanTichNguyenNhanSuCo.ChiTietPhieuBaoCao(RenderInfo, SuCoYKhoaId).value;\r\n" +
+                    "           if(!AjaxOut.Error)\r\n" +
+                    "           {\r\n" +
+                    "               $('#divHocVien').html(AjaxOut.HtmlContent);\r\n" +
+                    "               $('.datepicker').datetimepicker({ \r\n" +
+                    "                   format: 'DD/MM/YYYY' \r\n" +
+                    "               }); \r\n" +
+                    "               CallInitSelect2('cbbChuyenMon', '" + WebEnvironments.GetRemoteProcessDataUrl(ChuyenMonService.StaticServiceId) + "', '" + WebLanguage.GetLanguage(OSiteParam, "Chuyên môn") + "');\r\n" +
+                    "           }\r\n" +
+                    "       }\r\n" +
+                    "   }\r\n" +
+                #endregion Bắt sự kiện thay đổi textbox mã học viên
+
+                #region Điền thông tin học viên theo mã học viên được chọn trên danh sách học viên gợi ý 
+                    "   function FillHocVienInfo(maHocVien){\r\n" +
+                    "       SuCoYKhoaId = document.getElementById('hdSuCoYKhoaId').value;\r\n" +
+                    "       if(maHocVien != '')\r\n" +//Load động thông tin học viên theo mã được nhập
+                    "       {\r\n" +
+                    "           RenderInfo=CreateRenderInfo();\r\n" +
+                    "           AjaxOut = OneTSQ.WebParts.PhieuPhanTichNguyenNhanSuCo.ChiTietPhieuBaoCao(RenderInfo, null, maHocVien, SuCoYKhoaId).value;\r\n" +
+                    "           if(!AjaxOut.Error)\r\n" +
+                    "           {\r\n" +
+                    "               $('#divHocVien').html(AjaxOut.HtmlContent);\r\n" +
+                    "               $('.datepicker').datetimepicker({ \r\n" +
+                    "                   format: 'DD/MM/YYYY' \r\n" +
+                    "               }); \r\n" +
+                    "               CallInitSelect2('cbbChuyenMon', '" + WebEnvironments.GetRemoteProcessDataUrl(ChuyenMonService.StaticServiceId) + "', '" + WebLanguage.GetLanguage(OSiteParam, "Chuyên môn") + "');\r\n" +
+                    "           }\r\n" +
+                    "       }\r\n" +
+                    "       $('#divFormModal').modal('hide');\r\n" +
+                    "   }\r\n" +
+                #endregion Điền thông tin học viên theo mã học viên được chọn trên danh sách học viên gợi ý
+
+                #region Hiển thị popup danh sách học viên theo 4 tiếu chí: Họ tên, ngày sinh, địa chỉ, giới tính
+                    "   function ShowPopupHocViens(){\r\n" +
+                    "       NguyenNhanSuCoId = document.getElementById('hdNguyenNhanSuCoId').value;\r\n" +
+                    "       hoTen = document.getElementById('txtHoTen').value;\r\n" +
+                    "       gioiTinh = $(\"input[name='GioiTinh']\").filter(':checked').val();\r\n" +
+                    "       ngaySinh = document.getElementById('dtNgaySinh').value;\r\n" +
+                    "       diaChiHanhChinh = document.getElementById('cbbDiaChiHanhChinh').value;\r\n" +
+                    "       if(NguyenNhanSuCoId == '' && hoTen != '' && ngaySinh != '' && diaChiHanhChinh != '')\r\n" +
+                    "       {\r\n" +
+                    "           RenderInfo=CreateRenderInfo();\r\n" +
+                    "           AjaxOut = OneTSQ.WebParts.DT_DangKy.PopupHocViens(RenderInfo, hoTen, gioiTinh, ngaySinh, diaChiHanhChinh).value;\r\n" +
+                    "           if(AjaxOut.Error)\r\n" +
+                    "           {\r\n" +
+                    "               callGallAlert(AjaxOut.InfoMessage);\r\n" +
+                    "               return;\r\n" +
+                    "           }\r\n" +
+                    "           if(AjaxOut.RetObject > 0)\r\n" +
+                    "           {\r\n" +
+                    "               document.getElementById('divModalContent').innerHTML=AjaxOut.HtmlContent;\r\n" +
+                    "               document.getElementById('ModalTitle').innerHTML= '<span class=\"fa fa-pencil-square-o\">" + WebLanguage.GetLanguage(OSiteParam, "Danh sách học viên gợi ý") + "</span>';\r\n" +
+                    "               $('#divFormModal').modal('show');\r\n" +
+                    "           }\r\n" +
+                    "       }\r\n" +
+                    "   }\r\n" +
+                #endregion Bắt sự kiện thay đổi textbox mã học viên
+
+                    "</script>\r\n";
+                #endregion javaScript
+                RetAjaxOut.HtmlContent = WebEnvironments.ProcessHtml(html) + WebEnvironments.ProcessJavascript(js);
+
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+        public static AjaxOut DrawDangKy(RenderInfoCls ORenderInfo, string NguyenNhanSuCoId)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+            try
+            {
+                SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+                WebSession.CheckSessionTimeOut(ORenderInfo);
+               
+                string Html =
+                "               <input id='hdNguyenNhanSuCoId' type='hidden' value=''>\r\n" +
+                "               <div class=\"row\" style='margin-left: 10px;'>\r\n" +
+                "                   <div class=\"col-md-2\">\r\n" +
+                "                       <div class=\"form-group\">\r\n" +
+                                            WebLanguage.GetLanguage(OSiteParam, "Số báo cáo/ Mã số sự cố:") +
+                "                           <input id='dtMaSuCo' required type='text' value='' class='form-control valueForm'>\r\n" +
+                "                       </div>\r\n" +
+                "                   </div>\r\n" +
+                "                   <div class=\"col-md-2\">\r\n" +
+                "                       <div class=\"form-group\">\r\n" +
+                                            WebLanguage.GetLanguage(OSiteParam, "Người lập:") +
+                "                           <select id = 'cbbNguoiLap' class='form-control valueForm' title = '" + WebLanguage.GetLanguage(OSiteParam, "Người lập") + "'>\r\n" +
+                "                           </select>\r\n"+
+                "                       </div> \r\n" +
+                "                   </div>\r\n" +
+                "                   <div class=\"col-md-2\">\r\n" +
+                "                       <div class=\"form-group\">\r\n" +
+                                            WebLanguage.GetLanguage(OSiteParam, "Chức danh:") +
+                "                           <select id = 'cbbChucDanh' class='form-control valueForm' title = '" + WebLanguage.GetLanguage(OSiteParam, "Chức danh") + "'>\r\n" +
+                "                           </select>\r\n" +
+                "                       </div> \r\n" +
+                "                   </div>\r\n" +
+                "                   <div class=\"col-md-2\">\r\n" +
+                "                       <div class=\"form-group\">\r\n" +
+                                            WebLanguage.GetLanguage(OSiteParam, "Thời gian lập:") +
+                "                           <input id='dtNgayDangKy' required type='text' value='' class='form-control valueForm datepicker'>\r\n" +
+                "                       </div>\r\n" +
+                "                   </div>\r\n" +
+                "               </div>\r\n" +           
+                "               <div class=\"row\" id='divHocVien'>\r\n" +
+                                    ChiTietPhieuBaoCao(ORenderInfo, NguyenNhanSuCoId).HtmlContent +
+                "               </div>\r\n";
+                Html = WebEnvironments.ProcessHtml(Html);
+                RetAjaxOut.HtmlContent = Html;
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+        public static AjaxOut ChiTietPhieuBaoCao(RenderInfoCls ORenderInfo, string sucoykhoaid)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+            try
+            {
+                SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+                WebSession.CheckSessionTimeOut(ORenderInfo);
+                string Html =
+                "                   <div class=\"ibox float-e-margins col-md-12\">\r\n" +
+                "                       <div class=\"ibox-title\">\r\n" +
+                "                           <h5>" + WebLanguage.GetLanguage(OSiteParam, "A. DÀNH CHO NHÂN VIÊN CHUYÊN TRÁCH") + "</h5>\r\n" +
+                "                           <div class=\"ibox-tools\">\r\n" +
+                "                               <a class=\"collapse-link\">\r\n" +
+                "                                   <i class=\"fa fa-chevron-up\"></i>\r\n" +
+                "                               </a>\r\n" +
+                "                           </div>\r\n" +
+                "                       </div>\r\n" +
+                "                       <div class=\"ibox-content col-md-12\">\r\n" +
+                "                           <div class='row'>\r\n" +
+                "                               <div class=\"col-md-12\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "2.Người bệnh: ") + "</label></br>\r\n" +
+                "                                       <textarea  id='txtMoTaChiTiet' type='text' style='z-index: 0; height: 150px;' required value='' class='form-control valueForm'></textarea>\r\n" +
+                "                                   </div> \r\n" +
+                "                               </div>\r\n" +
+                "                           </div>\r\n" +
+                "                           <div class='row'>\r\n" +
+                "                               <div class=\"col-md-12\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                       <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "II.Phân loại sự cố theo nhóm sự cố(Incident type") + "</label>\r\n" +
+                "                                   </div> \r\n" +
+                "                               </div>\r\n" +
+                "                           </div>\r\n" +
+                "                           <div class='row'>\r\n" +
+                "                               <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "1.Thực hiện quy trình kỹ thuật thủ") + "</label>\r\n" +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">Không có sự đồng ý của người bệnh/người nhà(đối với những kỹ thuật, thủ thuật quy định phải ký cam kết) </label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl1\" type = \"checkbox\" name=\"khambenh\" value=\"\">Không thực hiện khi có chỉ định</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl2\" type = \"checkbox\" name=\"cdha\" value=\"\">Thực hiện sai người bệnh</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Thực hiện sai thủ thuật/quy trình/phương pháp điều trị</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Thực hiện sai vị trí phẫu thuật/thủ thuật</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Bỏ sót dụng cụ, vật tư tiêu hao trong quá trình phẫu thuật</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Tử vong trong thai kỳ</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Tử vong khi sinh</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Tử vong sơ sinh</label></br> " +
+                "                                   </div> \r\n" +
+                "                                </div>\r\n" +
+                "                                <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "2.Nhiễm khuẩn bệnh viện:") + "</label></br>\r\n" +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">Nhiễm khuẩn huyết </label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl1\" type = \"checkbox\" name=\"khambenh\" value=\"\">Viêm phổi</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl2\" type = \"checkbox\" name=\"cdha\" value=\"\">Các loại nhiễm khuẩn khác</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Nhiễm khuẩn vết mổ</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Nhiễm khuẩn tiết niệu</label></br> " +
+                "                                   </div> \r\n" +
+                "                                </div>\r\n" +
+                "                           </div>\r\n" +    
+                "                           <div class='row'>\r\n" +
+                "                               <div class=\"col-md-6\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "3.Thuốc và dịch truyền:") + "</label></br>\r\n" +
+                "                                   <div class='row'>\r\n" +
+                "                                       <div class=\"col-md-6\">\r\n" +
+                "                                           <div class=\"form-group\">\r\n" +
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">Cấp phát sai thuốc dịch truyền</label></br> " +
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl1\" type = \"checkbox\" name=\"khambenh\" value=\"\">Thiếu thuốc</label></br> " +
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl2\" type = \"checkbox\" name=\"cdha\" value=\"\">Sai liều, sai hàm lượng</label></br> " +
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Sai thời gian</label></br> " +
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Sai y lệnh</label></br> " +
+                "                                           </div> \r\n" +
+                "                                       </div>\r\n" +
+                "                                       <div class=\"col-md-6\">\r\n" +
+                "                                           <div class=\"form-group\">\r\n" +          
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Bỏ sót thuốc/liều thuốc</label></br> " +
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Sai thuốc</label></br> " +
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Sai người bệnh</label></br> " +
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Sai đường dùng</label></br> " +
+                "                                           </div> \r\n" +
+                "                                       </div>\r\n" +
+                "                                   </div>\r\n" +
+                "                                </div>\r\n" +
+                "                                <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "4.Máu và các chế phẩm máu: ") + "</label></br>\r\n" +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">Phản ứng phụ, tai biến khi truyền máu</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl1\" type = \"checkbox\" name=\"khambenh\" value=\"\">Truyền máu nhầm, chế phẩm máu</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl2\" type = \"checkbox\" name=\"cdha\" value=\"\">Truyền sai liều, sai thời điểm</label></br> " +
+                "                                   </div> \r\n" +
+                "                                </div>\r\n" +
+                "                           </div>\r\n" +
+                "                           <div class='row'>\r\n" +
+                "                               <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "5.Thiết bị y tế: ") + "</label></br>\r\n" +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Thiếu thông tin hướng dẫn sử dụng</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Lỗi thiết bị</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Thiếu thiết bị hoặc không phù hợp</label></br> " +
+                "                                   </div> \r\n" +
+                "                                </div>\r\n" +
+                "                                <div class=\"col-md-6\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "6.Hành vi: ") + "</label></br>\r\n" +
+                "                                   <div class='row'>\r\n" +
+                "                                       <div class=\"col-md-6\">\r\n" +
+                "                                           <div class=\"form-group\">\r\n" +                         
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">Khuynh hướng tự gây gại, tự tử</label></br> " +
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl1\" type = \"checkbox\" name=\"khambenh\" value=\"\">Quấy rối tình dục bởi nhân viên</label></br> " +
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl2\" type = \"checkbox\" name=\"cdha\" value=\"\">Quấy rối tình dục bởi người bệnh/khách đến thăm</label></br> " +
+                "                                           </div> \r\n" +
+                "                                       </div> \r\n" +
+                 "                                      <div class=\"col-md-6\">\r\n" +
+                "                                          <div class=\"form-group\">\r\n" +
+                "                                             <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">Xâm hại cơ thể bởi người bệnh/khác đến thăm</label></br> " +
+                "                                             <label class=\"checkbox-inline\"><input  id = \"optradioHl1\" type = \"checkbox\" name=\"khambenh\" value=\"\">Có hành động tử tự</label></br> " +
+                "                                             <label class=\"checkbox-inline\"><input  id = \"optradioHl2\" type = \"checkbox\" name=\"cdha\" value=\"\">Trốn viện</label></br> " +
+                "                                          </div> \r\n" +
+                "                                       </div> \r\n" +
+                "                                   </div>\r\n" +
+                "                                </div>\r\n" +
+                "                           </div>\r\n" +
+                "                           <div class='row'>\r\n" +
+                "                               <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "7.Tai nạn đối với người bệnh: ") + "</label></br>\r\n" +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Tai nạn</label></br> " +
+                "                                   </div> \r\n" +
+                "                                </div>\r\n" +
+                "                                <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "8.Hạ tầng cơ sở: ") + "</label></br>\r\n" +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">Bị hư hỏng, bị lỗi</label> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl1\" type = \"checkbox\" name=\"khambenh\" value=\"\">Thiếu hoặc không phù hợp</label>" +
+                "                                   </div> \r\n" +
+                "                                </div>\r\n" +
+                "                           </div>\r\n" +
+                "                           <div class='row'>\r\n" +
+                "                               <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "9.Quản lý nguồn lực, tổ chức: ") + "</label></br>\r\n" +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Tính phù hợp, đầy đủ của dịch vụ khám bệnh, chữa bệnh</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Tính phù hợp, đầy đủ của nguồn lực</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Tính phù hợp, đầy đủ của chính sách, quy định, quy trình, hướng dẫn chuyên môn</label></br> " +
+                "                                   </div> \r\n" +
+                "                                </div>\r\n" +
+                "                                <div class=\"col-md-6\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "10.Hồ sơ, tài liệu, thủ tục hành chính: ") + "</label></br>\r\n" +
+                "                                   <div class='row'>\r\n" +
+                "                                       <div class=\"col-md-6\">\r\n" +
+                "                                           <div class=\"form-group\">\r\n" +
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">Tài liệu thiếu</label></br> " +
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl1\" type = \"checkbox\" name=\"khambenh\" value=\"\">Tài liệu không rõ ràng, không hoàn chỉnh</label></br> " +
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl2\" type = \"checkbox\" name=\"cdha\" value=\"\">Thời gian chờ đợi khéo dài</label></br> " +
+                "                                           </div> \r\n" +
+                "                                       </div>\r\n" +
+                "                                       <div class=\"col-md-6\">\r\n" +
+                "                                           <div class=\"form-group\">\r\n" +
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl2\" type = \"checkbox\" name=\"cdha\" value=\"\">Cung cấp hồ sơ tài liệu chậm</label></br> " +
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl2\" type = \"checkbox\" name=\"cdha\" value=\"\">Nhầm hồ sơ tài liệu</label></br> " +
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl2\" type = \"checkbox\" name=\"cdha\" value=\"\">Thủ tục hành chính phức tạp</label></br> " +
+                "                                           </div> \r\n" +
+                "                                       </div>\r\n" +
+                "                                   </div>\r\n" +
+                "                                </div>\r\n" +
+                "                           </div>\r\n" +
+                "                           <div class='row'>\r\n" +
+                "                               <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "11.Khác: ") + "</label></br>\r\n" +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Các sựu cố không được đề cập từ mục 1 - 10</label></br> " +
+                "                                   </div> \r\n" +
+                "                                </div>\r\n" +              
+                "                           </div>\r\n" +
+                "                           <div class='row'>\r\n" +
+                "                               <div class=\"col-md-12\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "III.Điều trị/y lệnh đã được thực hiện") + "</label>\r\n" +
+                "                                       <textarea  id='txtMoTaChiTiet' type='text' style='z-index: 0; height: 150px;' required value='' class='form-control valueForm'></textarea>\r\n" +
+                "                                   </div> \r\n" +
+                "                               </div>\r\n" +
+                "                           </div>\r\n" +
+                "                           <div class='row'>\r\n" +
+                "                               <div class=\"col-md-12\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                       <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "IV.Phân loại sự cố theo nhóm nguyên nhân gây ra sự cố(*)") + "</label>\r\n" +
+                "                                   </div> \r\n" +
+                "                               </div>\r\n" +
+                "                           </div>\r\n" +
+                "                           <div class='row'>\r\n" +
+                "                               <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "1.Nhân viên: ") + "</label></br>\r\n" +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">Nhận thức(kiến thức, hiểu biết, quan niệm)</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl1\" type = \"checkbox\" name=\"khambenh\" value=\"\">Thực hành(kỹ năng thực hành không đúng quy định, hướng dẫn chuẩn hoặc thực hành theo quy định, hướng dẫn sai)</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl2\" type = \"checkbox\" name=\"cdha\" value=\"\">Thái độ, hành vi, cảm xúc</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Giao tiếp</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Tâm sinh lý, thể chất, bệnh lý</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Các yếu tố xã hội</label></br> " +                       
+                "                                   </div> \r\n" +
+                "                                </div>\r\n" +
+                "                                <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "2.Người bệnh: ") + "</label></br>\r\n" +           
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">Nhận thức(kiến thức, hiểu biết, quan niệm) </label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl1\" type = \"checkbox\" name=\"khambenh\" value=\"\">Thực hành(kỹ năng thực hành không đúng quy định, hướng dẫn chuẩn hoặc thực hành theo quy định, hướng dẫn sai)</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl2\" type = \"checkbox\" name=\"cdha\" value=\"\">Thái độ, hành vi, cảm xúc</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Giao tiếp</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Tâm sinh lý, thể chất, bệnh lý</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Các yếu tố xã hội</label></br> " +
+                "                                   </div> \r\n" +
+                "                                </div>\r\n" +
+                "                           </div>\r\n" +
+                "                           <div class='row'>\r\n" +
+                "                               <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "3.Môi trường làm việc: ") + "</label></br>\r\n" +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">Cơ sở vật chất, hạ tầng, trang thiết bị</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl1\" type = \"checkbox\" name=\"khambenh\" value=\"\">Khoảng cách đến nơi làm việc quá xa</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl2\" type = \"checkbox\" name=\"cdha\" value=\"\">Đánh giá về độ an toàn, các nguy cơ rủi ro của môi trường làm việc</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Nội quy, quy định và đặc tính kĩ thuật</label></br> " +
+                "                                   </div> \r\n" +
+                "                                </div>\r\n" +
+                "                                <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "4.Tổ chức/dịch vụ: ") + "</label></br>\r\n" +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">Các chính sách, quy trình, hướng dẫn chuyên môn</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl1\" type = \"checkbox\" name=\"khambenh\" value=\"\">Tuân thủ quy trình thực hành chuẩn</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl2\" type = \"checkbox\" name=\"cdha\" value=\"\">Văn hóa tổ chức</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl6\" type = \"checkbox\" name=\"thuthuat\" value=\"\">Làm việc nhóm</label></br> " +
+                "                                   </div> \r\n" +
+                "                                </div>\r\n" +
+                "                           </div>\r\n" +
+                "                           <div class='row'>\r\n" +
+                "                               <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "5.Yếu tố bên ngoài: ") + "</label></br>\r\n" +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">Môi trường tự nhiên</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl1\" type = \"checkbox\" name=\"khambenh\" value=\"\">Sản phẩm, công nghệ và cơ sở hạ tầng</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl2\" type = \"checkbox\" name=\"cdha\" value=\"\">Quy trình, hệ thống dịch vụ</label></br> " +
+                "                                   </div> \r\n" +
+                "                                </div>\r\n" +
+                "                                <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "6.khác: ") + "</label></br>\r\n" +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">Các yếu tố không đề cập trong các mục từ 1 - 5</label></br> " +
+                "                                   </div> \r\n" +
+                "                                </div>\r\n" +
+                "                           </div>\r\n" +
+                "                           <div class='row'>\r\n" +
+                "                               <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "V.Hành động khắc phục sự cố") + "</label>\r\n" +
+                "                                       <textarea  id='txtMoTaChiTiet' type='text' style='z-index: 0; height: 150px;' required value='' class='form-control valueForm'></textarea>\r\n" +
+                "                                   </div> \r\n" +
+                "                               </div>\r\n" +
+                "                               <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "VI.Đề xuất khuến cáo phòng ngừa sự cố") + "</label>\r\n" +
+                "                                       <textarea  id='txtMoTaChiTiet' type='text' style='z-index: 0; height: 150px;' required value='' class='form-control valueForm'></textarea>\r\n" +
+                "                                   </div> \r\n" +
+                "                               </div>\r\n" +
+                "                           </div>\r\n" +
+                "                       </div>\r\n" +
+                "                   </div>\r\n" +
+                //Thông tin sự cố
+                "                   <div class=\"ibox float-e-margins col-md-12\">\r\n" +
+                "                       <div class=\"ibox-title\">\r\n" +
+                "                           <h5>" + WebLanguage.GetLanguage(OSiteParam, "B. DÀNH CHO CẤP QUẢN LÝ") + "</h5>\r\n" +
+                "                           <div class=\"ibox-tools\">\r\n" +
+                "                               <a class=\"collapse-link\">\r\n" +
+                "                                   <i class=\"fa fa-chevron-up\"></i>\r\n" +
+                "                               </a>\r\n" +
+                "                           </div>\r\n" +
+                "                       </div>\r\n" +
+                "                       <div class=\"ibox-content col-md-12\">\r\n" +
+                "                           <div class='row'>\r\n" +
+                "                               <div class=\"col-md-12\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "I.Đánh gia trưởng nhóm chuyên gia") + "</label></br>\r\n" +
+                                                        WebLanguage.GetLanguage(OSiteParam, "Mô tả kết quả phát hiện được(không lặp lại các mô tả sự cố)") + "</br>\r\n" +
+                "                                       <textarea  id='txtMoTaChiTiet' type='text' style='z-index: 0; height: 150px;' required value='' class='form-control valueForm'></textarea>\r\n" +
+                "                                   </div> \r\n" +
+                "                               </div>\r\n" +
+                "                           </div>\r\n" +
+                "                           <div class='row'>\r\n" +
+                "                               <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                                                        WebLanguage.GetLanguage(OSiteParam, "Đã thảo luận đưa ra khuyến cáo/hướng xử lý với người báo cáo:") + "<br>\r\n" +
+                "                                       <label class=\"radio-inline\"><input  id = \"rdlqCo\" type = \"radio\" name=\"optradioHl1\" value=\"1\">Có</label> " +
+                "                                       <label class=\"radio-inline\"><input  id = \"rdlqKhong\" type = \"radio\" name=\"optradioHl1\" value=\"2\">Không</label> " +
+                "                                       <label class=\"radio-inline\"><input  id = \"rdlqKhongGhiNhan\" type = \"radio\" name=\"optradioHl1\" value=\"3\">Không ghi nhận</label> " +
+                "                                   </div> \r\n" +
+                "                               </div> \r\n" +
+                "                               <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                                                        WebLanguage.GetLanguage(OSiteParam, "Phù hợp với các khuyến cáo chính thức được ban hành (Ghi cụ thể khuyến cáo):") + "<br>\r\n" +
+                "                                       <label class=\"radio-inline\"><input  id = \"rdlqCo\" type = \"radio\" name=\"optradioHl2\" value=\"1\">Có</label> " +
+                "                                       <label class=\"radio-inline\"><input  id = \"rdlqKhong\" type = \"radio\" name=\"optradioHl2\" value=\"2\">Không</label> " +
+                "                                       <label class=\"radio-inline\"><input  id = \"rdlqKhongGhiNhan\" type = \"radio\" name=\"optradioHl2\" value=\"3\">Không ghi nhận</label> " +
+                "                                   </div> \r\n" +
+                "                               </div> \r\n" +
+                "                           </div>\r\n" +
+                "                           <div class='row'>\r\n" +
+                "                               <div class=\"col-md-12\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                "                                       <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "II.Đánh mức độ tổn thương") + "</label></br>\r\n" +
+                "                                       <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "1.Trên người bệnh: ") + "</label></br>\r\n" +
+                "                                   </div> \r\n" +
+                "                               </div>\r\n" +
+                "                           </div>\r\n" +
+                "                           <div class='row'>\r\n" +
+                "                               <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                                                       WebLanguage.GetLanguage(OSiteParam, "Chưa xảy ra (NC0) ") + "</br>\r\n" +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">A Tình huống có nguy cơ gây ra sự cố (near miss)</label></br> " +
+                "                                   </div> \r\n" +
+                "                                </div>\r\n" +
+                "                                <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                                                        WebLanguage.GetLanguage(OSiteParam, "Tổn thương nhẹ(NC1) ") + "</br>\r\n" +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">B Sự cố đã xảy ra chưa tác động đến người bệnh</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">C Sự cố đã xảy ra tác động trực tiếp đến người bệnh, chưa gây nguy hại</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">D Sự cố đã xảy ra tác động trực tiếp đến người bệnh, phải cần theo dõi hoặc đã can thiệp điều trị kịp thời nên không gây nguy hại</label></br> " +
+                "                                   </div> \r\n" +
+                "                                </div>\r\n" +
+                "                           </div>\r\n" +
+                "                           <div class='row'>\r\n" +
+                "                               <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                                                       WebLanguage.GetLanguage(OSiteParam, "Tổn thương trung bình(NC2) ") + "</br>\r\n" +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">E Sự cố đã xảy ra nguy hại tạm thời và cần phải can thiệp điều trị</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">F Sự cố đã xảy ra nguy hại tạm thời, cần phải can thiệp điều trị và kéo dài thời gian nằm viện</label></br> " +
+                "                                   </div> \r\n" +
+                "                                </div>\r\n" +
+                "                                <div class=\"col-md-6\">\r\n" +
+                "                                   <div class=\"form-group\">\r\n" +
+                                                        WebLanguage.GetLanguage(OSiteParam, "Tổn thương nặng (NC3)") + "</br>\r\n" +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">G Sự cố đã xảy nguy hại kéo dài, để lại di chứng</label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">H Sự cố đã xảy nguy hại cần phải hồi sức tích cực </label></br> " +
+                "                                      <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">I Sự cố đã xảy ra có ảnh hưởng hoặc trực tiếp gây tử vong</label></br> " +
+                "                                   </div> \r\n" +
+                "                                </div>\r\n" +
+                "                           </div>\r\n" +
+                "                           <div class='row' style='margin-bottom: 50px;'>\r\n" +
+                "                               <div class=\"col-md-6\">\r\n" +
+                "                                   <label style='font-weight: bold;'>" + WebLanguage.GetLanguage(OSiteParam, "2.Trên tổ chức: ") + "</label></br>\r\n" +
+                "                                   <div class='row'>\r\n" +
+                "                                       <div class=\"col-md-6\">\r\n" +
+                "                                           <div class=\"form-group\">\r\n" +                         
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">Tổn hại tài sản</label></br> " +
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl1\" type = \"checkbox\" name=\"khambenh\" value=\"\">Tăng nguồn lực phục vụ cho bệnh viện</label></br> " +
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl2\" type = \"checkbox\" name=\"cdha\" value=\"\">Quan tâm của truyền thông</label></br> " +
+                "                                              <label class=\"checkbox-inline\"><input  id = \"optradioHl2\" type = \"checkbox\" name=\"cdha\" value=\"\">Khiếu nại của người bệnh</label></br> " +
+                "                                           </div> \r\n" +
+                "                                       </div> \r\n" +
+                "                                      <div class=\"col-md-6\">\r\n" +
+                "                                          <div class=\"form-group\">\r\n" +
+                "                                             <label class=\"checkbox-inline\"><input  id = \"optradioHl0\" type = \"checkbox\" name=\"vienphi\" value=\"\">Tổn hại danh tiếng</label></br> " +
+                "                                             <label class=\"checkbox-inline\"><input  id = \"optradioHl1\" type = \"checkbox\" name=\"khambenh\" value=\"\">Can thiệp của pháp luật</label></br> " +
+                "                                             <label class=\"checkbox-inline\"><input  id = \"optradioHl2\" type = \"checkbox\" name=\"cdha\" value=\"\">Khác</label></br> " +
+                "                                          </div> \r\n" +
+                "                                       </div> \r\n" +
+                "                                   </div>\r\n" +
+                "                               </div>\r\n" +
+                "                           </div>\r\n" +
+                "                       </div>\r\n" +
+                "                   </div>\r\n";
+                Html = WebEnvironments.ProcessHtml(Html);
+                RetAjaxOut.HtmlContent = Html;
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+        public static AjaxOut PopupHocViens(RenderInfoCls ORenderInfo, string hoTen, int gioiTinh, string ngaySinh, string diaChiHanhChinh)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+            try
+            {
+                SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+                WebSession.CheckSessionTimeOut(ORenderInfo);
+                DT_HocVienFilterCls filter = new DT_HocVienFilterCls()
+                {
+                    Keyword = hoTen,
+                    GioiTinh = gioiTinh,
+                    NgaySinh = DateTime.ParseExact(ngaySinh, "dd/MM/yyyy", null),
+                    MaDiaChiHanhChinh = diaChiHanhChinh
+                };
+                DT_HocVienCls[] hocViens = CallBussinessUtility.CreateBussinessProcess().CreateDT_HocVienProcess().Reading(ORenderInfo, filter);
+                string html =
+                         "<table class=\"table table-striped table-bordered table-hover\"> \r\n" +
+                         "  <thead> \r\n" +
+                         "      <tr> \r\n" +
+                         "          <th width=30 style='text-align: center;'>" + WebLanguage.GetLanguage(OSiteParam, "STT") + " </th> \r\n" +
+                         "          <th style='text-align: center;'>" + WebLanguage.GetLanguage(OSiteParam, "Mã") + " </th> \r\n" +
+                         "          <th style='text-align: center;'>" + WebLanguage.GetLanguage(OSiteParam, "Họ tên khai sinh") + " </th> \r\n" +
+                         "          <th width=100 style='text-align: center;'>" + WebLanguage.GetLanguage(OSiteParam, "Giới tính") + " </th> \r\n" +
+                         "          <th width=100 style='text-align: center;'>" + WebLanguage.GetLanguage(OSiteParam, "Ngày sinh") + " </th> \r\n" +
+                         "          <th style='text-align: center;'>" + WebLanguage.GetLanguage(OSiteParam, "Nơi sinh") + " </th> \r\n" +
+                         "          <th style='text-align: center;'>" + WebLanguage.GetLanguage(OSiteParam, "Số CMND") + " </th> \r\n" +
+                         "          <th style='text-align: center;'>" + WebLanguage.GetLanguage(OSiteParam, "Số điện thoại") + " </th> \r\n" +
+                         "          <th style='text-align: center;'>" + WebLanguage.GetLanguage(OSiteParam, "Đơn vị công tác") + " </th> \r\n" +
+                         "      </tr> \r\n" +
+                         "  </thead> \r\n" +
+                         "  <tbody> \r\n";
+                for (int iIndex = 0; iIndex < hocViens.Count(); iIndex++)
+                {
+                    TinhThanhCls tinhThanh = null;
+                    if (!string.IsNullOrEmpty(hocViens[iIndex].NOISINH_MA))
+                    {
+                        tinhThanh = OneMES3.DM.Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreateTinhThanhProcess().CreateModel(Model.Common.CreateRenderInfo(ORenderInfo), hocViens[iIndex].NOISINH_MA);
+                    }
+                    DonViCongTacCls donViCongTac = null;
+                    if (!string.IsNullOrEmpty(hocViens[iIndex].DONVICONGTAC_MA))
+                    {
+                        donViCongTac = OneMES3.DM.Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreateDonViCongTacProcess().CreateModel(Model.Common.CreateRenderInfo(ORenderInfo), hocViens[iIndex].DONVICONGTAC_MA);
+                    }
+                    html +=
+                        "       <tr> \r\n" +
+                        "           <td style='text-align: center; vertical-align: middle;'>" + (iIndex + 1) + "</td> \r\n" +
+                        "           <td style='text-align: center; vertical-align: middle;'>" + hocViens[iIndex].MA + "</td> \r\n" +
+                        "           <td style='vertical-align: middle;'><a href='javascript: FillHocVienInfo(\"" + hocViens[iIndex].MA + "\")' title='" + WebLanguage.GetLanguage(OSiteParam, "Chọn học viên") + "'>" + hocViens[iIndex].HOTEN + "</td> \r\n" +
+                        "           <td style='text-align: center; vertical-align: middle;'>" + (hocViens[iIndex].GIOITINH == null ? null : Common.BenhNhan.GioiTinhs[hocViens[iIndex].GIOITINH.Value]) + "</td> \r\n" +
+                        "           <td style='text-align: center; vertical-align: middle;'>" + (hocViens[iIndex].NGAYSINH == null ? null : hocViens[iIndex].NGAYSINH.Value.ToString("dd/MM/yyyy")) + "</td> \r\n" +
+                        "           <td style='vertical-align: middle;'>" + (tinhThanh == null ? null : tinhThanh.Ten) + "</td> \r\n" +
+                        "           <td style='text-align: center; vertical-align: middle;'>" + hocViens[iIndex].CMTND + "</td> \r\n" +
+                        "           <td style='text-align: center; vertical-align: middle;'>" + hocViens[iIndex].DIENTHOAI + "</td> \r\n" +
+                        "           <td style='vertical-align: middle;'>" + (donViCongTac == null ? null : donViCongTac.Ten) + "</td> \r\n" +
+                        "       </tr> \r\n";
+                }
+                html += "   </tbody> \r\n" +
+                        "</table> \r\n";
+                RetAjaxOut.RetObject = hocViens.Count();
+                RetAjaxOut.HtmlContent = WebEnvironments.ProcessHtml(html);
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+        public static string ShowTrangThai(RenderInfoCls ORenderInfo, string SuCoYKhoaId)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+            try
+            {
+                SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+                WebSession.CheckSessionTimeOut(ORenderInfo);
+                DT_KetQuaDaoTaoCls NguyenNhanSuCo = CallBussinessUtility.CreateBussinessProcess().CreateDT_KetQuaDaoTaoProcess().CreateModel(ORenderInfo, SuCoYKhoaId);
+                if (NguyenNhanSuCo != null)
+                    return DT_KetQuaDaoTaoParser.sColorTrangThai[NguyenNhanSuCo.TRANGTHAI];
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+            }
+            return null;
+        }
+        #endregion Vẽ giao diện
+
+        #region Xử lý nghiệp vụ
+        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+        public static AjaxOut GetBoDemValueAndMaHV(RenderInfoCls ORenderInfo)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+            string boDemValue = null;
+            string maHV = null;
+            BoMaCls boMa = CoreCallBussinessUtility.CreateBussinessProcess().CreateBoMaProcess().Reading(ORenderInfo, new BoMaFilterCls() { TableName = "DT_HocVien", FieldName = "Ma" }).FirstOrDefault();
+            if (boMa != null && !string.IsNullOrEmpty(boMa.BIEUTHUC))
+            {
+                while (maHV == null || CallBussinessUtility.CreateBussinessProcess().CreateDT_HocVienProcess().CreateModel(ORenderInfo, maHV) != null)
+                {
+                    if (maHV != null)
+                    {
+                        var boDem = CoreCallBussinessUtility.CreateBussinessProcess().CreateBoDemProcess().CreateModel(ORenderInfo, Model.Common.GetMaBoDem(boMa.BIEUTHUC));
+                        //if (boDem != null)
+                        //{
+                        //    CoreCallBussinessUtility.CreateBussinessProcess().CreateBoDemProcess().UpdateStatus(ORenderInfo, boDem.ID, int.Parse(boDemValue), 1);
+                        //}
+                    }
+                    boDemValue = CoreCallBussinessUtility.CreateBussinessProcess().CreateBoDemProcess().GetValue(ORenderInfo, Model.Common.GetMaBoDem(boMa.BIEUTHUC), Model.Common.GetValueFormat(boMa.BIEUTHUC));
+                    maHV = Model.Common.GetDisplayPart(boMa.BIEUTHUC) + boDemValue;
+                }
+            }
+            RetAjaxOut.RetExtraParam1 = boDemValue;
+            RetAjaxOut.RetExtraParam2 = maHV;
+            return RetAjaxOut;
+        }
+        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+        public static AjaxOut SaveThongTin(RenderInfoCls ORenderInfo, string SuCoYKhoaId)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+            try
+            {
+                SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+                WebSession.CheckSessionTimeOut(ORenderInfo);
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+        [AjaxPro.AjaxMethod(AjaxPro.HttpSessionStateRequirement.ReadWrite)]
+        public static AjaxOut DeleteThongTin(RenderInfoCls ORenderInfo, string SuCoYKhoaId)
+        {
+            AjaxOut RetAjaxOut = new AjaxOut();
+            try
+            {
+                SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+                WebSession.CheckSessionTimeOut(ORenderInfo);
+                CallBussinessUtility.CreateBussinessProcess().CreateDT_KetQuaDaoTaoProcess().Delete(ORenderInfo, SuCoYKhoaId);
+                RetAjaxOut.InfoMessage = WebLanguage.GetLanguage(OSiteParam, "Đã xóa.");
+                string dangKyUrl = WebScreen.BuildUrl(OSiteParam, WebSessionUtility.GetCurrentLoginUser(OSiteParam).OwnerCode, "DT_DangKies", new WebParamCls[] { });
+                RetAjaxOut.RetUrl = dangKyUrl;
+            }
+            catch (Exception ex)
+            {
+                RetAjaxOut.Error = true;
+                RetAjaxOut.InfoMessage = ex.Message.ToString();
+                RetAjaxOut.HtmlContent = ex.Message.ToString();
+            }
+            return RetAjaxOut;
+        }
+        #endregion    
+    }
+}

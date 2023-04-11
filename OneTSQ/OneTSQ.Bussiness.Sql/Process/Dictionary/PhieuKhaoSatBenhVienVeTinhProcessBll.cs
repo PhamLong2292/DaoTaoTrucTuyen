@@ -1,0 +1,433 @@
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Data;
+using OneTSQ.Model;
+using OneTSQ.Bussiness.Template;
+using OneTSQ.Database.Service;
+using OneTSQ.Core.Model;
+
+namespace OneTSQ.Bussiness.Sql
+{
+    public class PhieuKhaoSatBenhVienVeTinhProcessBll : PhieuKhaoSatBenhVienVeTinhTemplate
+    {
+        public override string ServiceId
+        {
+            get
+            {
+                return "SqlPhieuKhaoSatBenhVienVeTinhProcessBll";
+            }
+        }
+        public override PhieuKhaoSatBenhVienVeTinhCls[] Reading(ActionSqlParamCls ActionSqlParam, PhieuKhaoSatBenhVienVeTinhFilterCls OPhieuKhaoSatBenhVienVeTinhFilter)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                if (OPhieuKhaoSatBenhVienVeTinhFilter == null)
+                {
+                    OPhieuKhaoSatBenhVienVeTinhFilter = new PhieuKhaoSatBenhVienVeTinhFilterCls();
+                }
+                Collection<DbParam>
+                    ColDbParams = new Collection<DbParam>();
+                string Query = " select * from PHIEUKHAOSATBVVT where 1=1 ";
+                if (!string.IsNullOrEmpty(OPhieuKhaoSatBenhVienVeTinhFilter.BenhVien_ID))
+                {
+                    ColDbParams.Add(new DbParam("BENHVIEN_ID", OPhieuKhaoSatBenhVienVeTinhFilter.BenhVien_ID));
+                    Query += " and BENHVIEN_ID = " + ActionSqlParam.SpecialChar + "BENHVIEN_ID ";
+                }            
+                if (OPhieuKhaoSatBenhVienVeTinhFilter.TrangThai != null)
+                {
+                    ColDbParams.Add(new DbParam("TRANGTHAI", OPhieuKhaoSatBenhVienVeTinhFilter.TrangThai));
+                    Query += " and TRANGTHAI = " + ActionSqlParam.SpecialChar + "TRANGTHAI ";
+                }
+                Query += " order by THOIGIAN";
+
+                DataSet dsResult =
+                        DBService.GetDataSet(ActionSqlParam.Trans, Query, ColDbParams.ToArray());
+                PhieuKhaoSatBenhVienVeTinhCls[] PhieuKhaoSatBenhVienVeTinhs = PhieuKhaoSatBenhVienVeTinhParser.ParseFromDataTable(dsResult.Tables[0]);
+
+                dsResult.Clear();
+                dsResult.Dispose();
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return PhieuKhaoSatBenhVienVeTinhs;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override PhieuKhaoSatBenhVienVeTinhCls[] PageReading(ActionSqlParamCls ActionSqlParam, PhieuKhaoSatBenhVienVeTinhFilterCls OPhieuKhaoSatBenhVienVeTinhFilter, ref long recordTotal)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                if (OPhieuKhaoSatBenhVienVeTinhFilter == null)
+                {
+                    OPhieuKhaoSatBenhVienVeTinhFilter = new PhieuKhaoSatBenhVienVeTinhFilterCls();
+                }
+                Collection<DbParam>
+                    ColDbParams = new Collection<DbParam>();
+                string Query = "";
+                string recordTotalQuery = "";
+
+                Query = " select * from PHIEUKHAOSATBVVT Where 1=1 ";
+                recordTotalQuery = " select count(1) from PHIEUKHAOSATBVVT Where 1=1 ";
+                if (!string.IsNullOrEmpty(OPhieuKhaoSatBenhVienVeTinhFilter.BenhVien_ID))
+                {
+                    ColDbParams.Add(new DbParam("BENHVIEN_ID", OPhieuKhaoSatBenhVienVeTinhFilter.BenhVien_ID));
+                    Query += " and BENHVIEN_ID = " + ActionSqlParam.SpecialChar + "BENHVIEN_ID ";
+                    recordTotalQuery += " and BENHVIEN_ID = " + ActionSqlParam.SpecialChar + "HINHTHUC_ID ";
+                }          
+                if (!string.IsNullOrEmpty(OPhieuKhaoSatBenhVienVeTinhFilter.Keyword))
+                {
+                    Query += " and (UPPER(MA) like UPPER('%" + OPhieuKhaoSatBenhVienVeTinhFilter.Keyword + "%') OR UPPER(TENKHOA) like UPPER(N'%" + OPhieuKhaoSatBenhVienVeTinhFilter.Keyword + "%'))";
+                    recordTotalQuery += " and (UPPER(MA) like UPPER('%" + OPhieuKhaoSatBenhVienVeTinhFilter.Keyword + "%') OR UPPER(TENKHOA) like UPPER(N'%" + OPhieuKhaoSatBenhVienVeTinhFilter.Keyword + "%'))";
+                }           
+                if (OPhieuKhaoSatBenhVienVeTinhFilter.TrangThai != null)
+                {
+                    ColDbParams.Add(new DbParam("TRANGTHAI", OPhieuKhaoSatBenhVienVeTinhFilter.TrangThai));
+                    Query += " and TRANGTHAI = " + ActionSqlParam.SpecialChar + "TRANGTHAI ";
+                    recordTotalQuery += " and TRANGTHAI = " + ActionSqlParam.SpecialChar + "TRANGTHAI ";
+                }
+                Query += " ORDER BY THOIGIAN " +
+                " OFFSET " + (OPhieuKhaoSatBenhVienVeTinhFilter.PageIndex * OPhieuKhaoSatBenhVienVeTinhFilter.PageSize) + " ROWS " +
+                " FETCH NEXT " + OPhieuKhaoSatBenhVienVeTinhFilter.PageSize + " ROWS ONLY ";
+
+                DataSet dsResult =
+                        DBService.GetDataSet(ActionSqlParam.Trans, Query, ColDbParams.ToArray());
+                PhieuKhaoSatBenhVienVeTinhCls[] PhieuKhaoSatBenhVienVeTinhs = PhieuKhaoSatBenhVienVeTinhParser.ParseFromDataTable(dsResult.Tables[0]);
+                recordTotal = long.Parse(DBService.GetDataSet(ActionSqlParam.Trans, recordTotalQuery, ColDbParams.ToArray()).Tables[0].Rows[0][0].ToString());
+
+                dsResult.Clear();
+                dsResult.Dispose();
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return PhieuKhaoSatBenhVienVeTinhs;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override void Add(ActionSqlParamCls ActionSqlParam, PhieuKhaoSatBenhVienVeTinhCls OPhieuKhaoSatBenhVienVeTinh)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                if (string.IsNullOrEmpty(OPhieuKhaoSatBenhVienVeTinh.ID))
+                {
+                    OPhieuKhaoSatBenhVienVeTinh.ID = System.Guid.NewGuid().ToString();
+                }
+                DBService.Insert(ActionSqlParam.Trans, "PHIEUKHAOSATBVVT",
+                    new DbParam[]{
+                    new DbParam("ID",OPhieuKhaoSatBenhVienVeTinh.ID),
+                    new DbParam("TRANGTHAI",OPhieuKhaoSatBenhVienVeTinh.TRANGTHAI),
+                    new DbParam("MA",OPhieuKhaoSatBenhVienVeTinh.MA),
+                    new DbParam("THOIGIAN",OPhieuKhaoSatBenhVienVeTinh.THOIGIAN),
+                    new DbParam("BENHVIEN_ID",OPhieuKhaoSatBenhVienVeTinh.BENHVIEN_ID),
+                    new DbParam("TENKHOA",OPhieuKhaoSatBenhVienVeTinh.TENKHOA),
+                    new DbParam("NGAYTHANHLAP",OPhieuKhaoSatBenhVienVeTinh.NGAYTHANHLAP),
+                    new DbParam("SOLUONGBACSI",OPhieuKhaoSatBenhVienVeTinh.SOLUONGBACSI),
+                    new DbParam("SOLUONGYSI",OPhieuKhaoSatBenhVienVeTinh.SOLUONGYSI),
+                    new DbParam("SOLUONGDUOCSI",OPhieuKhaoSatBenhVienVeTinh.SOLUONGDUOCSI),
+                    new DbParam("SOLUONGDIEUDUONG",OPhieuKhaoSatBenhVienVeTinh.SOLUONGDIEUDUONG),
+                    new DbParam("SOLUONGKTV",OPhieuKhaoSatBenhVienVeTinh.SOLUONGKTV),
+                    new DbParam("SOLUONGKHAC",OPhieuKhaoSatBenhVienVeTinh.SOLUONGKHAC),
+                    new DbParam("SOGIUONGKEHOACH",OPhieuKhaoSatBenhVienVeTinh.SOGIUONGKEHOACH),
+                    new DbParam("SOGIUONGTHUCTE",OPhieuKhaoSatBenhVienVeTinh.SOGIUONGTHUCTE),
+                    new DbParam("SOBUONGBENH",OPhieuKhaoSatBenhVienVeTinh.SOBUONGBENH),
+                    new DbParam("SOPKTHUTHUAT",OPhieuKhaoSatBenhVienVeTinh.SOPKTHUTHUAT),
+                    new DbParam("SOLANKHAMYHCT",OPhieuKhaoSatBenhVienVeTinh.SOLANKHAMYHCT),
+                    new DbParam("SOBNNOITRU",OPhieuKhaoSatBenhVienVeTinh.SOBNNOITRU),
+                    new DbParam("SOLANTHUTHUAT",OPhieuKhaoSatBenhVienVeTinh.SOLANTHUTHUAT),
+                    new DbParam("TRANGTHIETBI",OPhieuKhaoSatBenhVienVeTinh.TRANGTHIETBI),
+                });
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override void Save(ActionSqlParamCls ActionSqlParam, string ID, PhieuKhaoSatBenhVienVeTinhCls OPhieuKhaoSatBenhVienVeTinh)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                DBService.Update(ActionSqlParam.Trans, "PHIEUKHAOSATBVVT", "ID", ID,
+                    new DbParam[]{
+                    new DbParam("TRANGTHAI",OPhieuKhaoSatBenhVienVeTinh.TRANGTHAI),
+                    new DbParam("MA",OPhieuKhaoSatBenhVienVeTinh.MA),
+                    new DbParam("THOIGIAN",OPhieuKhaoSatBenhVienVeTinh.THOIGIAN),
+                    new DbParam("BENHVIEN_ID",OPhieuKhaoSatBenhVienVeTinh.BENHVIEN_ID),
+                    new DbParam("TENKHOA",OPhieuKhaoSatBenhVienVeTinh.TENKHOA),
+                    new DbParam("NGAYTHANHLAP",OPhieuKhaoSatBenhVienVeTinh.NGAYTHANHLAP),
+                    new DbParam("SOLUONGBACSI",OPhieuKhaoSatBenhVienVeTinh.SOLUONGBACSI),
+                    new DbParam("SOLUONGYSI",OPhieuKhaoSatBenhVienVeTinh.SOLUONGYSI),
+                    new DbParam("SOLUONGDUOCSI",OPhieuKhaoSatBenhVienVeTinh.SOLUONGDUOCSI),
+                    new DbParam("SOLUONGDIEUDUONG",OPhieuKhaoSatBenhVienVeTinh.SOLUONGDIEUDUONG),
+                    new DbParam("SOLUONGKTV",OPhieuKhaoSatBenhVienVeTinh.SOLUONGKTV),
+                    new DbParam("SOLUONGKHAC",OPhieuKhaoSatBenhVienVeTinh.SOLUONGKHAC),
+                    new DbParam("SOGIUONGKEHOACH",OPhieuKhaoSatBenhVienVeTinh.SOGIUONGKEHOACH),
+                    new DbParam("SOGIUONGTHUCTE",OPhieuKhaoSatBenhVienVeTinh.SOGIUONGTHUCTE),
+                    new DbParam("SOBUONGBENH",OPhieuKhaoSatBenhVienVeTinh.SOBUONGBENH),
+                    new DbParam("SOPKTHUTHUAT",OPhieuKhaoSatBenhVienVeTinh.SOPKTHUTHUAT),
+                    new DbParam("SOLANKHAMYHCT",OPhieuKhaoSatBenhVienVeTinh.SOLANKHAMYHCT),
+                    new DbParam("SOBNNOITRU",OPhieuKhaoSatBenhVienVeTinh.SOBNNOITRU),
+                    new DbParam("SOLANTHUTHUAT",OPhieuKhaoSatBenhVienVeTinh.SOLANTHUTHUAT),
+                    new DbParam("TRANGTHIETBI",OPhieuKhaoSatBenhVienVeTinh.TRANGTHIETBI),
+                    });
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override void Delete(ActionSqlParamCls ActionSqlParam, string ID)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                string DelQuery = " Delete from PHIEUKHAOSATBVVT where ID=" + ActionSqlParam.SpecialChar + "ID";
+                DBService.ExecuteNonQuery(ActionSqlParam.Trans, DelQuery,
+                    new DbParam[]
+                    {
+                    new DbParam("ID", ID)
+                    });
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override PhieuKhaoSatBenhVienVeTinhCls CreateModel(ActionSqlParamCls ActionSqlParam, string ID)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                DataSet dsResult =
+                        DBService.GetDataSet(ActionSqlParam.Trans, "select * from PHIEUKHAOSATBVVT where (ID =" + ActionSqlParam.SpecialChar + "ID or MA =" + ActionSqlParam.SpecialChar + "ID)", new DbParam[]{
+                    new DbParam("ID",ID)
+                    });
+                PhieuKhaoSatBenhVienVeTinhCls OPhieuKhaoSatBenhVienVeTinh = null;
+                if (dsResult.Tables[0].Rows.Count > 0)
+                {
+                    OPhieuKhaoSatBenhVienVeTinh = PhieuKhaoSatBenhVienVeTinhParser.ParseFromDataRow(dsResult.Tables[0].Rows[0]);
+                }
+                dsResult.Clear();
+                dsResult.Dispose();
+
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return OPhieuKhaoSatBenhVienVeTinh;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override string Duplicate(ActionSqlParamCls ActionSqlParam, string ID)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            string NewID = System.Guid.NewGuid().ToString();
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                PhieuKhaoSatBenhVienVeTinhCls OPhieuKhaoSatBenhVienVeTinh = CreateModel(ActionSqlParam, ID);
+                OPhieuKhaoSatBenhVienVeTinh.ID = NewID;
+                Add(ActionSqlParam, OPhieuKhaoSatBenhVienVeTinh);
+
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return NewID;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override long Count(ActionSqlParamCls ActionSqlParam, PhieuKhaoSatBenhVienVeTinhFilterCls OPhieuKhaoSatBenhVienVeTinhFilter)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                if (OPhieuKhaoSatBenhVienVeTinhFilter == null)
+                {
+                    OPhieuKhaoSatBenhVienVeTinhFilter = new PhieuKhaoSatBenhVienVeTinhFilterCls();
+                }
+                Collection<DbParam>
+                    ColDbParams = new Collection<DbParam>();
+                string Query = " select count(1) from PHIEUKHAOSATBVVT";
+                if (!string.IsNullOrEmpty(OPhieuKhaoSatBenhVienVeTinhFilter.BenhVien_ID))
+                {
+                    ColDbParams.Add(new DbParam("BENHVIEN_ID", OPhieuKhaoSatBenhVienVeTinhFilter.BenhVien_ID));
+                    Query += " and BENHVIEN_ID = " + ActionSqlParam.SpecialChar + "BENHVIEN_ID ";
+                }              
+                if (OPhieuKhaoSatBenhVienVeTinhFilter.TrangThai != null)
+                {
+                    ColDbParams.Add(new DbParam("TRANGTHAI", OPhieuKhaoSatBenhVienVeTinhFilter.TrangThai));
+                    Query += " and TRANGTHAI = " + ActionSqlParam.SpecialChar + "TRANGTHAI ";
+                }
+                if (OPhieuKhaoSatBenhVienVeTinhFilter.TuNgay != null)
+                {
+                    ColDbParams.Add(new DbParam("TUNGAY", OPhieuKhaoSatBenhVienVeTinhFilter.TuNgay));
+                    Query += " and THOIGIAN >= " + ActionSqlParam.SpecialChar + "TUNGAY ";
+                }
+                if (OPhieuKhaoSatBenhVienVeTinhFilter.TuNgay != null)
+                {
+                    ColDbParams.Add(new DbParam("DENNGAY", OPhieuKhaoSatBenhVienVeTinhFilter.TuNgay));
+                    Query += " and THOIGIAN < " + ActionSqlParam.SpecialChar + "DENNGAY ";
+                }              
+                long result = long.Parse(DBService.GetDataSet(ActionSqlParam.Trans, Query, ColDbParams.ToArray()).Tables[0].Rows[0][0].ToString());
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+    }
+}

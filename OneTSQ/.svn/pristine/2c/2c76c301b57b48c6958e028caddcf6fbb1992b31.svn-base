@@ -1,0 +1,4 @@
+﻿ALTER TABLE XetNghiem ADD ViTri nvarchar(255);
+ALTER TABLE XetNghiem ADD ChanDoan nvarchar(255);
+ALTER TABLE XetNghiem ADD NhanXetDaiThe nvarchar(2000);
+ALTER TABLE XetNghiem ADD NhanXetViThe nvarchar(2000);

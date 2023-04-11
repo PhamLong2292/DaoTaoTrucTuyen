@@ -1,0 +1,61 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Data;
+using OneTSQ.Core.Model;using OneTSQ.Model;
+
+namespace OneTSQ.Call.Bussiness.Template
+{
+    public interface IDanhMucLoaiXetNghiemProcess
+    {
+        string ServiceId { get; }
+        DanhMucLoaiXetNghiemCls[] Reading(RenderInfoCls ORenderInfo, DanhMucLoaiXetNghiemFilterCls ODanhMucLoaiXetNghiemFilter);
+        void Add(RenderInfoCls ORenderInfo, DanhMucLoaiXetNghiemCls ODanhMucLoaiXetNghiem);
+        void Save(RenderInfoCls ORenderInfo, string DanhMucLoaiXetNghiemId, DanhMucLoaiXetNghiemCls ODanhMucLoaiXetNghiem);
+        void Delete(RenderInfoCls ORenderInfo, string DanhMucLoaiXetNghiemId);
+        DanhMucLoaiXetNghiemCls CreateModel(RenderInfoCls ORenderInfo, string DanhMucLoaiXetNghiemId);
+        string Duplicate(RenderInfoCls ORenderInfo, string DanhMucLoaiXetNghiemId);
+        DanhMucLoaiXetNghiemCls[] PageReading(RenderInfoCls ORenderInfo, DanhMucLoaiXetNghiemFilterCls ODanhMucLoaiXetNghiemFilter, ref int recordTotal);
+        DanhMucLoaiXetNghiemCls[] ReadingWithPaging(RenderInfoCls ORenderInfo, DanhMucLoaiXetNghiemFilterCls ODanhMucLoaiXetNghiemFilter, int PageIndex, int PageSize);
+        long Count(RenderInfoCls ORenderInfo, DanhMucLoaiXetNghiemFilterCls ODanhMucLoaiXetNghiemFilter);
+
+        DanhMucLoaiXetNghiemCls[] Reading(SiteParam OSiteParam, DanhMucLoaiXetNghiemFilterCls ODanhMucLoaiXetNghiemFilter);
+        void Add(SiteParam OSiteParam, DanhMucLoaiXetNghiemCls ODanhMucLoaiXetNghiem);
+        void Save(SiteParam OSiteParam, string DanhMucLoaiXetNghiemId, DanhMucLoaiXetNghiemCls ODanhMucLoaiXetNghiem);
+        void Delete(SiteParam OSiteParam, string DanhMucLoaiXetNghiemId);
+        DanhMucLoaiXetNghiemCls CreateModel(SiteParam OSiteParam, string DanhMucLoaiXetNghiemId);
+        string Duplicate(SiteParam OSiteParam, string DanhMucLoaiXetNghiemId);
+        DanhMucLoaiXetNghiemCls[] PageReading(SiteParam OSiteParam, DanhMucLoaiXetNghiemFilterCls ODanhMucLoaiXetNghiemFilter, ref int recordTotal);
+        DanhMucLoaiXetNghiemCls[] ReadingWithPaging(SiteParam OSiteParam, DanhMucLoaiXetNghiemFilterCls ODanhMucLoaiXetNghiemFilter, int PageIndex, int PageSize);
+        long Count(SiteParam OSiteParam, DanhMucLoaiXetNghiemFilterCls ODanhMucLoaiXetNghiemFilter);
+
+        DanhMucLoaiXetNghiemCls CreateModel(string connectstring, string DanhMucLoaiXetNghiemId);
+    }
+
+    public class DanhMucLoaiXetNghiemTemplate : IDanhMucLoaiXetNghiemProcess
+    {
+        public virtual string ServiceId { get { return null; } }
+        public virtual DanhMucLoaiXetNghiemCls[] Reading(RenderInfoCls ORenderInfo, DanhMucLoaiXetNghiemFilterCls ODanhMucLoaiXetNghiemFilter) { return null; }
+        public virtual void Add(RenderInfoCls ORenderInfo, DanhMucLoaiXetNghiemCls ODanhMucLoaiXetNghiem) { }
+        public virtual void Save(RenderInfoCls ORenderInfo, string DanhMucLoaiXetNghiemId, DanhMucLoaiXetNghiemCls ODanhMucLoaiXetNghiem) { }
+        public virtual void Delete(RenderInfoCls ORenderInfo, string DanhMucLoaiXetNghiemId) { }
+        public virtual DanhMucLoaiXetNghiemCls CreateModel(RenderInfoCls ORenderInfo, string DanhMucLoaiXetNghiemId) { return null; }
+        public virtual string Duplicate(RenderInfoCls ORenderInfo, string DanhMucLoaiXetNghiemId) { return null; }
+        public virtual DanhMucLoaiXetNghiemCls[] PageReading(RenderInfoCls ORenderInfo, DanhMucLoaiXetNghiemFilterCls ODanhMucLoaiXetNghiemFilter, ref int recordTotal) { return null; }
+        public virtual DanhMucLoaiXetNghiemCls[] ReadingWithPaging(RenderInfoCls ORenderInfo, DanhMucLoaiXetNghiemFilterCls ODanhMucLoaiXetNghiemFilter, int PageIndex, int PageSize) { return null; }
+        public virtual long Count(RenderInfoCls ORenderInfo, DanhMucLoaiXetNghiemFilterCls ODanhMucLoaiXetNghiemFilter) { return 0; }
+
+        public virtual DanhMucLoaiXetNghiemCls[] Reading(SiteParam OSiteParam, DanhMucLoaiXetNghiemFilterCls ODanhMucLoaiXetNghiemFilter) { return null; }
+        public virtual void Add(SiteParam OSiteParam, DanhMucLoaiXetNghiemCls ODanhMucLoaiXetNghiem) { }
+        public virtual void Save(SiteParam OSiteParam, string DanhMucLoaiXetNghiemId, DanhMucLoaiXetNghiemCls ODanhMucLoaiXetNghiem) { }
+        public virtual void Delete(SiteParam OSiteParam, string DanhMucLoaiXetNghiemId) { }
+        public virtual DanhMucLoaiXetNghiemCls CreateModel(SiteParam OSiteParam, string DanhMucLoaiXetNghiemId) { return null; }
+        public virtual string Duplicate(SiteParam OSiteParam, string DanhMucLoaiXetNghiemId) { return null; }
+        public virtual DanhMucLoaiXetNghiemCls[] PageReading(SiteParam OSiteParam, DanhMucLoaiXetNghiemFilterCls ODanhMucLoaiXetNghiemFilter, ref int recordTotal) { return null; }
+        public virtual DanhMucLoaiXetNghiemCls[] ReadingWithPaging(SiteParam OSiteParam, DanhMucLoaiXetNghiemFilterCls ODanhMucLoaiXetNghiemFilter, int PageIndex, int PageSize) { return null; }
+        public virtual long Count(SiteParam OSiteParam, DanhMucLoaiXetNghiemFilterCls ODanhMucLoaiXetNghiemFilter) { return 0; }
+
+        public virtual DanhMucLoaiXetNghiemCls CreateModel(string connectstring, string DanhMucLoaiXetNghiemId) { return null; }
+    }
+}

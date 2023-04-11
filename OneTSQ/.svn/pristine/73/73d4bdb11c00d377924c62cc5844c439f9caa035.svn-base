@@ -1,0 +1,2 @@
+﻿ALTER TABLE XetNghiem ADD PhuongPhapID varchar(36);
+ALTER TABLE XetNghiem ADD QuyTrinhID varchar(36);

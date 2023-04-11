@@ -1,0 +1,12 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Office.Task.Services.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="Office_Task_Services_SMS247_sms" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">https://sms247.vn/app/services/api/sms.asmx</Value>
+    </Setting>
+    <Setting Name="Office_Task_Services_AwsEmailWs_Email" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">https://sms247.vn/app/services/api/email.asmx</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

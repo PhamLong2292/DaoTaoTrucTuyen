@@ -1,0 +1,40 @@
+﻿CREATE TABLE [dbo].[TongHopMauBenhPham](
+	[ID] [varchar](36) NOT NULL,
+	[TrangThai] [tinyint] NOT NULL,
+	[Ma] [varchar](36) NULL,
+	[TuNgay] [datetime] NOT NULL,
+	[DenNgay] [datetime] NOT NULL,	
+	[PhongLayMauID] [varchar](36) NULL,
+	[NguoiLayMauID] [varchar](36) NULL,	
+	[LoaiMauID] [varchar](36) NULL,
+	[NgayTongHop] [datetime] NOT NULL,
+	[NguoiTongHopID] [varchar](36) NULL,
+	[GhiChu] [nvarchar](500) NULL,
+ CONSTRAINT [PK_TongHopMauBenhPham] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+--
+CREATE TABLE [dbo].[GiaoNhanMauBenhPham](
+	[ID] [varchar](36) NOT NULL,
+	[TrangThai] [tinyint] NOT NULL,
+	[Ma] [varchar](36) NULL,	
+	[NgayGiaoNhanMau] [datetime] NOT NULL,
+	[NoiNhanMauID] [varchar](36) NULL,
+	[NguoiNhanMauID] [varchar](36) NULL,
+	[NguoiGiaoMauID] [varchar](36) NULL,	
+	[TongHopMauBenhPhamID] [varchar](36) NULL,
+	[GhiChu] [nvarchar](500) NULL,
+ CONSTRAINT [PK_GiaoNhanMauBenhPham] PRIMARY KEY CLUSTERED 
+(
+	[ID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+--
+ALTER TABLE MauBenhPham ADD TongHopMauBenhPhamID varchar(36);
+ALTER TABLE MauBenhPham ADD GiaoNhanMauBenhPhamID varchar(36);

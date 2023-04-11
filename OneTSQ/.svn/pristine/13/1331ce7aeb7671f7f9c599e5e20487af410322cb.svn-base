@@ -1,0 +1,244 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{1A349130-12D5-467F-BDAF-435D4EC4BEA7}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OneTSQ.Gui.WebParts</RootNamespace>
+    <AssemblyName>OneTSQ.Gui.WebParts</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AjaxPro.2, Version=9.2.17.1, Culture=neutral, PublicKeyToken=50c73aeba215f5a1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\AjaxPro.2.dll</HintPath>
+    </Reference>
+    <Reference Include="Aspose.Words, Version=13.7.0.0, Culture=neutral, PublicKeyToken=00725b1ceb58d0a9, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Runtime\web\Bin\Aspose.Words.dll</HintPath>
+    </Reference>
+    <Reference Include="FlexCel, Version=6.3.0.0, Culture=neutral, PublicKeyToken=cb8f6080e6d5a4d6, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\FlexCel.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\Runtime\web\bin\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="ONEMES3.DM.Call.Bussiness.Template">
+      <HintPath>..\CoreDlls\ONEMES3.DM.Call.Bussiness.Template.dll</HintPath>
+    </Reference>
+    <Reference Include="ONEMES3.DM.Call.Bussiness.Utility">
+      <HintPath>..\CoreDlls\ONEMES3.DM.Call.Bussiness.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="ONEMES3.DM.Call.Bussiness.Ws">
+      <HintPath>..\CoreDlls\ONEMES3.DM.Call.Bussiness.Ws.dll</HintPath>
+    </Reference>
+    <Reference Include="ONEMES3.DM.Model">
+      <HintPath>..\CoreDlls\ONEMES3.DM.Model.dll</HintPath>
+    </Reference>
+    <Reference Include="ONEMES3.SYS.Core.Model">
+      <HintPath>..\CoreDlls\ONEMES3.SYS.Core.Model.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.CallTempService, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Runtime\web\bin\OneTSQ.CallTempService.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.ChatUtility">
+      <HintPath>..\CoreDlls\OneTSQ.ChatUtility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.CheckPermissionUtility">
+      <HintPath>..\CoreDlls\OneTSQ.CheckPermissionUtility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.BarcodeLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Runtime\web\bin\OneTSQ.Core.BarcodeLib.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.Call.Bussiness.Template, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\OneTSQ.Core.Call.Bussiness.Template.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.Call.Bussiness.Utility">
+      <HintPath>..\CoreDlls\OneTSQ.Core.Call.Bussiness.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.Gui.WebParts, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Runtime\web\bin\OneTSQ.Core.Gui.WebParts.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.Model, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\OneTSQ.Core.Model.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Database.Service, Version=1.0.0.0, Culture=neutral, PublicKeyToken=3b6ee3c81ce7aaf6, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\OneTSQ.Database.Service.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.MediaService">
+      <HintPath>..\Runtime\web\bin\OneTSQ.MediaService.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.ProcessCommand">
+      <HintPath>..\CoreDlls\OneTSQ.ProcessCommand.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.ReportUtility">
+      <HintPath>..\CoreDlls\OneTSQ.ReportUtility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.SpeechUtility">
+      <HintPath>..\CoreDlls\OneTSQ.SpeechUtility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.TempService">
+      <HintPath>..\CoreDlls\OneTSQ.TempService.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.UploadUtility">
+      <HintPath>..\CoreDlls\OneTSQ.UploadUtility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Utilities">
+      <HintPath>..\CoreDlls\OneTSQ.Utilities.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Utility, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\OneTSQ.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.WebRender">
+      <HintPath>..\CoreDlls\OneTSQ.WebRender.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.WebServiceUtility, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\OneTSQ.WebServiceUtility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.WebSession, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\OneTSQ.WebSession.dll</HintPath>
+    </Reference>
+    <Reference Include="OneNet.PubSub.Client">
+      <HintPath>..\Runtime\web\bin\OneNet.PubSub.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="PdfSharp">
+      <HintPath>..\Runtime\web\Bin\PdfSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Spire.License">
+      <HintPath>..\CoreDlls\Spire.License.dll</HintPath>
+    </Reference>
+    <Reference Include="Spire.Pdf">
+      <HintPath>..\CoreDlls\Spire.Pdf.dll</HintPath>
+    </Reference>
+    <Reference Include="Spire.XLS">
+      <HintPath>..\CoreDlls\Spire.XLS.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http">
+      <HintPath>..\Runtime\web\bin\System.Net.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Dictionary\BacSy.cs" />
+    <Compile Include="Dictionary\ChuyenKhoaDaoTaoTt.cs" />
+    <Compile Include="Dictionary\DM_GiayToDiChuyenGiao.cs" />
+    <Compile Include="Dictionary\DM_TenKhoaHoc.cs" />
+    <Compile Include="Dictionary\DM_NhomKhoaHoc.cs" />
+    <Compile Include="Dictionary\DM_TieuChuanThamGiaKhoaHoc.cs" />
+    <Compile Include="Dictionary\DT_KhoaHoc.cs" />
+    <Compile Include="Dictionary\DT_KhoaHocs.cs" />
+    <Compile Include="Dictionary\DT_LichChuyenGiaos.cs" />
+    <Compile Include="Dictionary\KyThuatChuyenGiao.cs" />
+    <Compile Include="Dictionary\TieuChiThoiGianDaoTaoTt.cs" />
+    <Compile Include="Dictionary\TieuChiThoiLuongDaoTaoTt.cs" />
+    <Compile Include="Dictionary\TrangThietBiTruyenHinhTt.cs" />
+    <Compile Include="Dictionary\YKienBenhVien.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RemoteDataService\BenhVienService.cs" />
+    <Compile Include="RemoteDataService\DM_GiayToDiChuyenGiaoService.cs" />
+    <Compile Include="RemoteDataService\DM_NhomKhoaHocService.cs" />
+    <Compile Include="RemoteDataService\DM_TenKhoaHocService.cs" />
+    <Compile Include="RemoteDataService\DM_TieuChuanThamGiaKhoaHocService.cs" />
+    <Compile Include="RemoteDataService\HocVienService.cs" />
+    <Compile Include="RemoteDataService\RecordCls.cs" />
+    <Compile Include="RemoteDataService\TinhThanhService.cs" />
+    <Compile Include="RemoteDataService\TrangThietBiTruyenHinhTtService.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OneTSQ.Bussiness.Template\OneTSQ.Bussiness.Template.csproj">
+      <Project>{91133486-ed5d-4967-b028-2c112ad1b0cc}</Project>
+      <Name>OneTSQ.Bussiness.Template</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Bussiness.Utility\OneTSQ.Bussiness.Utility.csproj">
+      <Project>{6385f257-bc5d-4511-aabf-3057e73c925b}</Project>
+      <Name>OneTSQ.Bussiness.Utility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Call.Bussiness.Template\OneTSQ.Call.Bussiness.Template.csproj">
+      <Project>{2e84367a-6d3f-4f87-9c31-b9896abb6aed}</Project>
+      <Name>OneTSQ.Call.Bussiness.Template</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Call.Bussiness.Utility\OneTSQ.Call.Bussiness.Utility.csproj">
+      <Project>{591f1d29-dc14-4397-9fb6-5a67a3b4dbd5}</Project>
+      <Name>OneTSQ.Call.Bussiness.Utility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Model\OneTSQ.Model.csproj">
+      <Project>{69c9d595-0157-4618-a501-cac1a4ec3525}</Project>
+      <Name>OneTSQ.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Permission\OneTSQ.Permission.csproj">
+      <Project>{aa42114d-fff1-40a5-9a3d-172e24f71cf9}</Project>
+      <Name>OneTSQ.Permission</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.ProcessCommand\OneTSQ.ProcessCommand.csproj">
+      <Project>{9592A462-136B-4E11-860F-880B2249E51D}</Project>
+      <Name>OneTSQ.ProcessCommand</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Report\BC\" />
+    <Folder Include="Report\PH\" />
+    <Folder Include="Utility\" />
+    <Folder Include="WebPartPartial\" />
+    <Folder Include="WebPart\" />
+    <Folder Include="Winsock\" />
+    <Folder Include="Workflow.demo\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy $(TargetPath) E:\OneTSQ\Runtime\web\bin
+copy $(TargetPath) E:\OneTSQ\CoreDlls
+
+</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

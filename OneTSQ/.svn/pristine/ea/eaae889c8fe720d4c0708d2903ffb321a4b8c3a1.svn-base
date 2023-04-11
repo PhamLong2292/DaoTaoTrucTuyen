@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{E0175F6B-AAAB-40B2-B92C-C02AF012AB1D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OneTSQ.Call.Bussiness.Ws</RootNamespace>
+    <AssemblyName>OneTSQ.Call.Bussiness.Ws</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\CoreDlls\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.Model">
+      <HintPath>..\Runtime\web\bin\OneTSQ.Core.Model.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Utility">
+      <HintPath>..\CoreDlls\OneTSQ.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.WebServiceUtility">
+      <HintPath>..\CoreDlls\OneTSQ.WebServiceUtility.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CoreWsProcess.cs" />
+    <Compile Include="Process\BacSyOwnerUserProcess.cs" />
+    <Compile Include="Process\BacSyProcess.cs" />
+    <Compile Include="Process\BinhLuanHinhAnhProcess.cs" />
+    <Compile Include="Process\DM_ChuyenKhoaDaoTaoTtProcess.cs" />
+    <Compile Include="Process\DM_GiayToDiChuyenGiaoProcess.cs" />
+    <Compile Include="Process\DM_KyThuatChuyenGiaoProcess.cs" />
+    <Compile Include="Process\DM_NhomKhoaHocProcess.cs" />
+    <Compile Include="Process\DM_TenKhoaHocProcess.cs" />
+    <Compile Include="Process\DM_TieuChiThoiGianDaoTaoTtProcess.cs" />
+    <Compile Include="Process\DM_TieuChiThoiLuongDaoTaoTtProcess.cs" />
+    <Compile Include="Process\DM_TieuChuanThamGiaKhoaHocProcess.cs" />
+    <Compile Include="Process\DM_TrangThietBiTruyenHinhTtProcess.cs" />
+    <Compile Include="Process\DM_YKienBenhVienProcess.cs" />
+    <Compile Include="Process\DT_DaoTaoVienTruongProcess.cs" />
+    <Compile Include="Process\DT_DiemDanhLyThuyetProcess.cs" />
+    <Compile Include="Process\DT_DiemDanhThucHanhProcess.cs" />
+    <Compile Include="Process\DT_HocVienProcess.cs" />
+    <Compile Include="Process\DT_KeHoachLopProcess.cs" />
+    <Compile Include="Process\DT_KetQuaChuyenGiaoProcess.cs" />
+    <Compile Include="Process\DT_KetQuaDaoTaoProcess.cs" />
+    <Compile Include="Process\DT_KhoaHocProcess.cs" />
+    <Compile Include="Process\DT_LichChuyenGiaoChiTietProcess.cs" />
+    <Compile Include="Process\DT_LichChuyenGiaoProcess.cs" />
+    <Compile Include="Process\DT_LichLyThuyetChiTietProcess.cs" />
+    <Compile Include="Process\DT_LichThucHanhChiTietProcess.cs" />
+    <Compile Include="Process\DT_LichThucHanhProcess.cs" />
+    <Compile Include="Process\DT_TaiLieuChuyenGiaoProcess.cs" />
+    <Compile Include="Process\DT_TaiLieuProcess.cs" />
+    <Compile Include="Process\DT_VanBangProcess.cs" />
+    <Compile Include="Process\HinhAnhProcess.cs" />
+    <Compile Include="Process\KetQuaXetNghiemChiTietProcess.cs" />
+    <Compile Include="Process\KetQuaXetNghiemProcess.cs" />
+    <Compile Include="Process\LapLichTepDinhKemProcess.cs" />
+    <Compile Include="Process\LapLichThanhVienHoiChanProcess.cs" />
+    <Compile Include="Process\LichHoiChanProcess.cs" />
+    <Compile Include="Process\TepDinhKemBlHinhAnhProcess.cs" />
+    <Compile Include="Process\TepDinhKemProcess.cs" />
+    <Compile Include="Process\TepTinProcess.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OneTSQ.Bussiness.Template\OneTSQ.Bussiness.Template.csproj">
+      <Project>{91133486-ed5d-4967-b028-2c112ad1b0cc}</Project>
+      <Name>OneTSQ.Bussiness.Template</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Bussiness.Utility\OneTSQ.Bussiness.Utility.csproj">
+      <Project>{6385f257-bc5d-4511-aabf-3057e73c925b}</Project>
+      <Name>OneTSQ.Bussiness.Utility</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Call.Bussiness.Template\OneTSQ.Call.Bussiness.Template.csproj">
+      <Project>{2e84367a-6d3f-4f87-9c31-b9896abb6aed}</Project>
+      <Name>OneTSQ.Call.Bussiness.Template</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Model\OneTSQ.Model.csproj">
+      <Project>{69c9d595-0157-4618-a501-cac1a4ec3525}</Project>
+      <Name>OneTSQ.Model</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy $(TargetPath) E:\OneTSQ\Runtime\web\bin
+copy $(TargetPath) E:\OneTSQ\CoreDlls
+
+</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

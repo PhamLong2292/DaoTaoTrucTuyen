@@ -1,0 +1,74 @@
+using System.Linq;
+using TELEPLATFORM.Call.Bussiness.Template;
+using TELEPLATFORM.Bussiness.Utility;
+using TELEPLATFORM.Model;
+using TELEPLATFORM.Utility;
+
+namespace TELEPLATFORM.Call.Bussiness.Ws
+{
+public class KetQuaXetNghiemProcessBll : KetQuaXetNghiemTemplate
+{
+public override string ServiceId
+{
+    get
+    {
+        return "WsKetQuaXetNghiemProcessBll";
+    }
+}
+
+
+public override KetQuaXetNghiemCls[] Reading(RenderInfoCls ORenderInfo,KetQuaXetNghiemFilterCls OKetQuaXetNghiemFilter)
+{
+    ActionSqlParamCls ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    return TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateKetQuaXetNghiemProcess().Reading(ActionSqlParam, OKetQuaXetNghiemFilter);
+}
+
+
+public override void Add(RenderInfoCls ORenderInfo, KetQuaXetNghiemCls OKetQuaXetNghiem)
+{
+    ActionSqlParamCls ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateKetQuaXetNghiemProcess().Add(ActionSqlParam, OKetQuaXetNghiem);
+}
+
+
+public override void Save(RenderInfoCls ORenderInfo, string KetQuaXetNghiemId, KetQuaXetNghiemCls OKetQuaXetNghiem)
+{
+    ActionSqlParamCls ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateKetQuaXetNghiemProcess().Save(ActionSqlParam, KetQuaXetNghiemId, OKetQuaXetNghiem);
+}
+
+
+public override void Delete(RenderInfoCls ORenderInfo, string KetQuaXetNghiemId)
+{
+    ActionSqlParamCls ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateKetQuaXetNghiemProcess().Delete(ActionSqlParam, KetQuaXetNghiemId);
+}
+
+
+public override KetQuaXetNghiemCls CreateModel(RenderInfoCls ORenderInfo, string KetQuaXetNghiemId)
+{
+    ActionSqlParamCls ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    return TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateKetQuaXetNghiemProcess().CreateModel(ActionSqlParam, KetQuaXetNghiemId);
+}
+
+
+public override string Duplicate(RenderInfoCls ORenderInfo, string KetQuaXetNghiemId)
+{
+    ActionSqlParamCls ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    return TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateKetQuaXetNghiemProcess().Duplicate(ActionSqlParam, KetQuaXetNghiemId);
+}
+public override long Count(RenderInfoCls ORenderInfo, KetQuaXetNghiemFilterCls OKetQuaXetNghiemFilter)
+{
+    ActionSqlParamCls ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    return TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateKetQuaXetNghiemProcess().Count(ActionSqlParam, OKetQuaXetNghiemFilter);
+}
+
+public override KetQuaXetNghiemCls[] ReadingWithPaging(RenderInfoCls ORenderInfo, KetQuaXetNghiemFilterCls OKetQuaXetNghiemFilter, int PageIndex, int PageSize)
+{
+    ActionSqlParamCls ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    return TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateKetQuaXetNghiemProcess().ReadingWithPaging(ActionSqlParam, OKetQuaXetNghiemFilter, PageIndex, PageSize);
+}
+
+
+}
+}

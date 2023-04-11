@@ -1,0 +1,75 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Data;
+using TELEPLATFORM.Model;
+using TELEPLATFORM.Call.Bussiness.Template;
+using TELEPLATFORM.Utility;
+using TELEPLATFORM.Bussiness.Utility;
+
+namespace TELEPLATFORM.Call.Bussiness.Ws
+{
+public class LapLichThanhVienHoiChanProcessBll : LapLichThanhVienHoiChanTemplate
+{
+public override string ServiceId
+{
+    get
+    {
+        return "SqlLapLichThanhVienHoiChanProcessBll";
+    }
+}
+
+
+public override LapLichThanhVienHoiChanCls[] Reading(
+    RenderInfoCls ORenderInfo,
+    LapLichThanhVienHoiChanFilterCls OLapLichThanhVienHoiChanFilter)
+{
+    ActionSqlParamCls
+        ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    return TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLapLichThanhVienHoiChanProcess().Reading(ActionSqlParam, OLapLichThanhVienHoiChanFilter);
+}
+
+
+public override void Add(RenderInfoCls ORenderInfo, LapLichThanhVienHoiChanCls OLapLichThanhVienHoiChan)
+{
+    ActionSqlParamCls
+        ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLapLichThanhVienHoiChanProcess().Add(ActionSqlParam, OLapLichThanhVienHoiChan);
+}
+
+
+public override void Save(RenderInfoCls ORenderInfo, string LapLichThanhVienHoiChanId, LapLichThanhVienHoiChanCls OLapLichThanhVienHoiChan)
+{
+    ActionSqlParamCls
+        ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLapLichThanhVienHoiChanProcess().Save(ActionSqlParam, LapLichThanhVienHoiChanId, OLapLichThanhVienHoiChan);
+}
+
+
+public override void Delete(RenderInfoCls ORenderInfo, string LapLichThanhVienHoiChanId)
+{
+    ActionSqlParamCls
+        ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLapLichThanhVienHoiChanProcess().Delete(ActionSqlParam, LapLichThanhVienHoiChanId);
+}
+
+
+public override LapLichThanhVienHoiChanCls CreateModel(RenderInfoCls ORenderInfo, string LapLichThanhVienHoiChanId)
+{
+    ActionSqlParamCls
+        ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    return TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLapLichThanhVienHoiChanProcess().CreateModel(ActionSqlParam, LapLichThanhVienHoiChanId);
+}
+
+
+public override string Duplicate(RenderInfoCls ORenderInfo, string LapLichThanhVienHoiChanId)
+{
+    ActionSqlParamCls
+        ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    return TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLapLichThanhVienHoiChanProcess().Duplicate(ActionSqlParam, LapLichThanhVienHoiChanId);
+}
+
+
+}
+}

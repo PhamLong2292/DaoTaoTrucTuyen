@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <s:element name="CheckWs">
+        <s:complexType />
+      </s:element>
+      <s:element name="CheckWsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="CheckWsResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SendAmazonWs">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Account" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="EmailId" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Subject" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Body" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="ToAddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="CcAddess" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="BccAddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="SendFromAddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="SendFromDisplayName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SendAmazonWsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SendAmazonWsResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="CheckWsSoapIn">
+    <wsdl:part name="parameters" element="tns:CheckWs" />
+  </wsdl:message>
+  <wsdl:message name="CheckWsSoapOut">
+    <wsdl:part name="parameters" element="tns:CheckWsResponse" />
+  </wsdl:message>
+  <wsdl:message name="SendAmazonWsSoapIn">
+    <wsdl:part name="parameters" element="tns:SendAmazonWs" />
+  </wsdl:message>
+  <wsdl:message name="SendAmazonWsSoapOut">
+    <wsdl:part name="parameters" element="tns:SendAmazonWsResponse" />
+  </wsdl:message>
+  <wsdl:portType name="EmailSoap">
+    <wsdl:operation name="CheckWs">
+      <wsdl:input message="tns:CheckWsSoapIn" />
+      <wsdl:output message="tns:CheckWsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SendAmazonWs">
+      <wsdl:input message="tns:SendAmazonWsSoapIn" />
+      <wsdl:output message="tns:SendAmazonWsSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="EmailSoap" type="tns:EmailSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="CheckWs">
+      <soap:operation soapAction="http://tempuri.org/CheckWs" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SendAmazonWs">
+      <soap:operation soapAction="http://tempuri.org/SendAmazonWs" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="EmailSoap12" type="tns:EmailSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="CheckWs">
+      <soap12:operation soapAction="http://tempuri.org/CheckWs" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SendAmazonWs">
+      <soap12:operation soapAction="http://tempuri.org/SendAmazonWs" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Email">
+    <wsdl:port name="EmailSoap" binding="tns:EmailSoap">
+      <soap:address location="https://sms247.vn/app/services/api/email.asmx" />
+    </wsdl:port>
+    <wsdl:port name="EmailSoap12" binding="tns:EmailSoap12">
+      <soap12:address location="https://sms247.vn/app/services/api/email.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

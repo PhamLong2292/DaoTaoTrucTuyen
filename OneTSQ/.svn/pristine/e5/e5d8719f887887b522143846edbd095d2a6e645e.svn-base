@@ -1,0 +1,115 @@
+﻿using FlexCel.Report;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using OneTSQ.Call.Bussiness.Utility;
+using OneTSQ.Core.Call.Bussiness.Utility;
+using OneTSQ.Model;
+using OneTSQ.ReportUtility;
+using OneTSQ.Utility;
+using OneTSQ.Core.Model;
+
+namespace OneTSQ.WebParts
+{
+    [ObjectReport(ID = "6C50580A-6130-4D14-8467-94ADC83C524D", Type = OneTSQ.ReportUtility.Report.eType.Flexcel, Name = "DT_LichHocThucHanh", Title = "Lịch học thực hành", ReportPath = @"\ReportTemplates\DT_LichHocThucHanh.xlsx")]
+    public class DT_LichHocThucHanh : ObjectReport<DT_LopHoc>
+    {
+        private class LichThucHanh
+        {
+            public string Id { get; set; }
+            public string DiaDiem { get; set; }
+            public string ThoiGian { get; set; }
+            public string Nhom { get; set; }
+            public int TongSoBuoi { get; set; }
+            public string NguoiLap { get; set; }
+            public string PtChuyenMon { get; set; }
+            public string LanhDao { get; set; }
+        }
+        private class LichThucHanhChiTiet
+        {
+            public string LichThucHanhId { get; set; }
+            public string Thu { get; set; }
+            public DateTime Ngay { get; set; }
+            public string TuGio { get; set; }
+            public string DenGio { get; set; }
+            public string NoiDung { get; set; }
+            public string GiangVien { get; set; }
+            public string GhiChu { get; set; }
+        }
+        protected override FlexCelReport OnFlexcelBuild(RenderInfoCls ORenderInfo, string khoaHocId)
+        {
+            SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+            FlexCelReport flexCelReport = new FlexCelReport();
+            DT_KhoaHocCls khoaHoc = CallBussinessUtility.CreateBussinessProcess().CreateDT_KhoaHocProcess().CreateModel(ORenderInfo, khoaHocId);
+
+            var lichThucHanhChiTiets = CallBussinessUtility.CreateBussinessProcess().CreateDT_LichThucHanhChiTietProcess().Reading(ORenderInfo, new DT_LichThucHanhChiTietFilterCls() { KHOAHOC_ID = khoaHocId })
+                .Select(o => new LichThucHanhChiTiet
+                {
+                    LichThucHanhId = o.LICHTHUCHANH_ID,
+                    Thu = GetDayOfWeek(OSiteParam, o.NGAY.DayOfWeek),
+                    Ngay = o.NGAY,
+                    TuGio = o.THOIGIAN == null ? null : o.THOIGIAN.Value.ToString("HH:mm"),
+                    DenGio = o.THOIGIANKETTHUC == null ? null : o.THOIGIANKETTHUC.Value.ToString("HH:mm"),
+                    NoiDung = o.NOIDUNG,
+                    GiangVien = string.IsNullOrEmpty(o.GIANGVIEN_ID) ? null : GetTenGiangVien(ORenderInfo, o.GIANGVIEN_ID),
+                    GhiChu = o.GHICHU
+                });
+
+            DT_LichThucHanhCls[] lichThucHanhs = CallBussinessUtility.CreateBussinessProcess().CreateDT_LichThucHanhProcess().Reading(ORenderInfo, new DT_LichThucHanhFilterCls() { KhoaHocId = khoaHocId });
+            List<LichThucHanh> lstLichThucHanh = new List<LichThucHanh>();
+            foreach (DT_LichThucHanhCls lichThucHanh in lichThucHanhs)
+            {
+                OwnerUserCls nguoiTao = CoreCallBussinessUtility.CreateBussinessProcess().CreateOwnerUserProcess().CreateModel(ORenderInfo, lichThucHanh.NGUOITAO_ID);
+                BacSyCls ptChuyenMon = string.IsNullOrEmpty(lichThucHanh.PTCHUYENMON_ID) ? null : CallBussinessUtility.CreateBussinessProcess().CreateBacSyProcess().CreateModel(ORenderInfo, lichThucHanh.PTCHUYENMON_ID);
+                BacSyCls lanhDao = string.IsNullOrEmpty(lichThucHanh.LANHDAO_ID) ? null : CallBussinessUtility.CreateBussinessProcess().CreateBacSyProcess().CreateModel(ORenderInfo, lichThucHanh.LANHDAO_ID);
+                lstLichThucHanh.Add(new LichThucHanh
+                {
+                    Id = lichThucHanh.ID,
+                    DiaDiem = lichThucHanh.DIADIEM,
+                    ThoiGian = "Từ " + (lichThucHanh.BATDAU == null ? null : lichThucHanh.BATDAU.Value.ToString("dd/MM/yyyy")) + " - " + (lichThucHanh.KETTHUC == null ? null : lichThucHanh.KETTHUC.Value.ToString("dd/MM/yyyy")),
+                    Nhom = lichThucHanh.NHOM,
+                    TongSoBuoi = lichThucHanhChiTiets.Where(o => o.LichThucHanhId == lichThucHanh.ID).Count(),
+                    NguoiLap = nguoiTao != null ? nguoiTao.FullName : null,
+                    PtChuyenMon = ptChuyenMon == null ? null : ptChuyenMon.HOTEN,
+                    LanhDao = lanhDao == null ? null : lanhDao.HOTEN,
+                });
+            }
+            DateTime ngayIn = DateTime.Today;
+            //flexCelReport.SetValue("DonViDaoTao", donVi != null ? donVi.OwnerName.ToUpper() : null);
+            flexCelReport.SetValue("DonViDaoTao", "BỆNH VIỆN YHCT NGHỆ AN");
+            flexCelReport.SetValue("NgayIn", "Hà Nội, ngày " + ngayIn.Day + " tháng " + ngayIn.Month + " năm " + ngayIn.Year);
+            flexCelReport.SetValue("TenKhoaHoc", khoaHoc.TENKHOAHOC);
+            flexCelReport.SetValue("SoKhoaHoc", khoaHoc.KHOA);
+            flexCelReport.AddTable("LichThucHanh", lstLichThucHanh);
+            flexCelReport.AddTable("LichThucHanhChiTiet", lichThucHanhChiTiets);
+            return flexCelReport;
+        }
+        private string GetTenGiangVien(RenderInfoCls ORenderInfo, string id)
+        {
+            BacSyCls giangVien = CallBussinessUtility.CreateBussinessProcess().CreateBacSyProcess().CreateModel(ORenderInfo, id);
+            if (giangVien == null)
+                return null;
+            return giangVien.HOTEN;
+        }
+        private string GetDayOfWeek(SiteParam oSiteParam, DayOfWeek dayOfWeek)
+        {
+            if (dayOfWeek == DayOfWeek.Monday)
+                return WebLanguage.GetLanguage(oSiteParam, "Thứ hai");
+            else if (dayOfWeek == DayOfWeek.Tuesday)
+                return WebLanguage.GetLanguage(oSiteParam, "Thứ ba");
+            else if (dayOfWeek == DayOfWeek.Wednesday)
+                return WebLanguage.GetLanguage(oSiteParam, "Thứ tư");
+            else if (dayOfWeek == DayOfWeek.Thursday)
+                return WebLanguage.GetLanguage(oSiteParam, "Thứ năm");
+            else if (dayOfWeek == DayOfWeek.Friday)
+                return WebLanguage.GetLanguage(oSiteParam, "Thứ sáu");
+            else if (dayOfWeek == DayOfWeek.Saturday)
+                return WebLanguage.GetLanguage(oSiteParam, "Thứ bảy");
+            else if (dayOfWeek == DayOfWeek.Sunday)
+                return WebLanguage.GetLanguage(oSiteParam, "Chủ nhật");
+            return null;
+        }
+    }
+}

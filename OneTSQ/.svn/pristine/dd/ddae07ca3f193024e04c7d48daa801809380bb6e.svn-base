@@ -1,0 +1,21 @@
+﻿<XmlConfig>
+  <XmlInfo>
+    <SiteId>online.onenet</SiteId>
+    <AssetCode>online</AssetCode>
+    <PathRoot>E:\OneTSQ\Runtime\web</PathRoot>
+    <HttpRoot>http://localhost:1989</HttpRoot>
+    
+    <MediaPathRoot>E:\OneTSQ\medias</MediaPathRoot>
+    <HttpMediaPathRoot>http://localhost:1989/media</HttpMediaPathRoot>
+    <XmlConfigFile>{PathRoot}\XmlConfig\Config.xml</XmlConfigFile>
+    <TempPathRoot>{PathRoot}\temp</TempPathRoot>
+    <HttpTempPathRoot>{HttpRoot}/temp</HttpTempPathRoot>
+    <ConnectionString>Data Source=192.168.1.252;Initial Catalog=OneTSQ;Integrated Security=false;User Id=sa1; password=7996F358-0AF1-4F1C-9B22-5F58A2FFD419; Pooling=true;Max Pool Size=9999999;</ConnectionString>
+	  <WebPort>80</WebPort>
+	  <WebPreviewUrl></WebPreviewUrl>
+    <RootWebServiceUrl></RootWebServiceUrl>
+  </XmlInfo>
+  
+  
+  
+</XmlConfig>

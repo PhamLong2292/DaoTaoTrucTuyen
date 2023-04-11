@@ -1,0 +1,225 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<title>Stringee Video Conference Demo</title>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="css/style.css">
+        <script src="../../jquery-2.1.1.js"></script>
+		<!--<script type="text/javascript" src="js/lib/jquery-3.1.0.min.js"></script>-->
+        <script src="../../../../themes/js/jquery-2.1.1.js"></script>
+        <script src="../../../../themes/js/plugins/stringee-conference-sdk-js/js/lib/socket.io-2.0.3.js" type="text/javascript"></script>\r\n" +
+        <script src="../../../../themes/js/plugins/stringee-conference-sdk-js/js/stringee-video-conference.min.js" type="text/javascript"></script>\r\n" +
+
+
+
+		
+
+
+		<script type="text/javascript">
+			var timeStampInMs = window.performance && window.performance.now && window.performance.timing && window.performance.timing.navigationStart ? window.performance.now() + window.performance.timing.navigationStart : Date.now();
+
+			var username = 'nhamltl.' + timeStampInMs;
+
+			var localStream;
+			var remoteStream;
+			var recordingId;
+
+			var roomId;
+
+			var getAccessTokenUrl = "http://14.225.5.181:82/stringee/php/access_token_for_client.php?u=";
+
+			$(document).ready(function () {
+
+				//lay access token tren server cua minh
+				$.getJSON(getAccessTokenUrl + username, function (data) {
+					var access_token = data.access_token;
+
+					//ket noi den Stringee Server
+					Stringee.connect(access_token, function (loginResponse) {
+						if (loginResponse.r === 0) {
+							$('#loggedUserId').html(loginResponse.userId);
+							console.log('Logged in: ' + JSON.stringify(loginResponse));
+						} else {
+							console.log('Login failed: ' + JSON.stringify(loginResponse));
+						}
+					});
+				});
+
+				//duoc goi trong truong hop reconnect
+				Stringee.onRequestNewAccessToken = function () {
+					$.getJSON(getAccessTokenUrl + username, function (data) {
+						var access_token = data.access_token;
+						Stringee.setNewAccessToken(access_token);
+					});
+				};
+
+				//video delegate ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+				Stringee.VideoConference.roomStreamSubscribed = function (streamEvent) {
+					console.log('+++++++++++++++stream subscribed: ' + streamEvent.stream.getID());
+
+					var stream = streamEvent.stream;
+
+					//remoteVideo.srcObject = event.stream;
+//					remoteVideo2.srcObject = stream.stream;
+					var div = document.createElement('div');
+					div.setAttribute("style", "width: 500px; height: 400px; margin-right: 10px; margin-bottom: 10px; float:left");
+					div.setAttribute("id", "remote_" + stream.getID());
+					document.body.appendChild(div);
+
+					stream.play("remote_" + stream.getID(), {speaker: false});
+				};
+
+				Stringee.VideoConference.roomStreamRemoved = function (streamEvent) {
+					console.log('stream removed: ' + streamEvent.stream.getID());
+					// Remove stream from DOM
+					var stream = streamEvent.stream;
+					if (stream.elementID !== undefined) {
+						var element = document.getElementById(stream.elementID);
+						document.body.removeChild(element);
+					}
+				};
+
+				Stringee.VideoConference.roomDisconnected = function (roomEvent) {
+					console.log('room disconnected');
+				};
+
+				Stringee.VideoConference.roomStreamAdded = function (streamEvent) {
+					console.log('roomStreamAdded', localStream);
+
+					var stream = streamEvent.stream;
+
+					if (localStream.getID() === stream.getID()) {
+						console.log("local stream published");
+
+						
+
+						return;
+					}
+
+					console.log('stream added: ' + stream.getID());
+					console.log('stream attributes: ' + JSON.stringify(stream.getAttributes()));
+
+					Stringee.VideoConference.subscribeToStream(stream, {audio: true, video: true});
+				};
+				//video delegate ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ <--
+
+			});
+
+			function createAndPublishLocalStream() {
+				var config = {audio: true, video: true, data: true, videoSize: [640, 480, 1920, 1080]};
+
+				var callbackAccessAccepted = function () {
+					console.log('access accepted');
+
+					localStream.play("localVideo", {speaker: false});
+
+					Stringee.VideoConference.publishLocalStream(localStream, {minVideoBW: 100, maxVideoBW: 1500});
+				};
+
+				var callbackAccessDenied = function () {
+					console.log('access denied');
+					alert('access denied');
+				};
+
+				localStream = Stringee.VideoConference.createLocalStream(config, callbackAccessAccepted, callbackAccessDenied);
+			}
+
+			function testMakeRoom() {
+				Stringee.VideoConference.makeRoom(function (res) {
+					console.log('makeRoom callback: ' + JSON.stringify(res));
+					if (res.r == 0) {
+						roomId = res.roomId;
+						$('#roomIdSpan').html(roomId);
+						console.log('roomId: ' + roomId);
+
+						var streams = res.streams;
+
+						for (var index in streams) {
+							var stream = streams[index];
+							Stringee.VideoConference.subscribeToStream(stream, {audio: true, video: true});
+						}
+
+						createAndPublishLocalStream();
+					}
+				});
+			}
+
+			function testJoinRoom() {
+				roomId = $('#roomId').val();
+				$('#roomIdSpan').html(roomId);
+
+				Stringee.VideoConference.joinRoom(roomId, function (res) {
+					console.log('joinRoom callback: ' + JSON.stringify(res));
+					if (res.r == 0) {
+						var streams = res.streams;
+
+						for (var index in streams) {
+							var stream = streams[index];
+
+							Stringee.VideoConference.subscribeToStream(stream, {audio: true, video: true});
+						}
+
+						createAndPublishLocalStream();
+					}
+				});
+			}
+
+
+			function testLeaveRoom() {
+				localStream.close();
+				Stringee.VideoConference.leaveRoom(roomId, function (res) {
+					console.log('sendLeaveRoom callback: ' + JSON.stringify(res));
+				});
+			}
+			
+
+			var enable = true;
+			function enableVideo() {
+				enable = !enable;
+				console.log('enableVideo: ' + enable);
+				Stringee.VideoConference.enableVideo(localStream, enable);
+			}
+
+			var mute = false;
+			function mute1() {
+				mute = !mute;
+				console.log('mute : ' + mute);
+				Stringee.VideoConference.mute(localStream, mute);
+			}
+
+		</script>
+
+
+	</head>
+
+	<body style="width: 1020px; margin: auto; display: table; margin-top: 10px;">
+
+		<div>
+			<button id="callBtn" onclick="testMakeRoom()">Make room</button>
+
+
+			<input id="roomId" type="text" name="roomId" style="width: 200px;" placeholder="Room ID" value="">
+			<button onclick="testJoinRoom()">Join room</button>
+
+			<button onclick="testLeaveRoom()">Leave room</button>
+		</div>
+
+		
+		
+
+		
+
+		<div>
+			<br/>
+			Logged in: <span id="loggedUserId" style="color: red">Not logged</span>
+			<br/>
+			Room ID: <span id="roomIdSpan" style="color: red"></span>
+		</div>
+		<br>
+		<div id="localVideo" style="width:500px;height:400px; float:left; margin-right: 10px; margin-bottom: 10px;"></div>
+
+		<!--<video id="remoteVideo2" autoplay style="width:300px; height: 200px; float:left; margin-right: 10px"></video>-->
+
+	</body>
+
+</html>

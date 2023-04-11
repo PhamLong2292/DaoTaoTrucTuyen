@@ -1,0 +1,75 @@
+using System.Linq;
+using TELEPLATFORM.Bussiness.Utility;
+using TELEPLATFORM.Model;
+using TELEPLATFORM.Call.Bussiness.Template;
+using TELEPLATFORM.Utility;
+
+namespace TELEPLATFORM.Call.Bussiness.Ws
+{
+
+public class DanhGiaThoiGianBuoiBaoCaoProcessBll : DanhGiaThoiGianBuoiBaoCaoTemplate
+{
+public override string ServiceId
+{
+    get
+    {
+        return "WsDanhGiaThoiGianBuoiBaoCaoProcessBll";
+    }
+}
+
+
+public override DanhGiaThoiGianBuoiBaoCaoCls[] Reading(RenderInfoCls ORenderInfo,DanhGiaThoiGianBuoiBaoCaoFilterCls ODanhGiaThoiGianBuoiBaoCaoFilter)
+{
+    ActionSqlParamCls ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    return TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateDanhGiaThoiGianBuoiBaoCaoProcess().Reading(ActionSqlParam, ODanhGiaThoiGianBuoiBaoCaoFilter);
+}
+
+
+public override void Add(RenderInfoCls ORenderInfo, DanhGiaThoiGianBuoiBaoCaoCls ODanhGiaThoiGianBuoiBaoCao)
+{
+    ActionSqlParamCls ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateDanhGiaThoiGianBuoiBaoCaoProcess().Add(ActionSqlParam, ODanhGiaThoiGianBuoiBaoCao);
+}
+
+
+public override void Save(RenderInfoCls ORenderInfo, string DanhGiaThoiGianBuoiBaoCaoId, DanhGiaThoiGianBuoiBaoCaoCls ODanhGiaThoiGianBuoiBaoCao)
+{
+    ActionSqlParamCls ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateDanhGiaThoiGianBuoiBaoCaoProcess().Save(ActionSqlParam, DanhGiaThoiGianBuoiBaoCaoId, ODanhGiaThoiGianBuoiBaoCao);
+}
+
+
+public override void Delete(RenderInfoCls ORenderInfo, string DanhGiaThoiGianBuoiBaoCaoId)
+{
+    ActionSqlParamCls ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateDanhGiaThoiGianBuoiBaoCaoProcess().Delete(ActionSqlParam, DanhGiaThoiGianBuoiBaoCaoId);
+}
+
+
+public override DanhGiaThoiGianBuoiBaoCaoCls CreateModel(RenderInfoCls ORenderInfo, string DanhGiaThoiGianBuoiBaoCaoId)
+{
+    ActionSqlParamCls ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    return TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateDanhGiaThoiGianBuoiBaoCaoProcess().CreateModel(ActionSqlParam, DanhGiaThoiGianBuoiBaoCaoId);
+}
+
+
+public override string Duplicate(RenderInfoCls ORenderInfo, string DanhGiaThoiGianBuoiBaoCaoId)
+{
+    ActionSqlParamCls ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    return TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateDanhGiaThoiGianBuoiBaoCaoProcess().Duplicate(ActionSqlParam, DanhGiaThoiGianBuoiBaoCaoId);
+}
+public override long Count(RenderInfoCls ORenderInfo, DanhGiaThoiGianBuoiBaoCaoFilterCls ODanhGiaThoiGianBuoiBaoCaoFilter)
+{
+    ActionSqlParamCls ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    return TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateDanhGiaThoiGianBuoiBaoCaoProcess().Count(ActionSqlParam, ODanhGiaThoiGianBuoiBaoCaoFilter);
+}
+
+public override DanhGiaThoiGianBuoiBaoCaoCls[] ReadingWithPaging(RenderInfoCls ORenderInfo, DanhGiaThoiGianBuoiBaoCaoFilterCls ODanhGiaThoiGianBuoiBaoCaoFilter, int PageIndex, int PageSize)
+{
+    ActionSqlParamCls ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    return TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateDanhGiaThoiGianBuoiBaoCaoProcess().ReadingWithPaging(ActionSqlParam, ODanhGiaThoiGianBuoiBaoCaoFilter, PageIndex, PageSize);
+}
+
+
+}
+}

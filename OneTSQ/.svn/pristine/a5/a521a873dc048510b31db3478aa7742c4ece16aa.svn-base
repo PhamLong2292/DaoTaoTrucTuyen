@@ -1,0 +1,35 @@
+﻿using OneTSQ.Core.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OneTSQ.Bussiness.Template
+{
+    public interface IBussinessProcess
+    {
+        string Id { get; }
+        string ServiceName { get; }
+
+        #region Danh mục
+        #endregion
+
+        #region Nghiệp vụ
+        #endregion
+    }
+
+    public class BussinessProcessTemplate : IBussinessProcess
+    {
+        public virtual string Id { get { return null; } }
+        public virtual string ServiceName { get { return null; } }
+
+        #region Danh mục
+        #endregion
+
+        #region Nghiệp vụ
+        #endregion
+
+    }
+}
+ 

@@ -1,0 +1,119 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Data;
+using TELEPLATFORM.Model;
+using TELEPLATFORM.Call.Bussiness.Template;
+using TELEPLATFORM.Utility;
+using TELEPLATFORM.Bussiness.Utility;
+
+namespace TELEPLATFORM.Call.Bussiness.Ws
+{
+public class LichHoiChanProcessBll : LichHoiChanTemplate
+{
+public override string ServiceId
+{
+    get
+    {
+        return "SqlLichHoiChanProcessBll";
+    }
+}
+
+
+public override LichHoiChanCls[] Reading(RenderInfoCls ORenderInfo, LichHoiChanFilterCls OLichHoiChanFilter)
+{
+    ActionSqlParamCls
+        ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    return TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLichHoiChanProcess().Reading(ActionSqlParam, OLichHoiChanFilter);
+}
+public override LichHoiChanCls[] PageReading(RenderInfoCls ORenderInfo, LichHoiChanFilterCls OLichHoiChanFilter, ref long recordTotal)
+{
+    ActionSqlParamCls
+        ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    return TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLichHoiChanProcess().PageReading(ActionSqlParam, OLichHoiChanFilter, ref recordTotal);
+}
+        public override void Add(RenderInfoCls ORenderInfo, LichHoiChanCls OLichHoiChan)
+{
+    ActionSqlParamCls
+        ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLichHoiChanProcess().Add(ActionSqlParam, OLichHoiChan);
+}
+
+
+public override void Save(RenderInfoCls ORenderInfo, string LichHoiChanId, LichHoiChanCls OLichHoiChan)
+{
+    ActionSqlParamCls
+        ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLichHoiChanProcess().Save(ActionSqlParam, LichHoiChanId, OLichHoiChan);
+}
+
+
+public override void Delete(RenderInfoCls ORenderInfo, string LichHoiChanId)
+{
+    ActionSqlParamCls
+        ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLichHoiChanProcess().Delete(ActionSqlParam, LichHoiChanId);
+}
+
+
+public override LichHoiChanCls CreateModel(RenderInfoCls ORenderInfo, string LichHoiChanId)
+{
+    ActionSqlParamCls
+        ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    return TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLichHoiChanProcess().CreateModel(ActionSqlParam, LichHoiChanId);
+}
+
+
+public override string Duplicate(RenderInfoCls ORenderInfo, string LichHoiChanId)
+{
+    ActionSqlParamCls
+        ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+    return TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLichHoiChanProcess().Duplicate(ActionSqlParam, LichHoiChanId);
+}
+
+        public override void AddChuyenGias(RenderInfoCls ORenderInfo, string lichHoiChanId, string[] bacSyIds, string[] donViCongTacTens)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLichHoiChanProcess().AddChuyenGias(ActionSqlParam, lichHoiChanId, bacSyIds, donViCongTacTens);
+        }
+        public override void RemoveChuyenGias(RenderInfoCls ORenderInfo, string lichHoiChanId, string[] bacSyIds)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLichHoiChanProcess().RemoveChuyenGias(ActionSqlParam, lichHoiChanId, bacSyIds);
+        }
+        public override void AddCaBenhs(RenderInfoCls ORenderInfo, string lichHoiChanId, string[] caBenhIds)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLichHoiChanProcess().AddCaBenhs(ActionSqlParam, lichHoiChanId, caBenhIds);
+        }
+        public override void RemoveCaBenhs(RenderInfoCls ORenderInfo, string lichHoiChanId, string[] caBenhIds)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLichHoiChanProcess().RemoveCaBenhs(ActionSqlParam, lichHoiChanId, caBenhIds);
+        }
+        public override void UpdateCaBenhStt(RenderInfoCls ORenderInfo, LichHoiChanCaBenhCls[] lichHoiChanCaBenhs)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLichHoiChanProcess().UpdateCaBenhStt(ActionSqlParam, lichHoiChanCaBenhs);
+        }
+        public override LichHoiChanCaBenhCls[] GetLichHoiChanCaBenhs(RenderInfoCls ORenderInfo, string lichHoiChanId)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            return TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLichHoiChanProcess().GetLichHoiChanCaBenhs(ActionSqlParam, lichHoiChanId);
+        }
+        public override bool IsTrucTiepHoiChan(RenderInfoCls ORenderInfo, string LichHoiChanId, string BacSyId)
+        {
+            ActionSqlParamCls
+                ActionSqlParam = WebEnvironments.CreateActionSqlParam(ORenderInfo);
+            return TELEPLATFORMBussinessUtility.CreateBussinessProcess().CreateLichHoiChanProcess().IsTrucTiepHoiChan(ActionSqlParam, LichHoiChanId, BacSyId);
+        }
+
+    }
+}

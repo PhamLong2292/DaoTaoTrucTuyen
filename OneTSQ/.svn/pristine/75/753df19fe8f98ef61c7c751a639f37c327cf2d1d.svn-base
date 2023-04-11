@@ -1,0 +1,267 @@
+﻿using OneTSQ.Call.Bussiness.Template;
+using OneTSQ.Core.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OneTSQ.Call.Bussiness.Sql
+{
+    public class CoreSqlProcess : BussinessProcessTemplate
+    {
+        public override string Id
+        {
+            get
+            {
+                return "CoreSqlProcess";
+            }
+        }
+        public override string ServiceName
+        {
+            get
+            {
+                return "MSSQL SERVICE";
+            }
+        }
+
+        #region Danh mục
+        public override ICommonProcess CreateCommonProcess()
+        {
+            return new CommonProcessBll();
+        }
+        public override ICaBenhProcess CreateCaBenhProcess()
+        {
+            return new CaBenhProcessBll();
+        }
+        public override IHinhAnhProcess CreateHinhAnhProcess()
+        {
+            return new HinhAnhProcessBll();
+        }
+        //public override ITaiLieuProcess CreateTaiLieuProcess()
+        //{
+        //    return new TaiLieuProcessBll();
+        //}
+        public override ITepTinProcess CreateTepTinProcess()
+        {
+            return new TepTinProcessBll();
+        }
+        //public override IYKienChuyenGiaProcess CreateYKienChuyenGiaProcess()
+        //{
+        //    return new YKienChuyenGiaProcessBll();
+        //}
+        public override ITepDinhKemProcess CreateTepDinhKemProcess()
+        {
+            return new TepDinhKemProcessBll();
+        }
+        public override IBinhLuanHinhAnhProcess CreateBinhLuanHinhAnhProcess()
+        {
+            return new BinhLuanHinhAnhProcessBll();
+        }
+        public override ITepDinhKemBlHinhAnhProcess CreateTepDinhKemBlHinhAnhProcess()
+        {
+            return new TepDinhKemBlHinhAnhProcessBll();
+        }
+        //public override IBienBanHoiChanProcess CreateBienBanHoiChanProcess()
+        //{
+        //    return new BienBanHoiChanProcessBll();
+        //}
+        //public override IChuyenGiaHoiChanProcess CreateChuyenGiaHoiChanProcess()
+        //{
+        //    return new ChuyenGiaHoiChanProcessBll();
+        //}
+        //public override IButPheProcess CreateButPheProcess()
+        //{
+        //    return new ButPheProcessBll();
+        //}
+        public override ILichHoiChanProcess CreateLichHoiChanProcess()
+        {
+            return new LichHoiChanProcessBll();
+        }
+        public override ILapLichTepDinhKemProcess CreateLapLichTepDinhKemProcess()
+        {
+            return new LapLichTepDinhKemProcessBll();
+        }
+        public override ILapLichThanhVienHoiChanProcess CreateLapLichThanhVienHoiChanProcess()
+        {
+            return new LapLichThanhVienHoiChanProcessBll();
+        }
+        public override IBacSyProcess CreateBacSyProcess()
+        {
+            return new BacSyProcessBll();
+        }
+        public override IBacSyOwnerUserProcess CreateBacSyOwnerUserProcess()
+        {
+            return new BacSyOwnerUserProcessBll();
+        }
+        //public override IBienBanHoiChanToanLichProcess CreateBienBanHoiChanToanLichProcess()
+        //{
+        //    return new BienBanHoiChanToanLichProcessBll();
+        //}
+        //public override IBienBanHoiChanToanLichBacSyProcess CreateBienBanHoiChanToanLichBacSyProcess()
+        //{
+        //    return new BienBanHoiChanToanLichBacSyProcessBll();
+        //}
+        //public override INoiDungHoiChanProcess CreateNoiDungHoiChanProcess()
+        //{
+        //    return new NoiDungHoiChanProcessBll();
+        //}
+        public override IKetQuaXetNghiemProcess CreateKetQuaXetNghiemProcess()
+        {
+            return new KetQuaXetNghiemProcessBll();
+        }
+        public override IKetQuaXetNghiemChiTietProcess CreateKetQuaXetNghiemChiTietProcess()
+        {
+            return new KetQuaXetNghiemChiTietProcessBll();
+        }
+        public override IDM_ChuyenKhoaDaoTaoTtProcess CreateChuyenKhoaDaoTaoTtProcess()
+        {
+            return new DM_ChuyenKhoaDaoTaoTtProcessBll();
+        }
+        public override IDM_TieuChiThoiGianDaoTaoTtProcess CreateTieuChiThoiGianDaoTaoTtProcess()
+        {
+            return new DM_TieuChiThoiGianDaoTaoTtProcessBll();
+        }
+        public override IDM_TieuChiThoiLuongDaoTaoTtProcess CreateTieuChiThoiLuongDaoTaoTtProcess()
+        {
+            return new DM_TieuChiThoiLuongDaoTaoTtProcessBll();
+        }
+        public override IDM_TrangThietBiTruyenHinhTtProcess CreateTrangThietBiTruyenHinhTtProcess()
+        {
+            return new DM_TrangThietBiTruyenHinhTtProcessBll();
+        }
+        //public override IChatLuongHoatDongTtbProcess CreateChatLuongHoatDongTtbProcess()
+        //{
+        //    return new ChatLuongHoatDongTtbProcessBll();
+        //}
+        //public override IDanhGiaThoiGianBuoiBaoCaoProcess CreateDanhGiaThoiGianBuoiBaoCaoProcess()
+        //{
+        //    return new DanhGiaThoiGianBuoiBaoCaoProcessBll();
+        //}
+        //public override IDanhGiaThoiLuongBuoiBaoCaoProcess CreateDanhGiaThoiLuongBuoiBaoCaoProcess()
+        //{
+        //    return new DanhGiaThoiLuongBuoiBaoCaoProcessBll();
+        //}
+        //public override IDoHieuQuaGiangDayProcess CreateDoHieuQuaGiangDayProcess()
+        //{
+        //    return new DoHieuQuaGiangDayProcessBll();
+        //}
+        //public override IMucDoPhongPhuBaiBaoCaoProcess CreateMucDoPhongPhuBaiBaoCaoProcess()
+        //{
+        //    return new MucDoPhongPhuBaiBaoCaoProcessBll();
+        //}
+        //public override IMucDoYNghiaChuongTrinhDaoTaoProcess CreateMucDoYNghiaChuongTrinhDaoTaoProcess()
+        //{
+        //    return new MucDoYNghiaChuongTrinhDaoTaoProcessBll();
+        //}
+        //public override IPhieuDanhGiaChatLuongDaoTaoProcess CreatePhieuDanhGiaChatLuongDaoTaoProcess()
+        //{
+        //    return new PhieuDanhGiaChatLuongDaoTaoProcessBll();
+        //}
+        //public override IBcDanhGiaChatLuongDaoTaoProcess CreateBcDanhGiaChatLuongDaoTaoProcess()
+        //{
+        //    return new BcDanhGiaChatLuongDaoTaoProcessBll();
+        //}
+        public override IDM_YKienBenhVienProcess CreateYKienBenhVienProcess()
+        {
+            return new DM_YKienBenhVienProcessBll();
+        }
+        public override IDT_DiemDanhLyThuyetProcess CreateDT_DiemDanhLyThuyetProcess()
+        {
+            return new DT_DiemDanhLyThuyetProcessBll();
+        }
+        public override IDT_DiemDanhThucHanhProcess CreateDT_DiemDanhThucHanhProcess()
+        {
+            return new DT_DiemDanhThucHanhProcessBll();
+        }
+        public override IDT_HocVienProcess CreateDT_HocVienProcess()
+        {
+            return new DT_HocVienProcessBll();
+        }
+        public override IDT_KeHoachLopProcess CreateDT_KeHoachLopProcess()
+        {
+            return new DT_KeHoachLopProcessBll();
+        }
+        public override IDT_KetQuaDaoTaoProcess CreateDT_KetQuaDaoTaoProcess()
+        {
+            return new DT_KetQuaDaoTaoProcessBll();
+        }
+        public override IDT_KhoaHocProcess CreateDT_KhoaHocProcess()
+        {
+            return new DT_KhoaHocProcessBll();
+        }
+        public override IDT_LichLyThuyetProcess CreateDT_LichLyThuyetProcess()
+        {
+            return new DT_LichLyThuyetProcessBll();
+        }
+        public override IDT_LichLyThuyetChiTietProcess CreateDT_LichLyThuyetChiTietProcess()
+        {
+            return new DT_LichLyThuyetChiTietProcessBll();
+        }
+        public override IDT_LichThucHanhProcess CreateDT_LichThucHanhProcess()
+        {
+            return new DT_LichThucHanhProcessBll();
+        }
+        public override IDT_LichThucHanhChiTietProcess CreateDT_LichThucHanhChiTietProcess()
+        {
+            return new DT_LichThucHanhChiTietProcessBll();
+        }
+        public override IDT_TaiLieuProcess CreateDT_TaiLieuProcess()
+        {
+            return new DT_TaiLieuProcessBll();
+        }
+        public override IDT_VanBangProcess CreateDT_VanBangProcess()
+        {
+            return new DT_VanBangProcessBll();
+        }
+        public override IDT_LichChuyenGiaoProcess CreateDT_LichChuyenGiaoProcess()
+        {
+            return new DT_LichChuyenGiaoProcessBll();
+        }
+        public override IDT_LichChuyenGiaoChiTietProcess CreateDT_LichChuyenGiaoChiTietProcess()
+        {
+            return new DT_LichChuyenGiaoChiTietProcessBll();
+        }
+        public override IDT_KetQuaChuyenGiaoProcess CreateDT_KetQuaChuyenGiaoProcess()
+        {
+            return new DT_KetQuaChuyenGiaoProcessBll();
+        }
+        public override IDM_KyThuatChuyenGiaoProcess CreateKyThuatChuyenGiaoProcess()
+        {
+            return new DM_KyThuatChuyenGiaoProcessBll();
+        }
+        public override IDT_TaiLieuChuyenGiaoProcess CreateDT_TaiLieuChuyenGiaoProcess()
+        {
+            return new DT_TaiLieuChuyenGiaoProcessBll();
+        }
+        public override IDM_NhomKhoaHocProcess CreateDM_NhomKhoaHocProcess()
+        {
+            return new DM_NhomKhoaHocProcessBll();
+        }
+        public override IDM_TenKhoaHocProcess CreateDM_TenKhoaHocProcess()
+        {
+            return new DM_TenKhoaHocProcessBll();
+        }
+        public override IDM_GiayToDiChuyenGiaoProcess CreateDM_GiayToDiChuyenGiaoProcess()
+        {
+            return new DM_GiayToDiChuyenGiaoProcessBll();
+        }
+        public override IDM_TieuChuanThamGiaKhoaHocProcess CreateDM_TieuChuanThamGiaKhoaHocProcess()
+        {
+            return new DM_TieuChuanThamGiaKhoaHocProcessBll();
+        }
+        //public override IDT_BcTongKetCongTacDaoTaoProcess CreateDT_BcTongKetCongTacDaoTaoProcess()
+        //{
+        //    return new DT_BcTongKetCongTacDaoTaoProcessBll();
+        //}
+        public override IDT_DaoTaoVienTruongProcess CreateDT_DaoTaoVienTruongProcess()
+        {
+            return new DT_DaoTaoVienTruongProcessBll();
+        }
+        #endregion
+
+        #region Nghiệp vụ
+        #endregion
+    }
+}
+ 

@@ -1,0 +1,21 @@
+﻿<XmlConfig>
+  <XmlInfo>
+    <SiteId>online.onenet</SiteId>
+    <AssetCode>online</AssetCode>
+    <PathRoot>E:\OneTSQ.VDUH.TTTM\Runtime\web</PathRoot>
+    <HttpRoot>http://localhost:93</HttpRoot>
+    
+    <MediaPathRoot>E:\OneTSQ.VDUH.TTTM\medias</MediaPathRoot>
+    <HttpMediaPathRoot>http://localhost:93/media</HttpMediaPathRoot>
+    <XmlConfigFile>{PathRoot}\XmlConfig\Config.xml</XmlConfigFile>
+    <TempPathRoot>{PathRoot}\temp</TempPathRoot>
+    <HttpTempPathRoot>{HttpRoot}/temp</HttpTempPathRoot>
+    <ConnectionString>Data Source=192.168.1.11;Initial Catalog=OneTSQ.VDUH.TTTM;Integrated Security=false;User Id=sa; password=Abc@123; Pooling=true;Max Pool Size=9999999;</ConnectionString>
+	  <WebPort>80</WebPort>
+	  <WebPreviewUrl></WebPreviewUrl>
+    <RootWebServiceUrl></RootWebServiceUrl>
+  </XmlInfo>
+  
+  
+  
+</XmlConfig>

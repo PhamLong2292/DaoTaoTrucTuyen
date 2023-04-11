@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C65CE934-9A24-4970-AA22-F88C884E2E69}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OneTSQ.Bussiness.Sql</RootNamespace>
+    <AssemblyName>OneTSQ.Bussiness.Sql</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="OneTSQ.Bussiness.Utility">
+      <HintPath>..\CoreDlls\OneTSQ.Bussiness.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Call.Bussiness.Utility">
+      <HintPath>..\CoreDlls\OneTSQ.Call.Bussiness.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.Bussiness.Sql">
+      <HintPath>..\CoreDlls\OneTSQ.Core.Bussiness.Sql.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Core.Model">
+      <HintPath>..\CoreDlls\OneTSQ.Core.Model.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Database.Service">
+      <HintPath>..\CoreDlls\OneTSQ.Database.Service.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Database.Service.Oracle">
+      <HintPath>..\CoreDlls\OneTSQ.Database.Service.Oracle.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Database.Service.Sql">
+      <HintPath>..\CoreDlls\OneTSQ.Database.Service.Sql.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Utilities">
+      <HintPath>..\CoreDlls\OneTSQ.Utilities.dll</HintPath>
+    </Reference>
+    <Reference Include="OneTSQ.Utility">
+      <HintPath>..\CoreDlls\OneTSQ.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Process\Dictionary\BacSyOwnerUserProcessBll.cs" />
+    <Compile Include="Process\Dictionary\BacSyProcessBll.cs" />
+    <Compile Include="Process\Dictionary\CommonProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DM_ChuyenKhoaDaoTaoTtProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DM_GiayToDiChuyenGiaoProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DM_KyThuatChuyenGiaoProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DM_NhomKhoaHocProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DM_TenKhoaHocProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DM_TieuChiThoiGianDaoTaoTtProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DM_TieuChiThoiLuongDaoTaoTtProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DM_TieuChuanThamGiaKhoaHocProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DM_TrangThietBiTruyenHinhTtProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DT_LichChuyenGiaoChiTietProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DT_LichChuyenGiaoProcessBll.cs" />
+    <Compile Include="Process\Dictionary\DT_LichLyThuyetProcessBll.cs" />
+    <Compile Include="SqlBussinessProcess.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WebDatabaseService.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OneTSQ.Bussiness.Template\OneTSQ.Bussiness.Template.csproj">
+      <Project>{91133486-ed5d-4967-b028-2c112ad1b0cc}</Project>
+      <Name>OneTSQ.Bussiness.Template</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OneTSQ.Model\OneTSQ.Model.csproj">
+      <Project>{69c9d595-0157-4618-a501-cac1a4ec3525}</Project>
+      <Name>OneTSQ.Model</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy $(TargetPath) E:\OneTSQ\Runtime\web\bin
+copy $(TargetPath) E:\OneTSQ\CoreDlls
+
+</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

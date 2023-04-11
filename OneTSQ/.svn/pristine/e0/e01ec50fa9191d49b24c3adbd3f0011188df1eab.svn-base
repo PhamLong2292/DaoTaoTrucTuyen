@@ -1,0 +1,442 @@
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Data;
+using OneTSQ.Model;
+using OneTSQ.Bussiness.Template;
+using OneTSQ.Database.Service;
+using OneTSQ.Core.Model;
+
+namespace OneTSQ.Bussiness.Sql
+{
+    public class DT_HocVienProcessBll : DT_HocVienTemplate
+    {
+        public override string ServiceId
+        {
+            get
+            {
+                return "SqlDT_HocVienProcessBll";
+            }
+        }
+        public override DT_HocVienCls[] Reading(
+            ActionSqlParamCls ActionSqlParam,
+            DT_HocVienFilterCls ODT_HocVienFilter)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                if (ODT_HocVienFilter == null)
+                {
+                    ODT_HocVienFilter = new DT_HocVienFilterCls();
+                }
+                Collection<DbParam>
+                    ColDbParams = new Collection<DbParam>();
+                string Query = "";
+                if (!string.IsNullOrEmpty(ODT_HocVienFilter.KhoaHocDangKy_Id) || !string.IsNullOrEmpty(ODT_HocVienFilter.KhoaHocDuyet_Id))
+                    Query = " select DT_HocVien.* from DT_HocVien join DT_KETQUADAOTAO on DT_HocVien.ID = DT_KETQUADAOTAO.HOCVIEN_ID where 1=1 ";
+                else Query = " select * from DT_HocVien where 1=1 ";
+                if (!string.IsNullOrEmpty(ODT_HocVienFilter.Keyword))
+                {
+                    ColDbParams.Add(new DbParam("Keyword", "%" + ODT_HocVienFilter.Keyword.ToUpper() + "%"));
+                    Query += " and upper(HOTEN) like " + ActionSqlParam.SpecialChar + "Keyword";
+                }
+                if (!string.IsNullOrEmpty(ODT_HocVienFilter.KhoaHocDangKy_Id))
+                {
+                    ColDbParams.Add(new DbParam("KHOAHOCDANGKY_ID", ODT_HocVienFilter.KhoaHocDangKy_Id));
+                    Query += " and KHOAHOCDANGKY_ID = " + ActionSqlParam.SpecialChar + "KHOAHOCDANGKY_ID";
+                }
+                if (!string.IsNullOrEmpty(ODT_HocVienFilter.KhoaHocDuyet_Id))
+                {
+                    ColDbParams.Add(new DbParam("KHOAHOCDUYET_ID", ODT_HocVienFilter.KhoaHocDuyet_Id));
+                    Query += " and KHOAHOCDUYET_ID = " + ActionSqlParam.SpecialChar + "KHOAHOCDUYET_ID";
+                }
+                if (ODT_HocVienFilter.NgaySinh != null)
+                {
+                    ColDbParams.Add(new DbParam("NGAYSINH", ODT_HocVienFilter.NgaySinh));
+                    Query += " and NGAYSINH = " + ActionSqlParam.SpecialChar + "NGAYSINH";
+                }
+                if (ODT_HocVienFilter.GioiTinh != null)
+                {
+                    ColDbParams.Add(new DbParam("GIOITINH", ODT_HocVienFilter.GioiTinh));
+                    Query += " and GIOITINH = " + ActionSqlParam.SpecialChar + "GIOITINH";
+                }
+                if (!string.IsNullOrEmpty(ODT_HocVienFilter.MaDiaChiHanhChinh))
+                {
+                    ColDbParams.Add(new DbParam("DIACHIHANHCHINH_MA", ODT_HocVienFilter.MaDiaChiHanhChinh));
+                    Query += " and DIACHIHANHCHINH_MA = " + ActionSqlParam.SpecialChar + "DIACHIHANHCHINH_MA";
+                }
+                Query += " order by DONVICONGTAC_MA";
+
+                DataSet dsResult =
+                        DBService.GetDataSet(ActionSqlParam.Trans, Query, ColDbParams.ToArray());
+                DT_HocVienCls[] DT_HocViens = DT_HocVienParser.ParseFromDataTable(dsResult.Tables[0]);
+
+                dsResult.Clear();
+                dsResult.Dispose();
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return DT_HocViens;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override DT_HocVienCls[] PageReading(ActionSqlParamCls ActionSqlParam, DT_HocVienFilterCls ODT_HocVienFilter, ref long recordTotal)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                if (ODT_HocVienFilter == null)
+                {
+                    ODT_HocVienFilter = new DT_HocVienFilterCls();
+                }
+                Collection<DbParam>
+                    ColDbParams = new Collection<DbParam>();
+                string Query = "";
+                string recordTotalQuery = "";
+                if (!string.IsNullOrEmpty(ODT_HocVienFilter.KhoaHocDangKy_Id) || !string.IsNullOrEmpty(ODT_HocVienFilter.KhoaHocDuyet_Id))
+                {
+                    Query = " select DT_HocVien.* from DT_HocVien join DT_KETQUADAOTAO on DT_HocVien.ID = DT_KETQUADAOTAO.HOCVIEN_ID where 1=1 ";
+                    recordTotalQuery = " select count(1) from DT_HocVien join DT_KETQUADAOTAO on DT_HocVien.ID = DT_KETQUADAOTAO.HOCVIEN_ID where 1=1 ";
+                }
+                else
+                {
+                    Query = " select * from DT_HocVien where 1=1 ";
+                    recordTotalQuery = " select count(1) from DT_HocVien where 1=1 ";
+                }
+                if (!string.IsNullOrEmpty(ODT_HocVienFilter.Keyword))
+                {
+                    ColDbParams.Add(new DbParam("Keyword", "%" + ODT_HocVienFilter.Keyword.ToUpper() + "%"));
+                    Query += " and upper(HOTEN) like " + ActionSqlParam.SpecialChar + "Keyword";
+                    recordTotalQuery += " and upper(HOTEN) like " + ActionSqlParam.SpecialChar + "Keyword";
+                }
+                if (!string.IsNullOrEmpty(ODT_HocVienFilter.KhoaHocDangKy_Id))
+                {
+                    ColDbParams.Add(new DbParam("KHOAHOCDANGKY_ID", ODT_HocVienFilter.KhoaHocDangKy_Id));
+                    Query += " and KHOAHOCDANGKY_ID = " + ActionSqlParam.SpecialChar + "KHOAHOCDANGKY_ID";
+                    recordTotalQuery += " and KHOAHOCDANGKY_ID = " + ActionSqlParam.SpecialChar + "KHOAHOCDANGKY_ID";
+                }
+                if (!string.IsNullOrEmpty(ODT_HocVienFilter.KhoaHocDuyet_Id))
+                {
+                    ColDbParams.Add(new DbParam("KHOAHOCDUYET_ID", ODT_HocVienFilter.KhoaHocDuyet_Id));
+                    Query += " and KHOAHOCDUYET_ID = " + ActionSqlParam.SpecialChar + "KHOAHOCDUYET_ID";
+                    recordTotalQuery += " and KHOAHOCDUYET_ID = " + ActionSqlParam.SpecialChar + "KHOAHOCDUYET_ID";
+                }
+                if (ODT_HocVienFilter.NgaySinh != null)
+                {
+                    ColDbParams.Add(new DbParam("NGAYSINH", ODT_HocVienFilter.NgaySinh));
+                    Query += " and NGAYSINH = " + ActionSqlParam.SpecialChar + "NGAYSINH";
+                    recordTotalQuery += " and NGAYSINH = " + ActionSqlParam.SpecialChar + "NGAYSINH";
+                }
+                if (ODT_HocVienFilter.GioiTinh != null)
+                {
+                    ColDbParams.Add(new DbParam("GIOITINH", ODT_HocVienFilter.GioiTinh));
+                    Query += " and GIOITINH = " + ActionSqlParam.SpecialChar + "GIOITINH";
+                    recordTotalQuery += " and GIOITINH = " + ActionSqlParam.SpecialChar + "GIOITINH";
+                }
+                if (!string.IsNullOrEmpty(ODT_HocVienFilter.MaDiaChiHanhChinh))
+                {
+                    ColDbParams.Add(new DbParam("DIACHIHANHCHINH_MA", ODT_HocVienFilter.MaDiaChiHanhChinh));
+                    Query += " and DIACHIHANHCHINH_MA = " + ActionSqlParam.SpecialChar + "DIACHIHANHCHINH_MA";
+                    recordTotalQuery += " and DIACHIHANHCHINH_MA = " + ActionSqlParam.SpecialChar + "DIACHIHANHCHINH_MA";
+                }
+                Query += " ORDER BY DONVICONGTAC_MA " +
+                    "OFFSET " + (ODT_HocVienFilter.PageIndex * ODT_HocVienFilter.PageSize) + " ROWS " +
+                    "FETCH NEXT " + ODT_HocVienFilter.PageSize + " ROWS ONLY ";
+                DataSet dsResult = DBService.GetDataSet(ActionSqlParam.Trans, Query, ColDbParams.ToArray());
+                DT_HocVienCls[] DT_HocViens = DT_HocVienParser.ParseFromDataTable(dsResult.Tables[0]);
+                recordTotal = long.Parse(DBService.GetDataSet(ActionSqlParam.Trans, recordTotalQuery, ColDbParams.ToArray()).Tables[0].Rows[0][0].ToString());
+
+                dsResult.Clear();
+                dsResult.Dispose();
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return DT_HocViens;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override void Add(ActionSqlParamCls ActionSqlParam, DT_HocVienCls ODT_HocVien)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                if (string.IsNullOrEmpty(ODT_HocVien.ID))
+                {
+                    ODT_HocVien.ID = System.Guid.NewGuid().ToString();
+                }
+                DBService.Insert(ActionSqlParam.Trans, "DT_HocVien",
+                    new DbParam[]{
+                    new DbParam("ID",ODT_HocVien.ID),
+                    new DbParam("MA",ODT_HocVien.MA),
+                    new DbParam("HOTEN",ODT_HocVien.HOTEN),
+                    new DbParam("TEN",ODT_HocVien.TEN),
+                    new DbParam("NGAYSINH",ODT_HocVien.NGAYSINH),
+                    new DbParam("NOISINH_MA",ODT_HocVien.NOISINH_MA),
+                    new DbParam("GIOITINH",ODT_HocVien.GIOITINH),
+                    new DbParam("DANTOC_MA",ODT_HocVien.DANTOC_MA),
+                    new DbParam("CMTND",ODT_HocVien.CMTND),
+                    new DbParam("CMTND_NGAYCAP",ODT_HocVien.CMTND_NGAYCAP),
+                    new DbParam("CMTND_NOICAP",ODT_HocVien.CMTND_NOICAP),
+                    new DbParam("KHOAPHONGCONGTAC",ODT_HocVien.KHOAPHONGCONGTAC),
+                    new DbParam("DONVICONGTAC_MA",ODT_HocVien.DONVICONGTAC_MA),
+                    new DbParam("SONAMKINHNGHIEM",ODT_HocVien.SONAMKINHNGHIEM),
+                    new DbParam("DIACHISONHA",ODT_HocVien.DIACHISONHA),
+                    new DbParam("DIACHIHANHCHINH_MA",ODT_HocVien.DIACHIHANHCHINH_MA),
+                    new DbParam("DIENTHOAI",ODT_HocVien.DIENTHOAI),
+                    new DbParam("EMAIL",ODT_HocVien.EMAIL),
+                    new DbParam("NOIDUNGANH",ODT_HocVien.NOIDUNGANH),
+                    new DbParam("EXTANH",ODT_HocVien.EXTANH),
+                    new DbParam("TOTNGHIEP_MA",ODT_HocVien.TOTNGHIEP_MA),
+                    new DbParam("NAMTOTNGHIEP",ODT_HocVien.NAMTOTNGHIEP),
+                    new DbParam("TRUONGCAPBANG",ODT_HocVien.TRUONGCAPBANG),
+                    new DbParam("CHUYENMON_MA",ODT_HocVien.CHUYENMON_MA),
+                    new DbParam("CHUYENNGANH_MA",ODT_HocVien.CHUYENNGANH_MA),
+                    new DbParam("USERNAME",ODT_HocVien.USERNAME),
+                    new DbParam("NGUOITAO_ID",ODT_HocVien.NGUOITAO_ID),
+                    new DbParam("NGAYTAO",ODT_HocVien.NGAYTAO),
+                    new DbParam("NGUOISUA_ID",ODT_HocVien.NGUOISUA_ID),
+                    new DbParam("NGAYSUA",ODT_HocVien.NGAYSUA)
+                });
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override void Save(ActionSqlParamCls ActionSqlParam, string ID, DT_HocVienCls ODT_HocVien)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                DBService.Update(ActionSqlParam.Trans, "DT_HocVien", "ID", ID,
+                    new DbParam[]{
+                   new DbParam("MA",ODT_HocVien.MA),
+                   new DbParam("HOTEN",ODT_HocVien.HOTEN),
+                   new DbParam("TEN",ODT_HocVien.TEN),
+                   new DbParam("NGAYSINH",ODT_HocVien.NGAYSINH),
+                   new DbParam("NOISINH_MA",ODT_HocVien.NOISINH_MA),
+                   new DbParam("GIOITINH",ODT_HocVien.GIOITINH),
+                   new DbParam("DANTOC_MA",ODT_HocVien.DANTOC_MA),
+                   new DbParam("CMTND",ODT_HocVien.CMTND),
+                   new DbParam("CMTND_NGAYCAP",ODT_HocVien.CMTND_NGAYCAP),
+                   new DbParam("CMTND_NOICAP",ODT_HocVien.CMTND_NOICAP),
+                   new DbParam("KHOAPHONGCONGTAC",ODT_HocVien.KHOAPHONGCONGTAC),
+                   new DbParam("DONVICONGTAC_MA",ODT_HocVien.DONVICONGTAC_MA),
+                   new DbParam("SONAMKINHNGHIEM",ODT_HocVien.SONAMKINHNGHIEM),
+                   new DbParam("DIACHISONHA",ODT_HocVien.DIACHISONHA),
+                   new DbParam("DIACHIHANHCHINH_MA",ODT_HocVien.DIACHIHANHCHINH_MA),
+                   new DbParam("DIENTHOAI",ODT_HocVien.DIENTHOAI),
+                   new DbParam("EMAIL",ODT_HocVien.EMAIL),
+                   new DbParam("NOIDUNGANH",ODT_HocVien.NOIDUNGANH),
+                   new DbParam("EXTANH",ODT_HocVien.EXTANH),
+                   new DbParam("TOTNGHIEP_MA",ODT_HocVien.TOTNGHIEP_MA),
+                   new DbParam("NAMTOTNGHIEP",ODT_HocVien.NAMTOTNGHIEP),
+                   new DbParam("TRUONGCAPBANG",ODT_HocVien.TRUONGCAPBANG),
+                   new DbParam("CHUYENMON_MA",ODT_HocVien.CHUYENMON_MA),
+                   new DbParam("CHUYENNGANH_MA",ODT_HocVien.CHUYENNGANH_MA),
+                   new DbParam("USERNAME",ODT_HocVien.USERNAME),
+                   new DbParam("NGUOITAO_ID",ODT_HocVien.NGUOITAO_ID),
+                   new DbParam("NGAYTAO",ODT_HocVien.NGAYTAO),
+                   new DbParam("NGUOISUA_ID",ODT_HocVien.NGUOISUA_ID),
+                   new DbParam("NGAYSUA",ODT_HocVien.NGAYSUA)
+                    });
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override void Delete(ActionSqlParamCls ActionSqlParam, string ID)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                string DelQuery = " Delete from DT_HocVien where ID=" + ActionSqlParam.SpecialChar + "ID";
+                DBService.ExecuteNonQuery(ActionSqlParam.Trans, DelQuery,
+                    new DbParam[]
+                    {
+                    new DbParam("ID", ID)
+                    });
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+        public override DT_HocVienCls CreateModel(ActionSqlParamCls ActionSqlParam, string ID)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                DataSet dsResult =
+                        DBService.GetDataSet(ActionSqlParam.Trans, "select * from DT_HocVien where (ID=" + ActionSqlParam.SpecialChar + "ID or MA=" + ActionSqlParam.SpecialChar + "ID) ", new DbParam[]{
+                    new DbParam("ID",ID)
+                    });
+                DT_HocVienCls ODT_HocVien = null;
+                if (dsResult.Tables[0].Rows.Count > 0)
+                {
+                    ODT_HocVien = DT_HocVienParser.ParseFromDataRow(dsResult.Tables[0].Rows[0]);
+                }
+                dsResult.Clear();
+                dsResult.Dispose();
+
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return ODT_HocVien;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+
+        public override string Duplicate(ActionSqlParamCls ActionSqlParam, string ID)
+        {
+            IDatabaseService DBService = WebDatabaseService.CreateDBService(ActionSqlParam);
+            bool HasTrans = ActionSqlParam.Trans != null;
+            bool HasCommit = false;
+
+            string NewID = System.Guid.NewGuid().ToString();
+            if (!HasTrans)
+            {
+                ActionSqlParam.Trans = DBService.BeginTransaction();
+            }
+
+            try
+            {
+                DT_HocVienCls ODT_HocVien = CreateModel(ActionSqlParam, ID);
+                ODT_HocVien.ID = NewID;
+                Add(ActionSqlParam, ODT_HocVien);
+
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Commit();
+                    ActionSqlParam.Trans = null;
+                    HasCommit = true;
+                }
+                return NewID;
+            }
+            catch (Exception ex)
+            {
+                if (!HasTrans && !HasCommit)
+                {
+                    ActionSqlParam.Trans.Rollback();
+                    ActionSqlParam.Trans = null;
+                }
+                throw (ex);
+            }
+        }
+    }
+}

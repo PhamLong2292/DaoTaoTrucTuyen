@@ -1,0 +1,23 @@
+button {
+	box-sizing: border-box;
+    background: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 3.01px;
+    color: black;
+    cursor: pointer;
+    display: inline-block;
+    font-family: inherit;
+    font-size: 16px;
+    font-variant: normal;
+    font-weight: 400;
+    height: 2.14285714em;
+    line-height: 1.42857143;
+    margin: 0;
+    padding: 4px 10px;
+    text-decoration: none;
+    vertical-align: baseline;
+    white-space: nowrap;
+}
+input {
+	font-size: 16px;
+}

@@ -1,0 +1,139 @@
+﻿using FlexCel.Report;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using OneTSQ.Call.Bussiness.Utility;
+using OneTSQ.Core.Call.Bussiness.Utility;
+using OneTSQ.Model;
+using OneTSQ.ReportUtility;
+using OneTSQ.Utility;
+using OneTSQ.Core.Model;
+
+namespace OneTSQ.WebParts
+{
+    [ObjectReport(ID = "096E75FB-93DF-4D08-8D4D-CBF887911354", Type = OneTSQ.ReportUtility.Report.eType.Flexcel, Name = "DT_DanhSachHocVienTrongLop", Title = "Danh sách học viên", ReportPath = @"\ReportTemplates\DT_DanhSachHocVienTrongLop.xlsx")]
+    public class DT_DanhSachHocVienTrongLop : ObjectReport<DT_LopHoc>
+    {
+        private class HocVien
+        {
+            public string ChucDanh { get; set; }
+            public string HoDem { get; set; }
+            public string Ten { get; set; }
+            public DateTime? NgaySinh { get; set; }
+            public string CoQuanCongTac { get; set; }
+            public string GhiChu { get; set; }
+        }
+        protected override FlexCelReport OnFlexcelBuild(RenderInfoCls ORenderInfo, string khoaHocId)
+        {
+            SiteParam OSiteParam = WebEnvironments.CreateSiteParam(ORenderInfo);
+            FlexCelReport flexCelReport = new FlexCelReport();
+
+            DT_KhoaHocCls khoaHoc = CallBussinessUtility.CreateBussinessProcess().CreateDT_KhoaHocProcess().CreateModel(ORenderInfo, khoaHocId);
+            var hocVienArr = CallBussinessUtility.CreateBussinessProcess().CreateDT_HocVienProcess().Reading(ORenderInfo, new DT_HocVienFilterCls() { KhoaHocDuyet_Id = khoaHocId });
+            List<HocVien> hocViens = new List<HocVien>();
+            //foreach (var hocVien in hocVienArr)
+            //{
+            //    string hoDem = "", ten = "";
+            //    if (!string.IsNullOrEmpty(hocVien.HOTEN))
+            //    {
+            //        hocVien.HOTEN = hocVien.HOTEN.TrimStart().TrimEnd();
+            //        int index = hocVien.HOTEN.LastIndexOf(' ');
+            //        if (index > -1 && index < hocVien.HOTEN.Length - 1)
+            //        {
+            //            hoDem = hocVien.HOTEN.Substring(0, index);
+            //            ten = hocVien.HOTEN.Substring(index + 1);
+            //        }
+            //        else ten = hocVien.HOTEN;
+            //    }
+            //    hocViens.Add(new HocVien
+            //    {
+            //        ChucDanh = hocVien.CHUYENMON_MA,
+            //        HoDem = ToTitleCase(hoDem),
+            //        Ten = ToTitleCase(ten),
+            //        NgaySinh = hocVien.NGAYSINH,
+            //        CoQuanCongTac = hocVien.KHOAPHONGCONGTAC + ", " + GetTenDonViCongTac(ORenderInfo, hocVien.DONVICONGTAC_MA) + ", " + hocVien.DIACHISONHA + ", " + GetTenDiaChiHanhChinh(ORenderInfo, hocVien.DIACHIHANHCHINH_MA),
+            //        GhiChu = hocVien.DIENTHOAI
+            //    });
+            //}
+            string hoDem = "", ten = "";
+            var khoaPhongCongTac = "";
+            var donViCongTac = "";
+            var diaChi = "";
+            for (int i =0; i < hocVienArr.Length; i++)
+            {
+                HocVien hocVien = new HocVien();
+              
+                if (!string.IsNullOrEmpty(hocVienArr[i].HOTEN))
+                {
+                    hocVienArr[i].HOTEN = hocVienArr[i].HOTEN.TrimStart().TrimEnd();
+                    int index = hocVienArr[i].HOTEN.LastIndexOf(' ');
+                    if (index > -1 && index < hocVienArr[i].HOTEN.Length - 1)
+                    {
+                        hoDem = hocVienArr[i].HOTEN.Substring(0, index);
+                        ten = hocVienArr[i].HOTEN.Substring(index + 1);
+                    }
+                    else ten = hocVienArr[i].HOTEN;
+                }
+                
+                khoaPhongCongTac = hocVienArr[i].KHOAPHONGCONGTAC;
+                donViCongTac = GetTenDonViCongTac(ORenderInfo, hocVienArr[i].DONVICONGTAC_MA);
+                if (!string.IsNullOrEmpty(khoaPhongCongTac))
+                {
+                    diaChi = khoaPhongCongTac+", ";
+                } else if (!string.IsNullOrEmpty(khoaPhongCongTac) && !string.IsNullOrEmpty(donViCongTac))
+                {
+                    diaChi = khoaPhongCongTac + ", " + donViCongTac+",";
+                }
+                else if (!string.IsNullOrEmpty(donViCongTac))
+                {
+                    diaChi = donViCongTac;
+                }
+                hocVien.ChucDanh = hocVienArr[i].CHUYENMON_MA;
+                hocVien.CoQuanCongTac =  diaChi + hocVienArr[i].DIACHISONHA + ", " + GetTenDiaChiHanhChinh(ORenderInfo, hocVienArr[i].DIACHIHANHCHINH_MA);
+                hocVien.NgaySinh = hocVienArr[i].NGAYSINH;
+                hocVien.GhiChu = hocVienArr[i].DIENTHOAI;
+                hocVien.HoDem = ToTitleCase(hoDem);
+                hocVien.Ten = ToTitleCase(ten);
+                hocViens.Add(hocVien);
+            }
+            DateTime ngayIn = DateTime.Today;
+            //flexCelReport.SetValue("DonViDaoTao", donVi != null ? donVi.OwnerName.ToUpper() : null);
+            flexCelReport.SetValue("DonViDaoTao", "BỆNH VIỆN YHCT NGHỆ AN");
+            flexCelReport.SetValue("NgayIn", "Hà Nội, ngày " + ngayIn.Day + " tháng " + ngayIn.Month + " năm " + ngayIn.Year);
+            flexCelReport.SetValue("TenKhoaHoc", khoaHoc.TENKHOAHOC);
+            flexCelReport.SetValue("SoKhoaHoc", khoaHoc.KHOA);
+            flexCelReport.SetValue("DiaDiem", "Bệnh VIỆN YHCT NGHỆ AN");
+            flexCelReport.SetValue("ThoiGian", (khoaHoc.NGAYKHAIGIANGDUKIEN == null ? null : khoaHoc.NGAYKHAIGIANGDUKIEN.Value.ToString("dd/MM/yyyy")) + " - " + (khoaHoc.NGAYBEGIANGDUKIEN == null ? null : khoaHoc.NGAYBEGIANGDUKIEN.Value.ToString("dd/MM/yyyy")));
+            flexCelReport.AddTable("HocVien", hocViens);
+            return flexCelReport;
+        }
+        private string GetTenDonViCongTac(RenderInfoCls ORenderInfo, string donViCongTacMa)
+        {
+            if (!string.IsNullOrEmpty(donViCongTacMa))
+            {
+                var donViCongTac = OneMES3.DM.Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreateDonViCongTacProcess().CreateModel(Model.Common.CreateRenderInfo(ORenderInfo), donViCongTacMa);
+                if (donViCongTac != null)
+                    return donViCongTac.Ten;
+            }
+            return null;
+        }
+        private string GetTenDiaChiHanhChinh(RenderInfoCls ORenderInfo, string diaChiHanhChinhMa)
+        {
+            if (!string.IsNullOrEmpty(diaChiHanhChinhMa))
+            {
+                var donViHanhChinh = OneMES3.DM.Call.Bussiness.Utility.CallBussinessUtility.CreateBussinessProcess().CreateDonViHanhChinhProcess().CreateModel(Model.Common.CreateRenderInfo(ORenderInfo), diaChiHanhChinhMa);
+                if (donViHanhChinh != null)
+                    return donViHanhChinh.Ten;
+            }
+            return null;
+        }
+        public string ToTitleCase(string str)
+        {
+            if (string.IsNullOrEmpty(str))
+                return null;
+            return System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(str.ToLower());
+        }
+    }
+}

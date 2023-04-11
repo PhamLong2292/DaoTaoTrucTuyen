@@ -1,0 +1,46 @@
+﻿using OneTSQ.Core.Call.Bussiness.Utility;
+using OneTSQ.Core.Model;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Data;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OneTSQ.CheckPermissionUtility
+{
+    public class PermissionUtility
+    {
+        public static bool CheckPermission(
+           RenderInfoCls ORenderInfo,
+           string PermissionFunctionCode,
+           string PermissionFunctionItemCode,
+           string ObjectType,
+           string ObjectId,
+           string OwnerUserId,
+           string DataOwnerUserId = null,
+           bool ThrowException = false)
+        {
+            bool HasPermission = CoreCallBussinessUtility.CreateBussinessProcess().CreatePermissionFunctionProcess().CheckPermission(ORenderInfo, PermissionFunctionCode, PermissionFunctionItemCode, ObjectType, ObjectId, OwnerUserId);
+            if (ThrowException)
+            {
+                if (HasPermission == false)
+                {
+                    throw new Exception("Access denied - " + PermissionFunctionCode + "." + PermissionFunctionItemCode);
+                }
+            }
+            OwnerUserCls
+                OUser = CoreCallBussinessUtility.CreateBussinessProcess().CreateOwnerUserProcess().CreateModel(ORenderInfo, OwnerUserId);
+            if (OUser != null)
+            {
+                if (OUser.IsSystemAdmin == 1)
+                {
+                    return true;
+                }
+            }
+            return HasPermission;
+        }
+    }
+}
